@@ -3,7 +3,7 @@
 ; LICENSE.TXT for details). This file is licensed under the same license.
 
 [common]
-subdirectories = AsmParser TargetInfo MCTargetDesc
+subdirectories = AsmParser InstPrinter TargetInfo MCTargetDesc
 
 [component_0]
 type = TargetGroup
@@ -15,5 +15,5 @@ has_asmparser = 1
 type = Library
 name = CAHPCodeGen
 parent = CAHP
-required_libraries = Core CodeGen CAHPInfo Support Target
+required_libraries = AsmPrinter Core CodeGen MC CAHPAsmPrinter CAHPDesc CAHPInfo Support Target
 add_to_library_groups = CAHP
