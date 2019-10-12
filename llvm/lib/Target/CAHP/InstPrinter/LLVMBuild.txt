@@ -4,7 +4,7 @@
 
 [component_0]
 type = Library
-name = CAHPDesc
+name = CAHPAsmPrinter
 parent = CAHP
-required_libraries = MC CAHPAsmPrinter CAHPInfo Support
+required_libraries = MC Support
 add_to_library_groups = CAHP
