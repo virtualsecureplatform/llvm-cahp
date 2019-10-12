@@ -5,6 +5,7 @@
 #ifndef LLVM_LIB_TARGET_CAHP_CAHPTARGETMACHINE_H
 #define LLVM_LIB_TARGET_CAHP_CAHPTARGETMACHINE_H
 
+#include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/Target/TargetMachine.h"
@@ -25,7 +26,6 @@ public:
     return TLOF.get();
   }
 };
-Target &getTheCAHPTarget();
 } // namespace llvm
 
 #endif

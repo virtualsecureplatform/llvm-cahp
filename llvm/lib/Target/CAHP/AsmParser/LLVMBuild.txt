@@ -2,18 +2,9 @@
 ; is distributed under the Apache License v2.0 with LLVM Exceptions (see
 ; LICENSE.TXT for details). This file is licensed under the same license.
 
-[common]
-subdirectories = AsmParser TargetInfo MCTargetDesc
-
 [component_0]
-type = TargetGroup
-name = CAHP
-parent = Target
-has_asmparser = 1
-
-[component_1]
 type = Library
-name = CAHPCodeGen
+name = CAHPAsmParser
 parent = CAHP
-required_libraries = Core CodeGen CAHPInfo Support Target
+required_libraries = MC MCParser CAHPDesc CAHPInfo Support
 add_to_library_groups = CAHP
