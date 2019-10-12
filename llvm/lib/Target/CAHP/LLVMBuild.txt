@@ -1,0 +1,18 @@
+; This file is copied and modified from The LLVM Compiler Infrastructure, which
+; is distributed under the Apache License v2.0 with LLVM Exceptions (see
+; LICENSE.TXT for details). This file is licensed under the same license.
+
+[common]
+subdirectories = TargetInfo
+
+[component_0]
+type = TargetGroup
+name = CAHP
+parent = Target
+
+[component_1]
+type = Library
+name = CAHPCodeGen
+parent = CAHP
+required_libraries = Core CodeGen CAHPInfo Support Target
+add_to_library_groups = CAHP

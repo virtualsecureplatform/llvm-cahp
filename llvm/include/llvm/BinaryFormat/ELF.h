@@ -321,6 +321,7 @@ enum {
   EM_AMDGPU = 224,        // AMD GPU architecture
   EM_RISCV = 243,         // RISC-V
   EM_LANAI = 244,         // Lanai 32-bit processor
+  EM_CAHP = 246,          // CAHP
   EM_BPF = 247,           // Linux kernel bpf virtual machine
   EM_VE = 251,            // NEC SX-Aurora VE
   EM_CSKY = 252,          // C-SKY 32-bit processor
@@ -696,6 +697,11 @@ enum {
 // ELF Relocation types for Hexagon
 enum {
 #include "ELFRelocs/Hexagon.def"
+};
+
+// ELF Relocation type for CAHP.
+enum {
+#include "ELFRelocs/CAHP.def"
 };
 
 // ELF Relocation type for Lanai.
