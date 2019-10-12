@@ -993,6 +993,17 @@ TEST(TripleTest, ParsedIDs) {
   EXPECT_EQ(Triple::arm, T.getArch());
   EXPECT_EQ(Triple::UnknownVendor, T.getVendor());
   EXPECT_EQ(Triple::LiteOS, T.getOS());
+
+  T = Triple("cahp-unknown-unknown");
+  EXPECT_EQ(Triple::cahp, T.getArch());
+  EXPECT_EQ(Triple::UnknownVendor, T.getVendor());
+  EXPECT_EQ(Triple::UnknownOS, T.getOS());
+  EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
+
+  T = Triple("cahp");
+  EXPECT_EQ(Triple::cahp, T.getArch());
+  EXPECT_EQ(Triple::UnknownVendor, T.getVendor());
+  EXPECT_EQ(Triple::UnknownOS, T.getOS());
   EXPECT_EQ(Triple::UnknownEnvironment, T.getEnvironment());
 
   T = Triple("x86_64-pc-serenity");
@@ -1356,6 +1367,11 @@ TEST(TripleTest, BitWidthPredicates) {
   EXPECT_TRUE(T.isArch32Bit());
   EXPECT_FALSE(T.isArch64Bit());
   EXPECT_TRUE(T.isCSKY());
+
+  T.setArch(Triple::cahp);
+  EXPECT_TRUE(T.isArch16Bit());
+  EXPECT_FALSE(T.isArch32Bit());
+  EXPECT_FALSE(T.isArch64Bit());
 
   T.setArch(Triple::loongarch32);
   EXPECT_FALSE(T.isArch16Bit());
