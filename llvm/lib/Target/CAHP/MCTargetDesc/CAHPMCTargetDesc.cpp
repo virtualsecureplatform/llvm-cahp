@@ -4,6 +4,7 @@
 
 #include "CAHPMCTargetDesc.h"
 #include "CAHPMCAsmInfo.h"
+#include "InstPrinter/CAHPInstPrinter.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCInstrInfo.h"
@@ -52,6 +53,14 @@ static MCSubtargetInfo *createCAHPMCSubtargetInfo(const Triple &TT,
   return createCAHPMCSubtargetInfoImpl(TT, CPUName, FS);
 }
 
+static MCInstPrinter *createCAHPMCInstPrinter(const Triple &T,
+                                              unsigned SyntaxVariant,
+                                              const MCAsmInfo &MAI,
+                                              const MCInstrInfo &MII,
+                                              const MCRegisterInfo &MRI) {
+  return new CAHPInstPrinter(MAI, MII, MRI);
+}
+
 extern "C" void LLVMInitializeCAHPTargetMC() {
   Target &T = getTheCAHPTarget();
   TargetRegistry::RegisterMCAsmInfo(T, createCAHPMCAsmInfo);
@@ -60,4 +69,5 @@ extern "C" void LLVMInitializeCAHPTargetMC() {
   TargetRegistry::RegisterMCAsmBackend(T, createCAHPAsmBackend);
   TargetRegistry::RegisterMCSubtargetInfo(T, createCAHPMCSubtargetInfo);
   TargetRegistry::RegisterMCCodeEmitter(T, createCAHPMCCodeEmitter);
+  TargetRegistry::RegisterMCInstPrinter(T, createCAHPMCInstPrinter);
 }
