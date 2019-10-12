@@ -1,0 +1,34 @@
+// This file is copied and modified from The LLVM Compiler Infrastructure, which
+// is distributed under the Apache License v2.0 with LLVM Exceptions (see
+// LICENSE.TXT for details). This file is licensed under the same license.
+
+include "llvm/Target/Target.td"
+
+//===----------------------------------------------------------------------===//
+// Register file, instruction descriptions.
+//===----------------------------------------------------------------------===//
+
+include "CAHPRegisterInfo.td"
+include "CAHPInstrInfo.td"
+
+//===----------------------------------------------------------------------===//
+// CAHP processors supported.
+//===----------------------------------------------------------------------===//
+
+def : ProcessorModel<"generic-cahp", NoSchedModel, []>;
+
+//===----------------------------------------------------------------------===//
+// Define the CAHP target.
+//===----------------------------------------------------------------------===//
+
+def CAHPInstrInfo : InstrInfo;
+
+def CAHPAsmParser : AsmParser {
+  // Use alternative names of registers when emitting.
+  let ShouldEmitMatchRegisterAltName = 1;
+}
+
+def CAHP : Target {
+  let InstructionSet = CAHPInstrInfo;
+  let AssemblyParsers = [CAHPAsmParser];
+}
