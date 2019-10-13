@@ -1,6 +1,11 @@
 # RUN: not llvm-mc -triple cahp < %s 2>&1 | FileCheck %s
 
 # Out of range immediates
+lw a4, 1024(a2) # CHECK: :[[@LINE]]:8: error: immediate must be a multiple of 2 bytes in the range [-1024, 1022]
+lb a4, -513(a2) # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
+lbu a4, -513(a2) # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-512, 511]
+sw a4, -1025(a2) # CHECK: :[[@LINE]]:8: error: immediate must be a multiple of 2 bytes in the range [-1024, 1022]
+sb a4, 512(a2) # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
 li t0, -513 # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
 li s0, 512 # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
 addi a0, a1, 128 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-128, 127]
@@ -9,6 +14,8 @@ andi a0, a1, 256 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in 
 andi a0, a1, -1 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 255]
 lsli a0, a1, 16 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
 asri a0, a1, -1 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
+lwsp a4, 128(sp) # CHECK: :[[@LINE]]:10: error: immediate must be a multiple of 2 bytes in the range [0, 126]
+swsp a3, -2(sp) # CHECK: :[[@LINE]]:10: error: immediate must be a multiple of 2 bytes in the range [0, 126]
 lsi a5, 32 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
 lsi a5, -33 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
 lui a5, 65 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [0, 63]
