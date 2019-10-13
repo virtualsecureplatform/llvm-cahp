@@ -56,7 +56,6 @@ def simm11_lsb0 : Operand<i16> {
 
 // 24-bit M-instructions.
 
-/*
 def LW  : CAHPInst24MLoad <0b010101, (outs GPR:$rd), (ins GPR:$rs, simm11_lsb0:$imm),
                            "lw",  "$rd, ${imm}(${rs})"> {
   bits<11> imm;
@@ -87,7 +86,7 @@ def SB  : CAHPInst24MStore<0b001101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
   let Inst{23-16} = imm{7-0};
   let Inst{7-6} = imm{9-8};
 }
-*/
+
 def LI  : CAHPInst24MLoad <0b110101, (outs GPR:$rd), (ins simm10:$imm),
                            "li", "$rd, $imm"> {
   bits<10> imm;
@@ -148,20 +147,19 @@ def BLEU : CAHPInst24J<0b011111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
 
 // 16-bit M-instructions.
 
-/*
-def LWSP : CAHPInst16Load <0b010100, (outs GPR:$rd), (ins uimm7_lsb0:$imm),
-                           "lwsp", "$rd, ${imm}(sp)"> {
+def LWSP : CAHPInst16Load <0b010100, (outs GPR:$rd), (ins SP:$rs, uimm7_lsb0:$imm),
+                           "lwsp", "$rd, ${imm}(${rs})"> {
   bits<7> imm;
   let Inst{15-12} = imm{4-1};
   let Inst{7-6} = imm{6-5};
 }
-def SWSP : CAHPInst16Store<0b011100, (outs), (ins GPR:$rs, uimm7_lsb0:$imm),
-                           "swsp", "$rs, ${imm}(sp)"> {
+def SWSP : CAHPInst16Store<0b011100, (outs), (ins GPR:$rs, SP:$rd, uimm7_lsb0:$imm),
+                           "swsp", "$rs, ${imm}(${rd})"> {
   bits<7> imm;
   let Inst{15-12} = imm{4-1};
   let Inst{7-6} = imm{6-5};
 }
-*/
+
 def LSI  : CAHPInst16Load <0b110100, (outs GPR:$rd), (ins simm6:$imm),
                            "lsi",  "$rd, $imm"> {
   bits<6> imm;

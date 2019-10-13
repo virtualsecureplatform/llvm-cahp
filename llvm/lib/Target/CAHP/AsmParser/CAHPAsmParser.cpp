@@ -46,6 +46,7 @@ class CAHPAsmParser : public MCTargetAsmParser {
 
   OperandMatchResultTy parseImmediate(OperandVector &Operands);
   OperandMatchResultTy parseRegister(OperandVector &Operands);
+  OperandMatchResultTy parseMemOpBaseReg(OperandVector &Operands);
 
   bool parseOperand(OperandVector &Operands);
 
@@ -382,6 +383,31 @@ OperandMatchResultTy CAHPAsmParser::parseImmediate(OperandVector &Operands) {
   return MatchOperand_Success;
 }
 
+OperandMatchResultTy CAHPAsmParser::parseMemOpBaseReg(OperandVector &Operands) {
+  if (getLexer().isNot(AsmToken::LParen)) {
+    Error(getLoc(), "expected '('");
+    return MatchOperand_ParseFail;
+  }
+
+  getParser().Lex(); // Eat '('
+  Operands.push_back(CAHPOperand::createToken("(", getLoc()));
+
+  if (parseRegister(Operands) != MatchOperand_Success) {
+    Error(getLoc(), "expected register");
+    return MatchOperand_ParseFail;
+  }
+
+  if (getLexer().isNot(AsmToken::RParen)) {
+    Error(getLoc(), "expected ')'");
+    return MatchOperand_ParseFail;
+  }
+
+  getParser().Lex(); // Eat ')'
+  Operands.push_back(CAHPOperand::createToken(")", getLoc()));
+
+  return MatchOperand_Success;
+}
+
 /// Looks at a token type and creates the relevant operand
 /// from this information, adding to Operands.
 /// If operand was parsed, returns false, else true.
@@ -391,8 +417,12 @@ bool CAHPAsmParser::parseOperand(OperandVector &Operands) {
     return false;
 
   // Attempt to parse token as an immediate
-  if (parseImmediate(Operands) == MatchOperand_Success)
+  if (parseImmediate(Operands) == MatchOperand_Success) {
+    // Parse memory base register if present
+    if (getLexer().is(AsmToken::LParen))
+      return parseMemOpBaseReg(Operands) != MatchOperand_Success;
     return false;
+  }
 
   // Finally we have exhausted all options and must declare defeat.
   Error(getLoc(), "unknown operand");
