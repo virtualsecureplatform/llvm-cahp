@@ -56,37 +56,43 @@ def simm11_lsb0 : Operand<i16> {
 
 // 24-bit M-instructions.
 
-def LW  : CAHPInst24MLoad <0b010101, (outs GPR:$rd), (ins GPR:$rs, simm11_lsb0:$imm),
-                           "lw",  "$rd, ${imm}(${rs})"> {
-  bits<11> imm;
-  let Inst{23-16} = imm{8-1};
-  let Inst{7-6} = imm{10-9};
-}
-def LB  : CAHPInst24MLoad <0b100101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
-                           "lb",  "$rd, ${imm}(${rs})"> {
-  bits<10> imm;
-  let Inst{23-16} = imm{7-0};
-  let Inst{7-6} = imm{9-8};
-}
-def LBU : CAHPInst24MLoad <0b000101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
-                           "lbu", "$rd, ${imm}(${rs})"> {
-  bits<10> imm;
-  let Inst{23-16} = imm{7-0};
-  let Inst{7-6} = imm{9-8};
-}
-def SW  : CAHPInst24MStore<0b011101, (outs GPR:$rd), (ins GPR:$rs, simm11_lsb0:$imm),
-                          "sw",  "$rs, ${imm}(${rd})"> {
-  bits<11> imm;
-  let Inst{23-16} = imm{8-1};
-  let Inst{7-6} = imm{10-9};
-}
-def SB  : CAHPInst24MStore<0b001101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
-                          "sb",  "$rs, ${imm}(${rd})"> {
-  bits<10> imm;
-  let Inst{23-16} = imm{7-0};
-  let Inst{7-6} = imm{9-8};
+let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in {
+  def LW  : CAHPInst24MLoad <0b010101, (outs GPR:$rd), (ins GPR:$rs, simm11_lsb0:$imm),
+                             "lw",  "$rd, ${imm}(${rs})"> {
+    bits<11> imm;
+    let Inst{23-16} = imm{8-1};
+    let Inst{7-6} = imm{10-9};
+  }
+  def LB  : CAHPInst24MLoad <0b100101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
+                             "lb",  "$rd, ${imm}(${rs})"> {
+    bits<10> imm;
+    let Inst{23-16} = imm{7-0};
+    let Inst{7-6} = imm{9-8};
+  }
+  def LBU : CAHPInst24MLoad <0b000101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
+                             "lbu", "$rd, ${imm}(${rs})"> {
+    bits<10> imm;
+    let Inst{23-16} = imm{7-0};
+    let Inst{7-6} = imm{9-8};
+  }
 }
 
+let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in {
+  def SW  : CAHPInst24MStore<0b011101, (outs GPR:$rd), (ins GPR:$rs, simm11_lsb0:$imm),
+                            "sw",  "$rs, ${imm}(${rd})"> {
+    bits<11> imm;
+    let Inst{23-16} = imm{8-1};
+    let Inst{7-6} = imm{10-9};
+  }
+  def SB  : CAHPInst24MStore<0b001101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
+                            "sb",  "$rs, ${imm}(${rd})"> {
+    bits<10> imm;
+    let Inst{23-16} = imm{7-0};
+    let Inst{7-6} = imm{9-8};
+  }
+}
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isMoveImm = 1 in
 def LI  : CAHPInst24MLoad <0b110101, (outs GPR:$rd), (ins simm10:$imm),
                            "li", "$rd, $imm"> {
   bits<10> imm;
@@ -96,63 +102,76 @@ def LI  : CAHPInst24MLoad <0b110101, (outs GPR:$rd), (ins simm10:$imm),
 
 // 24-bit R-instructions.
 
-def ADD : CAHPInst24R<0b00000001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
-                      "add", "$rd, $rs1, $rs2">;
-def SUB : CAHPInst24R<0b00001001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
-                      "sub", "$rd, $rs1, $rs2">;
-def AND : CAHPInst24R<0b00010001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
-                      "and", "$rd, $rs1, $rs2">;
-def XOR : CAHPInst24R<0b00011001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
-                      "xor", "$rd, $rs1, $rs2">;
-def OR  : CAHPInst24R<0b00100001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
-                      "or",  "$rd, $rs1, $rs2">;
-def LSL : CAHPInst24R<0b00101001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
-                      "lsl", "$rd, $rs1, $rs2">;
-def LSR : CAHPInst24R<0b00110001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
-                      "lsr", "$rd, $rs1, $rs2">;
-def ASR : CAHPInst24R<0b00111001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
-                      "asr", "$rd, $rs1, $rs2">;
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
+  let isCommutable = 1 in {
+    def ADD : CAHPInst24R<0b00000001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+                          "add", "$rd, $rs1, $rs2">;
+    def AND : CAHPInst24R<0b00010001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+                          "and", "$rd, $rs1, $rs2">;
+    def XOR : CAHPInst24R<0b00011001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+                          "xor", "$rd, $rs1, $rs2">;
+    def OR  : CAHPInst24R<0b00100001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+                          "or",  "$rd, $rs1, $rs2">;
+  }
+
+  def SUB : CAHPInst24R<0b00001001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+                        "sub", "$rd, $rs1, $rs2">;
+  def LSL : CAHPInst24R<0b00101001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+                        "lsl", "$rd, $rs1, $rs2">;
+  def LSR : CAHPInst24R<0b00110001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+                        "lsr", "$rd, $rs1, $rs2">;
+  def ASR : CAHPInst24R<0b00111001, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+                        "asr", "$rd, $rs1, $rs2">;
+}
 
 // 24-bit I-instructions.
 
-def ADDI : CAHPInst24I<0b11000011, (outs GPR:$rd), (ins GPR:$rs1, simm8:$imm),
-                       "addi", "$rd, $rs1, $imm">;
-def ANDI : CAHPInst24I<0b01010011, (outs GPR:$rd), (ins GPR:$rs1, uimm8:$imm),
-                       "andi", "$rd, $rs1, $imm">;
-def XORI : CAHPInst24I<0b01011011, (outs GPR:$rd), (ins GPR:$rs1, uimm8:$imm),
-                       "xori", "$rd, $rs1, $imm">;
-def ORI  : CAHPInst24I<0b01100011, (outs GPR:$rd), (ins GPR:$rs1, uimm8:$imm),
-                       "ori",  "$rd, $rs1, $imm">;
-def LSLI : CAHPInst24I<0b00101011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
-                       "lsli", "$rd, $rs1, $imm">;
-def LSRI : CAHPInst24I<0b00110011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
-                       "lsri", "$rd, $rs1, $imm">;
-def ASRI : CAHPInst24I<0b00111011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
-                       "asri", "$rd, $rs1, $imm">;
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
+  def ADDI : CAHPInst24I<0b11000011, (outs GPR:$rd), (ins GPR:$rs1, simm8:$imm),
+                         "addi", "$rd, $rs1, $imm">;
+  def ANDI : CAHPInst24I<0b01010011, (outs GPR:$rd), (ins GPR:$rs1, uimm8:$imm),
+                         "andi", "$rd, $rs1, $imm">;
+  def XORI : CAHPInst24I<0b01011011, (outs GPR:$rd), (ins GPR:$rs1, uimm8:$imm),
+                         "xori", "$rd, $rs1, $imm">;
+  def ORI  : CAHPInst24I<0b01100011, (outs GPR:$rd), (ins GPR:$rs1, uimm8:$imm),
+                         "ori",  "$rd, $rs1, $imm">;
+  def LSLI : CAHPInst24I<0b00101011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
+                         "lsli", "$rd, $rs1, $imm">;
+  def LSRI : CAHPInst24I<0b00110011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
+                         "lsri", "$rd, $rs1, $imm">;
+  def ASRI : CAHPInst24I<0b00111011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
+                         "asri", "$rd, $rs1, $imm">;
+}
 
 // 24-bit J-instructions.
 
-def BEQ  : CAHPInst24J<0b001111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
-                       "beq",  "$rs1, $rs2, $imm">;
-def BNE  : CAHPInst24J<0b101111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
-                       "bne",  "$rs1, $rs2, $imm">;
-def BLT  : CAHPInst24J<0b110111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
-                       "blt",  "$rs1, $rs2, $imm">;
-def BLTU : CAHPInst24J<0b010111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
-                       "bltu", "$rs1, $rs2, $imm">;
-def BLE  : CAHPInst24J<0b111111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
-                       "ble",  "$rs1, $rs2, $imm">;
-def BLEU : CAHPInst24J<0b011111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
-                       "bleu", "$rs1, $rs2, $imm">;
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0,
+    isBranch = 1, isTerminator = 1 in {
+  def BEQ  : CAHPInst24J<0b001111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+                         "beq",  "$rs1, $rs2, $imm">;
+  def BNE  : CAHPInst24J<0b101111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+                         "bne",  "$rs1, $rs2, $imm">;
+  def BLT  : CAHPInst24J<0b110111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+                         "blt",  "$rs1, $rs2, $imm">;
+  def BLTU : CAHPInst24J<0b010111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+                         "bltu", "$rs1, $rs2, $imm">;
+  def BLE  : CAHPInst24J<0b111111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+                         "ble",  "$rs1, $rs2, $imm">;
+  def BLEU : CAHPInst24J<0b011111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+                         "bleu", "$rs1, $rs2, $imm">;
+}
 
 // 16-bit M-instructions.
 
+let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in
 def LWSP : CAHPInst16Load <0b010100, (outs GPR:$rd), (ins SP:$rs, uimm7_lsb0:$imm),
                            "lwsp", "$rd, ${imm}(${rs})"> {
   bits<7> imm;
   let Inst{15-12} = imm{4-1};
   let Inst{7-6} = imm{6-5};
 }
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 def SWSP : CAHPInst16Store<0b011100, (outs), (ins GPR:$rs, SP:$rd, uimm7_lsb0:$imm),
                            "swsp", "$rs, ${imm}(${rd})"> {
   bits<7> imm;
@@ -160,12 +179,15 @@ def SWSP : CAHPInst16Store<0b011100, (outs), (ins GPR:$rs, SP:$rd, uimm7_lsb0:$i
   let Inst{7-6} = imm{6-5};
 }
 
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isMoveImm = 1 in
 def LSI  : CAHPInst16Load <0b110100, (outs GPR:$rd), (ins simm6:$imm),
                            "lsi",  "$rd, $imm"> {
   bits<6> imm;
   let Inst{15-12} = imm{3-0};
   let Inst{7-6} = imm{5-4};
 }
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isMoveImm = 1 in
 def LUI  : CAHPInst16Load <0b000100, (outs GPR:$rd), (ins uimm6:$imm),
                            "lui",  "$rd, $imm"> {
   bits<6> imm;
@@ -175,20 +197,25 @@ def LUI  : CAHPInst16Load <0b000100, (outs GPR:$rd), (ins uimm6:$imm),
 
 // 16-bit R-instructions.
 
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isMoveReg = 1 in
 def MOV  : CAHPInst16R<0b11000000, (outs GPR:$rd), (ins GPR:$rs),
                       "mov",  "$rd, $rs">;
 
-let Constraints = "$rd = $rd_w" in {
-  def ADD2 : CAHPInst16R<0b10000000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
-                        "add2", "$rd, $rs">;
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0,
+    Constraints = "$rd = $rd_w" in {
+  let isCommutable = 1 in {
+    def ADD2 : CAHPInst16R<0b10000000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
+                          "add2", "$rd, $rs">;
+    def AND2 : CAHPInst16R<0b10010000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
+                          "and2", "$rd, $rs">;
+    def XOR2 : CAHPInst16R<0b10011000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
+                          "xor2", "$rd, $rs">;
+    def OR2  : CAHPInst16R<0b10100000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
+                          "or2",  "$rd, $rs">;
+  }
+
   def SUB2 : CAHPInst16R<0b10001000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
                         "sub2", "$rd, $rs">;
-  def AND2 : CAHPInst16R<0b10010000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
-                        "and2", "$rd, $rs">;
-  def XOR2 : CAHPInst16R<0b10011000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
-                        "xor2", "$rd, $rs">;
-  def OR2  : CAHPInst16R<0b10100000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
-                        "or2",  "$rd, $rs">;
   def LSL2 : CAHPInst16R<0b10101000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
                         "lsl2", "$rd, $rs">;
   def LSR2 : CAHPInst16R<0b10110000, (outs GPR:$rd_w), (ins GPR:$rd, GPR:$rs),
@@ -199,7 +226,8 @@ let Constraints = "$rd = $rd_w" in {
 
 // 16-bit I-instructions.
 
-let Constraints = "$rd = $rd_w" in {
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0,
+    Constraints = "$rd = $rd_w" in {
   def LSLI2 : CAHPInst16I<0b101010, (outs GPR:$rd_w), (ins GPR:$rd, uimm4:$imm),
                           "lsli2", "$rd, $imm">;
   def LSRI2 : CAHPInst16I<0b110010, (outs GPR:$rd_w), (ins GPR:$rd, uimm4:$imm),
@@ -214,13 +242,23 @@ let Constraints = "$rd = $rd_w" in {
 
 // 16-bit J-instructions.
 
-def JALR : CAHPInst16JR<0b10110, (ins GPR:$rs),     "jalr", "$rs">;
-def JR   : CAHPInst16JR<0b00110, (ins GPR:$rs),     "jr",   "$rs">;
-def JS   : CAHPInst16JI<0b01110, (ins simm11:$imm), "js",   "$imm">;
-def JSAL : CAHPInst16JI<0b11110, (ins simm11:$imm), "jsal", "$imm">;
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
+  let isCall = 1, Defs = [X0] in
+  def JALR : CAHPInst16JR<0b10110, (ins GPR:$rs),     "jalr", "$rs">;
+
+  let isBranch = 1, isBarrier = 1, isTerminator = 1, isIndirectBranch = 1 in
+  def JR   : CAHPInst16JR<0b00110, (ins GPR:$rs),     "jr",   "$rs">;
+
+  let isBranch = 1, isTerminator = 1, isBarrier = 1 in
+  def JS   : CAHPInst16JI<0b01110, (ins simm11:$imm), "js",   "$imm">;
+
+  let isCall = 1, Defs = [X0] in
+  def JSAL : CAHPInst16JI<0b11110, (ins simm11:$imm), "jsal", "$imm">;
+}
 
 // Others.
 
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 def NOP : CAHPInst16<(outs), (ins), "nop", ""> {
   let Inst = 0;
 }
