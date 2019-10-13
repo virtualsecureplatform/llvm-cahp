@@ -1,6 +1,21 @@
 # RUN: llvm-mc %s -triple=cahp -show-encoding \
 # RUN:     | FileCheck -check-prefixes=CHECK,CHECK-INST %s
 
+# CHECK-INST: lw ra, -1000(sp)
+# CHECK: encoding: [0x95,0x10,0x0c]
+lw ra, -1000(sp)
+# CHECK-INST: lb ra, -500(sp)
+# CHECK: encoding: [0xa5,0x10,0x0c]
+lb ra, -500(sp)
+# CHECK-INST: lbu ra, -500(sp)
+# CHECK: encoding: [0x85,0x10,0x0c]
+lbu ra, -500(sp)
+# CHECK-INST: sw ra, -1000(sp)
+# CHECK: encoding: [0x9d,0x10,0x0c]
+sw ra, -1000(sp)
+# CHECK-INST: sb ra, -500(sp)
+# CHECK: encoding: [0x8d,0x10,0x0c]
+sb ra, -500(sp)
 # CHECK-INST: li ra, -500
 # CHECK: encoding: [0xb5,0x00,0x0c]
 li ra, -500
@@ -100,6 +115,12 @@ bleu ra, sp, 16
 # CHECK-INST: bleu ra, sp, 16
 # CHECK: encoding: [0x1f,0x01,0x10]
 bleu ra, sp, 16
+# CHECK-INST: lwsp ra, 32(sp)
+# CHECK: encoding: [0x54,0x00]
+lwsp ra, 32(sp)
+# CHECK-INST: swsp ra, 64(sp)
+# CHECK: encoding: [0x9c,0x00]
+swsp ra, 64(sp)
 # CHECK-INST: lsi ra, -32
 # CHECK: encoding: [0xb4,0x00]
 lsi ra, -32
