@@ -1,5 +1,7 @@
 # RUN: llvm-mc %s -triple=cahp -show-encoding \
 # RUN:     | FileCheck -check-prefixes=CHECK,CHECK-INST %s
+# RUN: llvm-mc -filetype=obj -triple=cahp < %s \
+# RUN:     | llvm-objdump -d - | FileCheck -check-prefix=CHECK-INST %s
 
 # CHECK-INST: lw ra, -1000(sp)
 # CHECK: encoding: [0x95,0x10,0x0c]
