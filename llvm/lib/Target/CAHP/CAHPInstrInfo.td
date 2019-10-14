@@ -20,38 +20,47 @@ class UImmAsmOperand<int width, string suffix = "">
 
 def uimm4 : Operand<i16> {
   let ParserMatchClass = UImmAsmOperand<4>;
+  let DecoderMethod = "decodeUImmOperand<4>";
 }
 
 def simm6 : Operand<i16> {
   let ParserMatchClass = SImmAsmOperand<6>;
+  let DecoderMethod = "decodeSImmOperand<6>";
 }
 
 def uimm6 : Operand<i16> {
   let ParserMatchClass = UImmAsmOperand<6>;
+  let DecoderMethod = "decodeUImmOperand<6>";
 }
 
 def simm8 : Operand<i16> {
   let ParserMatchClass = SImmAsmOperand<8>;
+  let DecoderMethod = "decodeSImmOperand<8>";
 }
 
 def uimm8 : Operand<i16> {
   let ParserMatchClass = UImmAsmOperand<8>;
+  let DecoderMethod = "decodeUImmOperand<8>";
 }
 
 def simm10 : Operand<i16> {
   let ParserMatchClass = SImmAsmOperand<10>;
+  let DecoderMethod = "decodeSImmOperand<10>";
 }
 
 def simm11 : Operand<i16> {
   let ParserMatchClass = SImmAsmOperand<11>;
+  let DecoderMethod = "decodeSImmOperand<11>";
 }
 
 def uimm7_lsb0 : Operand<i16> {
   let ParserMatchClass = UImmAsmOperand<7, "Lsb0">;
+  let DecoderMethod = "decodeUImmOperand<7>";
 }
 
 def simm11_lsb0 : Operand<i16> {
   let ParserMatchClass = SImmAsmOperand<11, "Lsb0">;
+  let DecoderMethod = "decodeSImmOperand<11>";
 }
 
 // 24-bit M-instructions.
