@@ -3,13 +3,15 @@
 ; LICENSE.TXT for details). This file is licensed under the same license.
 
 [common]
-subdirectories = AsmParser InstPrinter TargetInfo MCTargetDesc
+subdirectories = AsmParser Disassembler InstPrinter TargetInfo MCTargetDesc
 
 [component_0]
 type = TargetGroup
 name = CAHP
 parent = Target
 has_asmparser = 1
+has_asmprinter = 1
+has_disassembler = 1
 
 [component_1]
 type = Library

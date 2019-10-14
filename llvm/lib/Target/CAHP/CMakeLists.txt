@@ -6,6 +6,7 @@ tablegen(LLVM CAHPGenMCCodeEmitter.inc -gen-emitter)
 tablegen(LLVM CAHPGenSubtargetInfo.inc -gen-subtarget)
 tablegen(LLVM CAHPGenAsmMatcher.inc -gen-asm-matcher)
 tablegen(LLVM CAHPGenAsmWriter.inc -gen-asm-writer)
+tablegen(LLVM CAHPGenDisassemblerTables.inc -gen-disassembler)
 
 add_public_tablegen_target(CAHPCommonTableGen)
 
@@ -13,6 +14,7 @@ add_llvm_target(CAHPCodeGen
   CAHPTargetMachine.cpp
   )
 add_subdirectory(AsmParser)
+add_subdirectory(Disassembler)
 add_subdirectory(InstPrinter)
 add_subdirectory(MCTargetDesc)
 add_subdirectory(TargetInfo)
