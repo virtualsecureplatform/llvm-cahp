@@ -136,19 +136,19 @@ public:
     return (isConstantImm() && isUInt<6>(getConstantImm()));
   }
 
-  bool isSImm8() const {
-    return (isConstantImm() && isInt<8>(getConstantImm()));
-  }
-
-  bool isUImm8() const {
-    return (isConstantImm() && isUInt<8>(getConstantImm()));
-  }
-
   bool isSImm10() const {
     if (!isImm())
       return false;
     if (isConstantImm())
       return isInt<10>(getConstantImm());
+    return isa<MCSymbolRefExpr>(getImm());
+  }
+
+  bool isUImm10() const {
+    if (!isImm())
+      return false;
+    if (isConstantImm())
+      return isUInt<10>(getConstantImm());
     return isa<MCSymbolRefExpr>(getImm());
   }
 
@@ -321,12 +321,10 @@ bool CAHPAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
     CASE_MATCH_INVALID_UIMM(4);
     CASE_MATCH_INVALID_SIMM(6);
     CASE_MATCH_INVALID_UIMM(6);
-    CASE_MATCH_INVALID_SIMM(8);
-    CASE_MATCH_INVALID_UIMM(8);
     CASE_MATCH_INVALID_SIMM(10);
+    CASE_MATCH_INVALID_UIMM(10);
     CASE_MATCH_INVALID_SIMM(11);
     CASE_MATCH_INVALID_UIMM_LSB0(7);
-    CASE_MATCH_INVALID_SIMM_LSB0(11);
   }
 
   llvm_unreachable("Unknown match type detected!");

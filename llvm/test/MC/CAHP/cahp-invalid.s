@@ -1,17 +1,17 @@
 # RUN: not llvm-mc -triple cahp < %s 2>&1 | FileCheck %s
 
 # Out of range immediates
-lw a4, 1024(a2) # CHECK: :[[@LINE]]:8: error: immediate must be a multiple of 2 bytes in the range [-1024, 1022]
+lw a4, 512(a2) # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
 lb a4, -513(a2) # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
 lbu a4, -513(a2) # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-512, 511]
-sw a4, -1025(a2) # CHECK: :[[@LINE]]:8: error: immediate must be a multiple of 2 bytes in the range [-1024, 1022]
+sw a4, -513(a2) # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
 sb a4, 512(a2) # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
 li t0, -513 # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
 li s0, 512 # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
-addi a0, a1, 128 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-128, 127]
-addi a0, a1, -129 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-128, 127]
-andi a0, a1, 256 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 255]
-andi a0, a1, -1 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 255]
+addi a0, a1, 512 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-512, 511]
+addi a0, a1, -513 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-512, 511]
+andi a0, a1, 1024 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 1023]
+xori a0, a1, -1 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 1023]
 lsli a0, a1, 16 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
 asri a0, a1, -1 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
 lwsp a4, 128(sp) # CHECK: :[[@LINE]]:10: error: immediate must be a multiple of 2 bytes in the range [0, 126]

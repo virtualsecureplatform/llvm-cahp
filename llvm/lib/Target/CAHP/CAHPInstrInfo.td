@@ -36,21 +36,15 @@ def uimm6 : Operand<i16> {
   let EncoderMethod = "getImmOpValue";
 }
 
-def simm8 : Operand<i16> {
-  let ParserMatchClass = SImmAsmOperand<8>;
-  let DecoderMethod = "decodeSImmOperand<8>";
-  let EncoderMethod = "getImmOpValue";
-}
-
-def uimm8 : Operand<i16> {
-  let ParserMatchClass = UImmAsmOperand<8>;
-  let DecoderMethod = "decodeUImmOperand<8>";
-  let EncoderMethod = "getImmOpValue";
-}
-
 def simm10 : Operand<i16> {
   let ParserMatchClass = SImmAsmOperand<10>;
   let DecoderMethod = "decodeSImmOperand<10>";
+  let EncoderMethod = "getImmOpValue";
+}
+
+def uimm10 : Operand<i16> {
+  let ParserMatchClass = UImmAsmOperand<10>;
+  let DecoderMethod = "decodeUImmOperand<10>";
   let EncoderMethod = "getImmOpValue";
 }
 
@@ -66,57 +60,27 @@ def uimm7_lsb0 : Operand<i16> {
   let EncoderMethod = "getImmOpValue";
 }
 
-def simm11_lsb0 : Operand<i16> {
-  let ParserMatchClass = SImmAsmOperand<11, "Lsb0">;
-  let DecoderMethod = "decodeSImmOperand<11>";
-  let EncoderMethod = "getImmOpValue";
-}
-
 // 24-bit M-instructions.
 
 let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in {
-  def LW  : CAHPInst24MLoad <0b010101, (outs GPR:$rd), (ins GPR:$rs, simm11_lsb0:$imm),
-                             "lw",  "$rd, ${imm}(${rs})"> {
-    bits<11> imm;
-    let Inst{23-16} = imm{8-1};
-    let Inst{7-6} = imm{10-9};
-  }
+  def LW  : CAHPInst24MLoad <0b010101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
+                             "lw",  "$rd, ${imm}(${rs})">;
   def LB  : CAHPInst24MLoad <0b100101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
-                             "lb",  "$rd, ${imm}(${rs})"> {
-    bits<10> imm;
-    let Inst{23-16} = imm{7-0};
-    let Inst{7-6} = imm{9-8};
-  }
+                             "lb",  "$rd, ${imm}(${rs})">;
   def LBU : CAHPInst24MLoad <0b000101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
-                             "lbu", "$rd, ${imm}(${rs})"> {
-    bits<10> imm;
-    let Inst{23-16} = imm{7-0};
-    let Inst{7-6} = imm{9-8};
-  }
+                             "lbu", "$rd, ${imm}(${rs})">;
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in {
-  def SW  : CAHPInst24MStore<0b011101, (outs GPR:$rd), (ins GPR:$rs, simm11_lsb0:$imm),
-                            "sw",  "$rs, ${imm}(${rd})"> {
-    bits<11> imm;
-    let Inst{23-16} = imm{8-1};
-    let Inst{7-6} = imm{10-9};
-  }
+  def SW  : CAHPInst24MStore<0b011101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
+                            "sw",  "$rs, ${imm}(${rd})">;
   def SB  : CAHPInst24MStore<0b001101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
-                            "sb",  "$rs, ${imm}(${rd})"> {
-    bits<10> imm;
-    let Inst{23-16} = imm{7-0};
-    let Inst{7-6} = imm{9-8};
-  }
+                            "sb",  "$rs, ${imm}(${rd})">;
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isMoveImm = 1 in
 def LI  : CAHPInst24MLoad <0b110101, (outs GPR:$rd), (ins simm10:$imm),
-                           "li", "$rd, $imm"> {
-  bits<10> imm;
-  let Inst{23-16} = imm{7-0};
-  let Inst{7-6} = imm{9-8};
-}
+                           "li", "$rd, $imm">;
 
 // 24-bit R-instructions.
 
@@ -145,19 +109,19 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 // 24-bit I-instructions.
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
-  def ADDI : CAHPInst24I<0b11000011, (outs GPR:$rd), (ins GPR:$rs1, simm8:$imm),
+  def ADDI : CAHPInst24I<0b000011, (outs GPR:$rd), (ins GPR:$rs1, simm10:$imm),
                          "addi", "$rd, $rs1, $imm">;
-  def ANDI : CAHPInst24I<0b01010011, (outs GPR:$rd), (ins GPR:$rs1, uimm8:$imm),
+  def ANDI : CAHPInst24I<0b010011, (outs GPR:$rd), (ins GPR:$rs1, uimm10:$imm),
                          "andi", "$rd, $rs1, $imm">;
-  def XORI : CAHPInst24I<0b01011011, (outs GPR:$rd), (ins GPR:$rs1, uimm8:$imm),
+  def XORI : CAHPInst24I<0b011011, (outs GPR:$rd), (ins GPR:$rs1, uimm10:$imm),
                          "xori", "$rd, $rs1, $imm">;
-  def ORI  : CAHPInst24I<0b01100011, (outs GPR:$rd), (ins GPR:$rs1, uimm8:$imm),
+  def ORI  : CAHPInst24I<0b100011, (outs GPR:$rd), (ins GPR:$rs1, uimm10:$imm),
                          "ori",  "$rd, $rs1, $imm">;
-  def LSLI : CAHPInst24I<0b00101011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
+  def LSLI : CAHPInst24I<0b101011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
                          "lsli", "$rd, $rs1, $imm">;
-  def LSRI : CAHPInst24I<0b00110011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
+  def LSRI : CAHPInst24I<0b110011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
                          "lsri", "$rd, $rs1, $imm">;
-  def ASRI : CAHPInst24I<0b00111011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
+  def ASRI : CAHPInst24I<0b111011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
                          "asri", "$rd, $rs1, $imm">;
 }
 

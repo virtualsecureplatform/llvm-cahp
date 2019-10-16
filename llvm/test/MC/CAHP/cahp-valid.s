@@ -3,18 +3,18 @@
 # RUN: llvm-mc -filetype=obj -triple=cahp < %s \
 # RUN:     | llvm-objdump -d - | FileCheck -check-prefix=CHECK-INST %s
 
-# CHECK-INST: lw ra, -1000(sp)
+# CHECK-INST: lw ra, -500(sp)
 # CHECK: encoding: [0x95,0x10,0x0c]
-lw ra, -1000(sp)
+lw ra, -500(sp)
 # CHECK-INST: lb ra, -500(sp)
 # CHECK: encoding: [0xa5,0x10,0x0c]
 lb ra, -500(sp)
 # CHECK-INST: lbu ra, -500(sp)
 # CHECK: encoding: [0x85,0x10,0x0c]
 lbu ra, -500(sp)
-# CHECK-INST: sw ra, -1000(sp)
+# CHECK-INST: sw ra, -500(sp)
 # CHECK: encoding: [0x9d,0x10,0x0c]
-sw ra, -1000(sp)
+sw ra, -500(sp)
 # CHECK-INST: sb ra, -500(sp)
 # CHECK: encoding: [0x8d,0x10,0x0c]
 sb ra, -500(sp)
@@ -45,21 +45,21 @@ lsr ra, sp, fp
 # CHECK-INST: asr ra, sp, fp
 # CHECK: encoding: [0x39,0x10,0x02]
 asr ra, sp, fp
+# CHECK-INST: addi ra, sp, 10
+# CHECK: encoding: [0x03,0x10,0x0a]
+addi ra, sp, 10
 # CHECK-INST: addi ra, sp, -10
 # CHECK: encoding: [0xc3,0x10,0xf6]
 addi ra, sp, -10
-# CHECK-INST: addi ra, sp, 10
-# CHECK: encoding: [0xc3,0x10,0x0a]
-addi ra, sp, 10
-# CHECK-INST: andi ra, sp, 10
-# CHECK: encoding: [0x53,0x10,0x0a]
-andi ra, sp, 10
-# CHECK-INST: xori ra, sp, 10
-# CHECK: encoding: [0x5b,0x10,0x0a]
-xori ra, sp, 10
-# CHECK-INST: ori ra, sp, 10
-# CHECK: encoding: [0x63,0x10,0x0a]
-ori ra, sp, 10
+# CHECK-INST: andi ra, sp, 778
+# CHECK: encoding: [0xd3,0x10,0x0a]
+andi ra, sp, 778
+# CHECK-INST: xori ra, sp, 778
+# CHECK: encoding: [0xdb,0x10,0x0a]
+xori ra, sp, 778
+# CHECK-INST: ori ra, sp, 778
+# CHECK: encoding: [0xe3,0x10,0x0a]
+ori ra, sp, 778
 # CHECK-INST: lsli ra, sp, 3
 # CHECK: encoding: [0x2b,0x10,0x03]
 lsli ra, sp, 3
