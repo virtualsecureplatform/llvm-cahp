@@ -2,6 +2,7 @@
 // is distributed under the Apache License v2.0 with LLVM Exceptions (see
 // LICENSE.TXT for details). This file is licensed under the same license.
 
+#include "MCTargetDesc/CAHPFixupKinds.h"
 #include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/MC/MCAsmInfo.h"
@@ -13,6 +14,7 @@
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCSymbol.h"
+#include "llvm/Support/Casting.h"
 #include "llvm/Support/EndianStream.h"
 #include "llvm/Support/raw_ostream.h"
 
@@ -21,6 +23,7 @@ using namespace llvm;
 #define DEBUG_TYPE "mccodeemitter"
 
 STATISTIC(MCNumEmitted, "Number of MC instructions emitted");
+STATISTIC(MCNumFixups, "Number of MC fixups created");
 
 namespace {
 class CAHPMCCodeEmitter : public MCCodeEmitter {
@@ -50,6 +53,10 @@ public:
   unsigned getMachineOpValue(const MCInst &MI, const MCOperand &MO,
                              SmallVectorImpl<MCFixup> &Fixups,
                              const MCSubtargetInfo &STI) const;
+
+  unsigned getImmOpValue(const MCInst &MI, unsigned OpNo,
+                         SmallVectorImpl<MCFixup> &Fixups,
+                         const MCSubtargetInfo &STI) const;
 };
 } // end anonymous namespace
 
@@ -97,6 +104,51 @@ CAHPMCCodeEmitter::getMachineOpValue(const MCInst &MI, const MCOperand &MO,
     return static_cast<unsigned>(MO.getImm());
 
   llvm_unreachable("Unhandled expression!");
+  return 0;
+}
+
+unsigned CAHPMCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
+                                          SmallVectorImpl<MCFixup> &Fixups,
+                                          const MCSubtargetInfo &STI) const {
+  const MCOperand &MO = MI.getOperand(OpNo);
+
+  if (MO.isImm())
+    return MO.getImm();
+
+  assert(MO.isExpr() && "getImmOpValue expects only expressions or immediates");
+
+  const MCExpr *Expr = MO.getExpr();
+  MCExpr::ExprKind Kind = Expr->getKind();
+  MCFixupKind FixupKind = static_cast<MCFixupKind>(CAHP::fixup_cahp_invalid);
+  unsigned Offset = 0;
+
+  if (Kind == MCExpr::SymbolRef &&
+      cast<MCSymbolRefExpr>(Expr)->getKind() == MCSymbolRefExpr::VK_None) {
+    switch (MI.getOpcode()) {
+    case CAHP::JS:
+    case CAHP::JSAL:
+      FixupKind = static_cast<MCFixupKind>(CAHP::fixup_cahp_pcrel_11);
+      break;
+
+    case CAHP::BEQ:
+    case CAHP::BNE:
+    case CAHP::BLT:
+    case CAHP::BLTU:
+    case CAHP::BLE:
+    case CAHP::BLEU:
+      FixupKind = static_cast<MCFixupKind>(CAHP::fixup_cahp_pcrel_10);
+      break;
+
+      // TODO: li and other instructions using %hi/%lo
+    }
+  }
+
+  assert(FixupKind != static_cast<MCFixupKind>(CAHP::fixup_cahp_invalid) &&
+         "Unhandled expression!");
+
+  Fixups.push_back(MCFixup::create(Offset, Expr, FixupKind, MI.getLoc()));
+  ++MCNumFixups;
+
   return 0;
 }
 
