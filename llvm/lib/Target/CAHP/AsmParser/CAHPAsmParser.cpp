@@ -145,11 +145,19 @@ public:
   }
 
   bool isSImm10() const {
-    return (isConstantImm() && isInt<10>(getConstantImm()));
+    if (!isImm())
+      return false;
+    if (isConstantImm())
+      return isInt<10>(getConstantImm());
+    return isa<MCSymbolRefExpr>(getImm());
   }
 
   bool isSImm11() const {
-    return (isConstantImm() && isInt<11>(getConstantImm()));
+    if (!isImm())
+      return false;
+    if (isConstantImm())
+      return isInt<11>(getConstantImm());
+    return isa<MCSymbolRefExpr>(getImm());
   }
 
   bool isUImm7Lsb0() const {
@@ -362,24 +370,34 @@ OperandMatchResultTy CAHPAsmParser::parseRegister(OperandVector &Operands) {
 }
 
 OperandMatchResultTy CAHPAsmParser::parseImmediate(OperandVector &Operands) {
+  SMLoc S = getLoc();
+  SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
+  const MCExpr *Res;
+
   switch (getLexer().getKind()) {
   default:
     return MatchOperand_NoMatch;
+
   case AsmToken::LParen:
   case AsmToken::Minus:
   case AsmToken::Plus:
   case AsmToken::Integer:
   case AsmToken::String:
+    if (getParser().parseExpression(Res))
+      return MatchOperand_ParseFail;
+    break;
+
+  case AsmToken::Identifier: {
+    StringRef Identifier;
+    if (getParser().parseIdentifier(Identifier))
+      return MatchOperand_ParseFail;
+    MCSymbol *Sym = getContext().getOrCreateSymbol(Identifier);
+    Res = MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None, getContext());
     break;
   }
+  }
 
-  const MCExpr *IdVal;
-  SMLoc S = getLoc();
-  if (getParser().parseExpression(IdVal))
-    return MatchOperand_ParseFail;
-
-  SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
-  Operands.push_back(CAHPOperand::createImm(IdVal, S, E));
+  Operands.push_back(CAHPOperand::createImm(Res, S, E));
   return MatchOperand_Success;
 }
 
