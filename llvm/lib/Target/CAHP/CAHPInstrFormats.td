@@ -57,9 +57,12 @@ class CAHPInst24MLoad<bits<6> opcode, dag outs, dag ins, string opcodestr, strin
 : CAHPInst24<outs, ins, opcodestr, argstr> {
   bits<4> rd;
   bits<4> rs;
+  bits<10> imm;
 
+  let Inst{23-16} = imm{7-0};
   let Inst{15-12} = rs;
   let Inst{11-8} = rd;
+  let Inst{7-6} = imm{9-8};
   let Inst{5-0} = opcode;
 }
 
@@ -67,9 +70,12 @@ class CAHPInst24MStore<bits<6> opcode, dag outs, dag ins, string opcodestr, stri
 : CAHPInst24<outs, ins, opcodestr, argstr> {
   bits<4> rs;
   bits<4> rd;
+  bits<10> imm;
 
+  let Inst{23-16} = imm{7-0};
   let Inst{15-12} = rd;
   let Inst{11-8} = rs;
+  let Inst{7-6} = imm{9-8};
   let Inst{5-0} = opcode;
 }
 
@@ -88,16 +94,17 @@ class CAHPInst24R<bits<8> opcode, dag outs, dag ins, string opcodestr, string ar
 }
 
 // 24-bit I-instruction format.
-class CAHPInst24I<bits<8> opcode, dag outs, dag ins, string opcodestr, string argstr>
+class CAHPInst24I<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
 : CAHPInst24<outs, ins, opcodestr, argstr> {
   bits<4> rd;
   bits<4> rs1;
-  bits<8> imm;
+  bits<10> imm;
 
-  let Inst{23-16} = imm;
+  let Inst{23-16} = imm{7-0};
   let Inst{15-12} = rs1;
   let Inst{11-8} = rd;
-  let Inst{7-0} = opcode;
+  let Inst{7-6} = imm{9-8};
+  let Inst{5-0} = opcode;
 }
 
 // 24-bit J-instruction format.
