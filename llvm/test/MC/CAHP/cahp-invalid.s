@@ -28,9 +28,9 @@ subs x1, x2 # CHECK: :[[@LINE]]:1: error: unrecognized instruction mnemonic
 nandi x14, x13 # CHECK: :[[@LINE]]:1: error: unrecognized instruction mnemonic
 
 # Invalid register names
-add foo, x1, x3 # CHECK: :[[@LINE]]:5: error: unknown operand
-sub x0, x16, x4 # CHECK: :[[@LINE]]:9: error: unknown operand
-mov t2, x8 # CHECK: :[[@LINE]]:5: error: unknown operand
+add foo, x1, x3 # CHECK: :[[@LINE]]:5: error: invalid operand for instruction
+sub x0, x16, x4 # CHECK: :[[@LINE]]:9: error: invalid operand for instruction
+mov t2, x8 # CHECK: :[[@LINE]]:5: error: invalid operand for instruction
 
 # Invalid operand types
 add x15, x1, 1 # CHECK: :[[@LINE]]:14: error: invalid operand for instruction
