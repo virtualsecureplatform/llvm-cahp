@@ -57,15 +57,18 @@ addi ra, sp, 10
 # CHECK-INST: addi ra, sp, -10
 # CHECK: encoding: [0xc3,0x10,0xf6]
 addi ra, sp, -10
-# CHECK-INST: andi ra, sp, 778
+# CHECK-INST: andi ra, sp, -246
 # CHECK: encoding: [0xd3,0x10,0x0a]
-andi ra, sp, 778
-# CHECK-INST: xori ra, sp, 778
+andi ra, sp, -246
+# CHECK-INST: xori ra, sp, -246
 # CHECK: encoding: [0xdb,0x10,0x0a]
-xori ra, sp, 778
-# CHECK-INST: ori ra, sp, 778
+xori ra, sp, -246
+# CHECK-INST: ori ra, sp, -246
 # CHECK: encoding: [0xe3,0x10,0x0a]
-ori ra, sp, 778
+ori ra, sp, -246
+# CHECK-INST: ori ra, sp, -246
+# CHECK: encoding: [0xe3,0x10,0x0a]
+ori ra, sp, %lo(0xA70A)
 # CHECK-INST: lsli ra, sp, 3
 # CHECK: encoding: [0x2b,0x10,0x03]
 lsli ra, sp, 3
@@ -132,9 +135,9 @@ swsp ra, 64(sp)
 # CHECK-INST: lsi ra, -32
 # CHECK: encoding: [0xb4,0x00]
 lsi ra, -32
-# CHECK-INST: lui ra, 32
+# CHECK-INST: lui ra, -32
 # CHECK: encoding: [0x84,0x00]
-lui ra, 32
+lui ra, -32
 # CHECK-INST: lui a0, 0
 # CHECK: encoding: [0x04,0x08]
 lui a0, %hi(2)
