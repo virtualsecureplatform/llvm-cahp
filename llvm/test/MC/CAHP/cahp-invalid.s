@@ -42,3 +42,10 @@ li x11, x12, x13 # CHECK: :[[@LINE]]:9: error: invalid operand for instruction
 # Too few operands
 li x8 # CHECK: :[[@LINE]]:1: error: too few operands for instruction
 mov x13 # CHECK: :[[@LINE]]:1: error: too few operands for instruction
+
+# Illegal operand modifier
+lsli a0, a0, %lo(1) # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
+ori a0, a1, %hi(foo) # CHECK: :[[@LINE]]:13: error: immediate must be an integer in the range [0, 1023]
+lui a0, %lo(1) # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [0, 63]
+addi t0, sp, %modifer(255) # CHECK: :[[@LINE]]:15: error: unrecognized operand modifier
+addi t1, %lo(t2), 1 # CHECK: :[[@LINE]]:10: error: invalid operand for instruction

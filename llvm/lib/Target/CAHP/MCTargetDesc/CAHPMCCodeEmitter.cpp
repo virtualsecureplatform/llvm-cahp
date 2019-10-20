@@ -3,6 +3,7 @@
 // LICENSE.TXT for details). This file is licensed under the same license.
 
 #include "MCTargetDesc/CAHPFixupKinds.h"
+#include "MCTargetDesc/CAHPMCExpr.h"
 #include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/ADT/Statistic.h"
 #include "llvm/MC/MCAsmInfo.h"
@@ -119,15 +120,32 @@ unsigned CAHPMCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
 
   const MCExpr *Expr = MO.getExpr();
   MCExpr::ExprKind Kind = Expr->getKind();
-  MCFixupKind FixupKind = static_cast<MCFixupKind>(CAHP::fixup_cahp_invalid);
+  CAHP::Fixups FixupKind = CAHP::fixup_cahp_invalid;
   unsigned Offset = 0;
 
-  if (Kind == MCExpr::SymbolRef &&
-      cast<MCSymbolRefExpr>(Expr)->getKind() == MCSymbolRefExpr::VK_None) {
+  if (Kind == MCExpr::Target) {
+    const CAHPMCExpr *CAHPExpr = cast<CAHPMCExpr>(Expr);
+
+    switch (CAHPExpr->getKind()) {
+    case CAHPMCExpr::VK_CAHP_None:
+    case CAHPMCExpr::VK_CAHP_Invalid:
+      llvm_unreachable("Unhandled fixup kind!");
+
+    case CAHPMCExpr::VK_CAHP_LO:
+      FixupKind = CAHP::fixup_cahp_lo10;
+      break;
+
+    case CAHPMCExpr::VK_CAHP_HI:
+      FixupKind = CAHP::fixup_cahp_hi6;
+      break;
+    }
+  } else if (Kind == MCExpr::SymbolRef &&
+             cast<MCSymbolRefExpr>(Expr)->getKind() ==
+                 MCSymbolRefExpr::VK_None) {
     switch (MI.getOpcode()) {
     case CAHP::JS:
     case CAHP::JSAL:
-      FixupKind = static_cast<MCFixupKind>(CAHP::fixup_cahp_pcrel_11);
+      FixupKind = CAHP::fixup_cahp_pcrel_11;
       break;
 
     case CAHP::BEQ:
@@ -136,17 +154,15 @@ unsigned CAHPMCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
     case CAHP::BLTU:
     case CAHP::BLE:
     case CAHP::BLEU:
-      FixupKind = static_cast<MCFixupKind>(CAHP::fixup_cahp_pcrel_10);
+      FixupKind = CAHP::fixup_cahp_pcrel_10;
       break;
-
-      // TODO: li and other instructions using %hi/%lo
     }
   }
 
-  assert(FixupKind != static_cast<MCFixupKind>(CAHP::fixup_cahp_invalid) &&
-         "Unhandled expression!");
+  assert(FixupKind != CAHP::fixup_cahp_invalid && "Unhandled expression!");
 
-  Fixups.push_back(MCFixup::create(Offset, Expr, FixupKind, MI.getLoc()));
+  Fixups.push_back(MCFixup::create(
+      Offset, Expr, static_cast<MCFixupKind>(FixupKind), MI.getLoc()));
   ++MCNumFixups;
 
   return 0;

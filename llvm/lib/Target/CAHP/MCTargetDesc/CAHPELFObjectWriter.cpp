@@ -33,6 +33,7 @@ unsigned CAHPELFObjectWriter::getRelocType(MCContext &Ctx,
                                            const MCValue &Target,
                                            const MCFixup &Fixup,
                                            bool IsPCRel) const {
+  // TODO: emit correct relocations.
   report_fatal_error("invalid fixup kind!");
 }
 

@@ -51,10 +51,15 @@ public:
 
     // MCFixupKindInfo{name, offset, bits, flag}
     switch ((unsigned)Kind) {
-    case CAHP::fixup_cahp_hi6:
-      llvm_unreachable("Not yet implemented (fixup_cahp_hi6)");
-    case CAHP::fixup_cahp_lo10:
-      llvm_unreachable("Not yet implemented (fixup_cahp_lo10)");
+    case CAHP::fixup_cahp_hi6: {
+      const static MCFixupKindInfo info{"fixup_cahp_hi6", 0, 16, 0};
+      return info;
+    }
+
+    case CAHP::fixup_cahp_lo10: {
+      const static MCFixupKindInfo info{"fixup_cahp_lo10", 0, 24, 0};
+      return info;
+    }
 
     case CAHP::fixup_cahp_pcrel_10: {
       const static MCFixupKindInfo info{"fixup_cahp_pcrel_10", 0, 24,
@@ -111,15 +116,16 @@ static uint64_t adjustFixupValue(const MCFixup &Fixup, uint64_t Value,
   case FK_Data_8:
     return Value;
 
-    /*
-       // TODO: need rearranging of bits
   case CAHP::fixup_cahp_hi6:
     // Add 1 if bit 9 is 1, to compensate for low 10 bits being negative.
-    return ((Value + 0x200) >> 10) & 0x3f;
+    Value = ((Value + 0x200) >> 10) & 0x3f;
+    // Need to produce (imm[3:0] << 12)|(imm[5:4] << 6) from the 6-bit Value.
+    return ((Value & 0xf) << 12) | (((Value >> 4) & 3) << 6);
 
   case CAHP::fixup_cahp_lo10:
-    return Value & 0x3ff;
-    */
+    Value = Value & 0x3ff;
+    // Need to produce (imm[7:0] << 16)|(imm[9:8] << 6)
+    return ((Value & 0xff) << 16) | (((Value >> 8) & 3) << 6);
 
   case CAHP::fixup_cahp_pcrel_10:
     if (!isInt<10>(Value))

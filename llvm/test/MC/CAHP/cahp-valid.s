@@ -21,6 +21,12 @@ sb ra, -500(sp)
 # CHECK-INST: li ra, -500
 # CHECK: encoding: [0xb5,0x00,0x0c]
 li ra, -500
+# CHECK-INST: li a0, 391
+# CHECK: encoding: [0x75,0x08,0x87]
+li a0, (0x187000 >> 12)
+# CHECK-INST: li a0, 256
+# CHECK: encoding: [0x75,0x08,0x00]
+li a0, %lo(0x8500)
 # CHECK-INST: add ra, sp, fp
 # CHECK: encoding: [0x01,0x10,0x02]
 add ra, sp, fp
@@ -129,6 +135,9 @@ lsi ra, -32
 # CHECK-INST: lui ra, 32
 # CHECK: encoding: [0x84,0x00]
 lui ra, 32
+# CHECK-INST: lui a0, 0
+# CHECK: encoding: [0x04,0x08]
+lui a0, %hi(2)
 # CHECK-INST: mov ra, sp
 # CHECK: encoding: [0xc0,0x10]
 mov ra, sp
