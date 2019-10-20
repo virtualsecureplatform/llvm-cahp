@@ -53,3 +53,15 @@ ble a0, a1, .LBB6
 bleu a0, a1, .LBB7
 # CHECK-FIXUP: fixup A - offset: 0, value: .LBB7, kind: fixup_cahp_pcrel_10
 # CHECK-INSTR: bleu a0, a1, -512
+
+addi a0, a1, %lo(val)
+# CHECK-FIXUP: fixup A - offset: 0, value: %lo(val), kind: fixup_cahp_lo10
+# CHECK-INSTR: addi a0, a1, -460
+
+lui a0, %hi(val)
+# CHECK-FIXUP: fixup A - offset: 0, value: %hi(val), kind: fixup_cahp_hi6
+# CHECK-INSTR: lui a0, 5
+
+.set val, 0x1234
+
+# CHECK-REL-NOT: R_CAHP
