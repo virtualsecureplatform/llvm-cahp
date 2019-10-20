@@ -80,7 +80,9 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in {
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isMoveImm = 1 in
 def LI  : CAHPInst24MLoad <0b110101, (outs GPR:$rd), (ins simm10:$imm),
-                           "li", "$rd, $imm">;
+                           "li", "$rd, $imm"> {
+  let rs = 0;
+}
 
 // 24-bit R-instructions.
 
