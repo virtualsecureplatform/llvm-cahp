@@ -30,21 +30,9 @@ def simm6 : Operand<i16> {
   let EncoderMethod = "getImmOpValue";
 }
 
-def uimm6 : Operand<i16> {
-  let ParserMatchClass = UImmAsmOperand<6>;
-  let DecoderMethod = "decodeUImmOperand<6>";
-  let EncoderMethod = "getImmOpValue";
-}
-
 def simm10 : Operand<i16> {
   let ParserMatchClass = SImmAsmOperand<10>;
   let DecoderMethod = "decodeSImmOperand<10>";
-  let EncoderMethod = "getImmOpValue";
-}
-
-def uimm10 : Operand<i16> {
-  let ParserMatchClass = UImmAsmOperand<10>;
-  let DecoderMethod = "decodeUImmOperand<10>";
   let EncoderMethod = "getImmOpValue";
 }
 
@@ -113,11 +101,11 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
   def ADDI : CAHPInst24I<0b000011, (outs GPR:$rd), (ins GPR:$rs1, simm10:$imm),
                          "addi", "$rd, $rs1, $imm">;
-  def ANDI : CAHPInst24I<0b010011, (outs GPR:$rd), (ins GPR:$rs1, uimm10:$imm),
+  def ANDI : CAHPInst24I<0b010011, (outs GPR:$rd), (ins GPR:$rs1, simm10:$imm),
                          "andi", "$rd, $rs1, $imm">;
-  def XORI : CAHPInst24I<0b011011, (outs GPR:$rd), (ins GPR:$rs1, uimm10:$imm),
+  def XORI : CAHPInst24I<0b011011, (outs GPR:$rd), (ins GPR:$rs1, simm10:$imm),
                          "xori", "$rd, $rs1, $imm">;
-  def ORI  : CAHPInst24I<0b100011, (outs GPR:$rd), (ins GPR:$rs1, uimm10:$imm),
+  def ORI  : CAHPInst24I<0b100011, (outs GPR:$rd), (ins GPR:$rs1, simm10:$imm),
                          "ori",  "$rd, $rs1, $imm">;
   def LSLI : CAHPInst24I<0b101011, (outs GPR:$rd), (ins GPR:$rs1, uimm4:$imm),
                          "lsli", "$rd, $rs1, $imm">;
@@ -172,7 +160,7 @@ def LSI  : CAHPInst16Load <0b110100, (outs GPR:$rd), (ins simm6:$imm),
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isMoveImm = 1 in
-def LUI  : CAHPInst16Load <0b000100, (outs GPR:$rd), (ins uimm6:$imm),
+def LUI  : CAHPInst16Load <0b000100, (outs GPR:$rd), (ins simm6:$imm),
                            "lui",  "$rd, $imm"> {
   bits<6> imm;
   let Inst{15-12} = imm{3-0};
@@ -220,7 +208,7 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0,
                           "asri2", "$rd, $imm">;
   def ADDI2 : CAHPInst16I<0b000010, (outs GPR:$rd_w), (ins GPR:$rd, simm6:$imm),
                           "addi2", "$rd, $imm">;
-  def ANDI2 : CAHPInst16I<0b010010, (outs GPR:$rd_w), (ins GPR:$rd, uimm6:$imm),
+  def ANDI2 : CAHPInst16I<0b010010, (outs GPR:$rd_w), (ins GPR:$rd, simm6:$imm),
                           "andi2", "$rd, $imm">;
 }
 

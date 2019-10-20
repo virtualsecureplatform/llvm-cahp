@@ -10,16 +10,16 @@ li t0, -513 # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the ra
 li s0, 512 # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
 addi a0, a1, 512 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-512, 511]
 addi a0, a1, -513 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-512, 511]
-andi a0, a1, 1024 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 1023]
-xori a0, a1, -1 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 1023]
+andi a0, a1, 512 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-512, 511]
+xori a0, a1, -513 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-512, 511]
 lsli a0, a1, 16 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
 asri a0, a1, -1 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
 lwsp a4, 128(sp) # CHECK: :[[@LINE]]:10: error: immediate must be a multiple of 2 bytes in the range [0, 126]
 swsp a3, -2(sp) # CHECK: :[[@LINE]]:10: error: immediate must be a multiple of 2 bytes in the range [0, 126]
 lsi a5, 32 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
 lsi a5, -33 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
-lui a5, 65 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [0, 63]
-lui a5, -1 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [0, 63]
+lui a5, 32 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
+lui a5, -33 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
 js 1024 # CHECK: :[[@LINE]]:4: error: immediate must be an integer in the range [-1024, 1023]
 js -1025 # CHECK: :[[@LINE]]:4: error: immediate must be an integer in the range [-1024, 1023]
 
@@ -45,7 +45,7 @@ mov x13 # CHECK: :[[@LINE]]:1: error: too few operands for instruction
 
 # Illegal operand modifier
 lsli a0, a0, %lo(1) # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
-ori a0, a1, %hi(foo) # CHECK: :[[@LINE]]:13: error: immediate must be an integer in the range [0, 1023]
-lui a0, %lo(1) # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [0, 63]
+ori a0, a1, %hi(foo) # CHECK: :[[@LINE]]:13: error: immediate must be an integer in the range [-512, 511]
+lui a0, %lo(1) # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
 addi t0, sp, %modifer(255) # CHECK: :[[@LINE]]:15: error: unrecognized operand modifier
 addi t1, %lo(t2), 1 # CHECK: :[[@LINE]]:10: error: invalid operand for instruction
