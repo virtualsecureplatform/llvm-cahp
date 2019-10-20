@@ -160,9 +160,7 @@ public:
 
   bool isUImm4() const { return isBareImm(isUInt<4>); }
 
-  bool isSImm6() const { return isBareImm(isInt<6>); }
-
-  bool isUImm6() const {
+  bool isSImm6() const {
     if (!isImm())
       return false;
 
@@ -172,7 +170,7 @@ public:
 
     bool IsConstantImm = evaluateConstantImm(Imm, VK);
     if (IsConstantImm)
-      IsValid = isUInt<6>(Imm);
+      IsValid = isInt<6>(Imm);
     else
       IsValid = CAHPAsmParser::classifySymbolRef(getImm(), VK, Imm);
 
@@ -198,27 +196,9 @@ public:
            (VK == CAHPMCExpr::VK_CAHP_None || VK == CAHPMCExpr::VK_CAHP_LO);
   }
 
-  bool isUImm10() const {
-    if (!isImm())
-      return false;
-
-    CAHPMCExpr::VariantKind VK;
-    int64_t Imm;
-    bool IsValid;
-
-    bool IsConstantImm = evaluateConstantImm(Imm, VK);
-    if (IsConstantImm)
-      IsValid = isUInt<10>(Imm);
-    else
-      IsValid = CAHPAsmParser::classifySymbolRef(getImm(), VK, Imm);
-
-    return IsValid &&
-           (VK == CAHPMCExpr::VK_CAHP_None || VK == CAHPMCExpr::VK_CAHP_LO);
-  }
-
   bool isSImm11() const { return isBareImm(isInt<11>); }
 
-  bool isUImm7Lsb0() const { return isBareImm(&isShiftedUInt<6, 1>); }
+  bool isUImm7Lsb0() const { return isBareImm(isShiftedUInt<6, 1>); }
 
   bool isSImm11Lsb0() const { return isBareImm(isShiftedInt<10, 1>); }
 
@@ -384,9 +364,7 @@ bool CAHPAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
 
     CASE_MATCH_INVALID_UIMM(4);
     CASE_MATCH_INVALID_SIMM(6);
-    CASE_MATCH_INVALID_UIMM(6);
     CASE_MATCH_INVALID_SIMM(10);
-    CASE_MATCH_INVALID_UIMM(10);
     CASE_MATCH_INVALID_SIMM(11);
     CASE_MATCH_INVALID_UIMM_LSB0(7);
   }
