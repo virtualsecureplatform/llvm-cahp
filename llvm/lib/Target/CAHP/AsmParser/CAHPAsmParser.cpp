@@ -2,6 +2,7 @@
 // is distributed under the Apache License v2.0 with LLVM Exceptions (see
 // LICENSE.TXT for details). This file is licensed under the same license.
 
+#include "MCTargetDesc/CAHPMCExpr.h"
 #include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/StringSwitch.h"
@@ -47,6 +48,7 @@ class CAHPAsmParser : public MCTargetAsmParser {
   OperandMatchResultTy parseImmediate(OperandVector &Operands);
   OperandMatchResultTy parseRegister(OperandVector &Operands);
   OperandMatchResultTy parseMemOpBaseReg(OperandVector &Operands);
+  OperandMatchResultTy parseOperandWithModifier(OperandVector &Operands);
 
   bool parseOperand(OperandVector &Operands);
 
@@ -57,6 +59,9 @@ public:
 #include "CAHPGenAsmMatcher.inc"
 #undef GET_OPERAND_DIAGNOSTIC_TYPES
   };
+
+  static bool classifySymbolRef(const MCExpr *Expr,
+                                CAHPMCExpr::VariantKind &Kind, int64_t &Addend);
 
   CAHPAsmParser(const MCSubtargetInfo &STI, MCAsmParser &Parser,
                 const MCInstrInfo &MII, const MCTargetOptions &Options)
@@ -115,8 +120,37 @@ public:
   bool isImm() const override { return Kind == Immediate; }
   bool isMem() const override { return false; }
 
-  bool isConstantImm() const {
-    return isImm() && dyn_cast<MCConstantExpr>(getImm());
+  bool evaluateConstantImm(int64_t &Imm, CAHPMCExpr::VariantKind &VK) const {
+    const MCExpr *Val = getImm();
+    bool Ret = false;
+    if (auto *RE = dyn_cast<CAHPMCExpr>(Val)) {
+      Ret = RE->evaluateAsConstant(Imm);
+      VK = RE->getKind();
+    } else if (auto CE = dyn_cast<MCConstantExpr>(Val)) {
+      Ret = true;
+      VK = CAHPMCExpr::VK_CAHP_None;
+      Imm = CE->getValue();
+    }
+    return Ret;
+  }
+
+  // True if operand is a symbol with no modifiers, or a constant with no
+  // modifiers and pred(Op) is true.
+  template <class Pred> bool isBareImm(Pred pred) const {
+    if (!isImm())
+      return false;
+
+    CAHPMCExpr::VariantKind VK;
+    int64_t Imm;
+    bool IsValid;
+
+    bool IsConstantImm = evaluateConstantImm(Imm, VK);
+    if (IsConstantImm)
+      IsValid = pred(Imm);
+    else
+      IsValid = CAHPAsmParser::classifySymbolRef(getImm(), VK, Imm);
+
+    return IsValid && VK == CAHPMCExpr::VK_CAHP_None;
   }
 
   int64_t getConstantImm() const {
@@ -124,49 +158,69 @@ public:
     return static_cast<const MCConstantExpr *>(Val)->getValue();
   }
 
-  bool isUImm4() const {
-    return (isConstantImm() && isUInt<4>(getConstantImm()));
-  }
+  bool isUImm4() const { return isBareImm(isUInt<4>); }
 
-  bool isSImm6() const {
-    return (isConstantImm() && isInt<6>(getConstantImm()));
-  }
+  bool isSImm6() const { return isBareImm(isInt<6>); }
 
   bool isUImm6() const {
-    return (isConstantImm() && isUInt<6>(getConstantImm()));
+    if (!isImm())
+      return false;
+
+    CAHPMCExpr::VariantKind VK;
+    int64_t Imm;
+    bool IsValid;
+
+    bool IsConstantImm = evaluateConstantImm(Imm, VK);
+    if (IsConstantImm)
+      IsValid = isUInt<6>(Imm);
+    else
+      IsValid = CAHPAsmParser::classifySymbolRef(getImm(), VK, Imm);
+
+    return IsValid &&
+           (VK == CAHPMCExpr::VK_CAHP_None || VK == CAHPMCExpr::VK_CAHP_HI);
   }
 
   bool isSImm10() const {
     if (!isImm())
       return false;
-    if (isConstantImm())
-      return isInt<10>(getConstantImm());
-    return isa<MCSymbolRefExpr>(getImm());
+
+    CAHPMCExpr::VariantKind VK;
+    int64_t Imm;
+    bool IsValid;
+
+    bool IsConstantImm = evaluateConstantImm(Imm, VK);
+    if (IsConstantImm)
+      IsValid = isInt<10>(Imm);
+    else
+      IsValid = CAHPAsmParser::classifySymbolRef(getImm(), VK, Imm);
+
+    return IsValid &&
+           (VK == CAHPMCExpr::VK_CAHP_None || VK == CAHPMCExpr::VK_CAHP_LO);
   }
 
   bool isUImm10() const {
     if (!isImm())
       return false;
-    if (isConstantImm())
-      return isUInt<10>(getConstantImm());
-    return isa<MCSymbolRefExpr>(getImm());
+
+    CAHPMCExpr::VariantKind VK;
+    int64_t Imm;
+    bool IsValid;
+
+    bool IsConstantImm = evaluateConstantImm(Imm, VK);
+    if (IsConstantImm)
+      IsValid = isUInt<10>(Imm);
+    else
+      IsValid = CAHPAsmParser::classifySymbolRef(getImm(), VK, Imm);
+
+    return IsValid &&
+           (VK == CAHPMCExpr::VK_CAHP_None || VK == CAHPMCExpr::VK_CAHP_LO);
   }
 
-  bool isSImm11() const {
-    if (!isImm())
-      return false;
-    if (isConstantImm())
-      return isInt<11>(getConstantImm());
-    return isa<MCSymbolRefExpr>(getImm());
-  }
+  bool isSImm11() const { return isBareImm(isInt<11>); }
 
-  bool isUImm7Lsb0() const {
-    return (isConstantImm() && isShiftedUInt<6, 1>(getConstantImm()));
-  }
+  bool isUImm7Lsb0() const { return isBareImm(&isShiftedUInt<6, 1>); }
 
-  bool isSImm11Lsb0() const {
-    return (isConstantImm() && isShiftedInt<10, 1>(getConstantImm()));
-  }
+  bool isSImm11Lsb0() const { return isBareImm(isShiftedInt<10, 1>); }
 
   /// getStartLoc - Gets location of the first token of this operand
   SMLoc getStartLoc() const override { return StartLoc; }
@@ -231,8 +285,18 @@ public:
 
   void addExpr(MCInst &Inst, const MCExpr *Expr) const {
     assert(Expr && "Expr shouldn't be null!");
-    if (auto *CE = dyn_cast<MCConstantExpr>(Expr))
-      Inst.addOperand(MCOperand::createImm(CE->getValue()));
+
+    int64_t Imm = 0;
+    bool IsConstant = false;
+    if (auto *RE = dyn_cast<CAHPMCExpr>(Expr)) {
+      IsConstant = RE->evaluateAsConstant(Imm);
+    } else if (auto *CE = dyn_cast<MCConstantExpr>(Expr)) {
+      IsConstant = true;
+      Imm = CE->getValue();
+    }
+
+    if (IsConstant)
+      Inst.addOperand(MCOperand::createImm(Imm));
     else
       Inst.addOperand(MCOperand::createExpr(Expr));
   }
@@ -393,9 +457,53 @@ OperandMatchResultTy CAHPAsmParser::parseImmediate(OperandVector &Operands) {
     Res = MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None, getContext());
     break;
   }
+
+  case AsmToken::Percent: {
+    return parseOperandWithModifier(Operands);
+  }
   }
 
   Operands.push_back(CAHPOperand::createImm(Res, S, E));
+  return MatchOperand_Success;
+}
+
+OperandMatchResultTy
+CAHPAsmParser::parseOperandWithModifier(OperandVector &Operands) {
+  SMLoc S = getLoc();
+  SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
+
+  if (getLexer().getKind() != AsmToken::Percent) {
+    Error(getLoc(), "expected '%' for operand modifier");
+    return MatchOperand_ParseFail;
+  }
+
+  getParser().Lex(); // Eat '%'
+
+  if (getLexer().getKind() != AsmToken::Identifier) {
+    Error(getLoc(), "expected valid identifier for operand modifier");
+    return MatchOperand_ParseFail;
+  }
+  StringRef Identifier = getParser().getTok().getIdentifier();
+  CAHPMCExpr::VariantKind VK = CAHPMCExpr::getVariantKindForName(Identifier);
+  if (VK == CAHPMCExpr::VK_CAHP_Invalid) {
+    Error(getLoc(), "unrecognized operand modifier");
+    return MatchOperand_ParseFail;
+  }
+
+  getParser().Lex(); // Eat the identifier
+  if (getLexer().getKind() != AsmToken::LParen) {
+    Error(getLoc(), "expected '('");
+    return MatchOperand_ParseFail;
+  }
+  getParser().Lex(); // Eat '('
+
+  const MCExpr *SubExpr;
+  if (getParser().parseParenExpression(SubExpr, E)) {
+    return MatchOperand_ParseFail;
+  }
+
+  const MCExpr *ModExpr = CAHPMCExpr::create(SubExpr, VK, getContext());
+  Operands.push_back(CAHPOperand::createImm(ModExpr, S, E));
   return MatchOperand_Success;
 }
 
@@ -476,6 +584,51 @@ bool CAHPAsmParser::ParseInstruction(ParseInstructionInfo &Info, StringRef Name,
 
   getParser().Lex(); // Consume the EndOfStatement.
   return false;
+}
+
+bool CAHPAsmParser::classifySymbolRef(const MCExpr *Expr,
+                                      CAHPMCExpr::VariantKind &Kind,
+                                      int64_t &Addend) {
+  Kind = CAHPMCExpr::VK_CAHP_None;
+  Addend = 0;
+
+  if (const CAHPMCExpr *RE = dyn_cast<CAHPMCExpr>(Expr)) {
+    Kind = RE->getKind();
+    Expr = RE->getSubExpr();
+  }
+
+  // It's a simple symbol reference or constant with no addend.
+  if (isa<MCConstantExpr>(Expr) || isa<MCSymbolRefExpr>(Expr))
+    return true;
+
+  const MCBinaryExpr *BE = dyn_cast<MCBinaryExpr>(Expr);
+  if (!BE)
+    return false;
+
+  if (!isa<MCSymbolRefExpr>(BE->getLHS()))
+    return false;
+
+  if (BE->getOpcode() != MCBinaryExpr::Add &&
+      BE->getOpcode() != MCBinaryExpr::Sub)
+    return false;
+
+  // We are able to support the subtraction of two symbol references
+  if (BE->getOpcode() == MCBinaryExpr::Sub &&
+      isa<MCSymbolRefExpr>(BE->getRHS()))
+    return true;
+
+  // See if the addend is is a constant, otherwise there's more going
+  // on here than we can deal with.
+  auto AddendExpr = dyn_cast<MCConstantExpr>(BE->getRHS());
+  if (!AddendExpr)
+    return false;
+
+  Addend = AddendExpr->getValue();
+  if (BE->getOpcode() == MCBinaryExpr::Sub)
+    Addend = -Addend;
+
+  // It's some symbol reference + a constant addend
+  return Kind != CAHPMCExpr::VK_CAHP_Invalid;
 }
 
 bool CAHPAsmParser::ParseDirective(AsmToken DirectiveID) { return true; }

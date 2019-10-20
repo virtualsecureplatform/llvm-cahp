@@ -4,4 +4,5 @@ add_llvm_library(LLVMCAHPDesc
   CAHPAsmBackend.cpp
   CAHPELFObjectWriter.cpp
   CAHPMCCodeEmitter.cpp
+  CAHPMCExpr.cpp
 )
