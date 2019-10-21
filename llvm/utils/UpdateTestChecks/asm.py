@@ -466,6 +466,16 @@ def scrub_asm_ve(asm, args):
     return asm
 
 
+def scrub_asm_cahp(asm, args):
+  # Scrub runs of whitespace out of the assembly, but leave the leading
+  # whitespace in place.
+  asm = common.SCRUB_WHITESPACE_RE.sub(r' ', asm)
+  # Expand the tabs used for indentation.
+  asm = string.expandtabs(asm, 2)
+  # Strip trailing whitespace.
+  asm = common.SCRUB_TRAILING_WHITESPACE_RE.sub(r'', asm)
+  return asm
+
 def scrub_asm_csky(asm, args):
     # Scrub runs of whitespace out of the assembly, but leave the leading
     # whitespace in place.
@@ -489,6 +499,22 @@ def scrub_asm_nvptx(asm, args):
     asm = common.SCRUB_TRAILING_WHITESPACE_RE.sub(r"", asm)
     return asm
 
+
+def get_triple_from_march(march):
+  triples = {
+      'amdgcn': 'amdgcn',
+      'r600': 'r600',
+      'mips': 'mips',
+      'sparc': 'sparc',
+      'hexagon': 'hexagon',
+      've': 've',
+      'cahp': 'cahp',
+  }
+  for prefix, triple in triples.items():
+    if march.startswith(prefix):
+      return triple
+  print("Cannot find a triple. Assume 'x86'", file=sys.stderr)
+  return 'x86'
 
 def scrub_asm_loongarch(asm, args):
     # Scrub runs of whitespace out of the assembly, but leave the leading
@@ -551,6 +577,7 @@ def get_run_handler(triple):
         "wasm32": (scrub_asm_wasm, ASM_FUNCTION_WASM_RE),
         "wasm64": (scrub_asm_wasm, ASM_FUNCTION_WASM_RE),
         "ve": (scrub_asm_ve, ASM_FUNCTION_VE_RE),
+        "cahp": (scrub_asm_cahp, ASM_FUNCTION_CAHP_RE),
         "csky": (scrub_asm_csky, ASM_FUNCTION_CSKY_RE),
         "nvptx": (scrub_asm_nvptx, ASM_FUNCTION_NVPTX_RE),
         "loongarch32": (scrub_asm_loongarch, ASM_FUNCTION_LOONGARCH_RE),
