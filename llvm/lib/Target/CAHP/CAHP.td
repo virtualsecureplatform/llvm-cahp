@@ -5,10 +5,11 @@
 include "llvm/Target/Target.td"
 
 //===----------------------------------------------------------------------===//
-// Register file, instruction descriptions.
+// Register file, calling conventions, instruction descriptions.
 //===----------------------------------------------------------------------===//
 
 include "CAHPRegisterInfo.td"
+include "CAHPCallingConv.td"
 include "CAHPInstrInfo.td"
 
 //===----------------------------------------------------------------------===//
@@ -21,7 +22,9 @@ def : ProcessorModel<"generic-cahp", NoSchedModel, []>;
 // Define the CAHP target.
 //===----------------------------------------------------------------------===//
 
-def CAHPInstrInfo : InstrInfo;
+def CAHPInstrInfo : InstrInfo {
+  let guessInstructionProperties = 0;
+}
 
 def CAHPAsmParser : AsmParser {
   // Use alternative names of registers when emitting.
@@ -31,4 +34,5 @@ def CAHPAsmParser : AsmParser {
 def CAHP : Target {
   let InstructionSet = CAHPInstrInfo;
   let AssemblyParsers = [CAHPAsmParser];
+  let AllowRegisterRenaming = 1;
 }

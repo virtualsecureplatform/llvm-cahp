@@ -4,6 +4,9 @@
 
 include "CAHPInstrFormats.td"
 
+def RetFlag : SDNode<"CAHPISD::RET_FLAG", SDTNone,
+                     [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+
 class ImmAsmOperand<string prefix, int width, string suffix> : AsmOperandClass {
   let Name = prefix # "Imm" # width # suffix;
   let RenderMethod = "addImmOperands";
@@ -234,3 +237,7 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 def NOP : CAHPInst16<(outs), (ins), "nop", ""> {
   let Inst = 0;
 }
+
+let isBarrier = 1, isReturn = 1, isTerminator = 1 in
+def PseudoRET : Pseudo<(outs), (ins), [(RetFlag)]>,
+                PseudoInstExpansion<(JR X0)>;

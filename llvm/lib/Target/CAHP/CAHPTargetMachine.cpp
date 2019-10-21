@@ -42,10 +42,31 @@ CAHPTargetMachine::CAHPTargetMachine(const Target &T, const Triple &TT,
     : LLVMTargetMachine(T, computeDataLayout(TT), TT, CPU, FS, Options,
                         getEffectiveRelocModel(TT, RM),
                         getEffectiveCodeModel(CM, CodeModel::Small), OL),
-      TLOF(make_unique<TargetLoweringObjectFileELF>()) {
+      TLOF(make_unique<TargetLoweringObjectFileELF>()),
+      Subtarget(TT, CPU, FS, *this) {
   initAsmInfo();
 }
 
+namespace {
+class CAHPPassConfig : public TargetPassConfig {
+public:
+  CAHPPassConfig(CAHPTargetMachine &TM, PassManagerBase &PM)
+      : TargetPassConfig(TM, PM) {}
+
+  CAHPTargetMachine &getCAHPTargetMachine() const {
+    return getTM<CAHPTargetMachine>();
+  }
+
+  bool addInstSelector() override;
+};
+} // namespace
+
 TargetPassConfig *CAHPTargetMachine::createPassConfig(PassManagerBase &PM) {
-  return new TargetPassConfig(*this, PM);
+  return new CAHPPassConfig(*this, PM);
+}
+
+bool CAHPPassConfig::addInstSelector() {
+  addPass(createCAHPISelDag(getCAHPTargetMachine()));
+
+  return false;
 }
