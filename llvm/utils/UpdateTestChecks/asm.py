@@ -376,6 +376,16 @@ def scrub_asm_ve(asm, args):
   asm = common.SCRUB_TRAILING_WHITESPACE_RE.sub(r'', asm)
   return asm
 
+def scrub_asm_cahp(asm, args):
+  # Scrub runs of whitespace out of the assembly, but leave the leading
+  # whitespace in place.
+  asm = common.SCRUB_WHITESPACE_RE.sub(r' ', asm)
+  # Expand the tabs used for indentation.
+  asm = string.expandtabs(asm, 2)
+  # Strip trailing whitespace.
+  asm = common.SCRUB_TRAILING_WHITESPACE_RE.sub(r'', asm)
+  return asm
+
 def scrub_asm_csky(asm, args):
   # Scrub runs of whitespace out of the assembly, but leave the leading
   # whitespace in place.
@@ -396,6 +406,7 @@ def get_triple_from_march(march):
       'sparc': 'sparc',
       'hexagon': 'hexagon',
       've': 've',
+      'cahp': 'cahp',
   }
   for prefix, triple in triples.items():
     if march.startswith(prefix):
@@ -440,6 +451,7 @@ def get_run_handler(triple):
       's390x': (scrub_asm_systemz, ASM_FUNCTION_SYSTEMZ_RE),
       'wasm32': (scrub_asm_wasm32, ASM_FUNCTION_WASM32_RE),
       've': (scrub_asm_ve, ASM_FUNCTION_VE_RE),
+      'cahp': (scrub_asm_cahp, ASM_FUNCTION_CAHP_RE),
       'csky': (scrub_asm_csky, ASM_FUNCTION_CSKY_RE),
   }
   handler = None
