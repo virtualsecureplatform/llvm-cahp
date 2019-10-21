@@ -21,7 +21,7 @@ class UImmAsmOperand<int width, string suffix = "">
     : ImmAsmOperand<"U", width, suffix> {
 }
 
-def uimm4 : Operand<i16> {
+def uimm4 : Operand<i16>, ImmLeaf<i16, [{return isUInt<16>(Imm);}]> {
   let ParserMatchClass = UImmAsmOperand<4>;
   let DecoderMethod = "decodeUImmOperand<4>";
   let EncoderMethod = "getImmOpValue";
@@ -33,7 +33,7 @@ def simm6 : Operand<i16> {
   let EncoderMethod = "getImmOpValue";
 }
 
-def simm10 : Operand<i16> {
+def simm10 : Operand<i16>, ImmLeaf<i16, [{return isInt<16>(Imm);}]> {
   let ParserMatchClass = SImmAsmOperand<10>;
   let DecoderMethod = "decodeSImmOperand<10>";
   let EncoderMethod = "getImmOpValue";
@@ -241,3 +241,22 @@ def NOP : CAHPInst16<(outs), (ins), "nop", ""> {
 let isBarrier = 1, isReturn = 1, isTerminator = 1 in
 def PseudoRET : Pseudo<(outs), (ins), [(RetFlag)]>,
                 PseudoInstExpansion<(JR X0)>;
+
+// Codegen patterns.
+
+def : Pat<(add GPR:$rs1, GPR:$rs2), (ADD GPR:$rs1, GPR:$rs2)>;
+def : Pat<(sub GPR:$rs1, GPR:$rs2), (SUB GPR:$rs1, GPR:$rs2)>;
+def : Pat<(and GPR:$rs1, GPR:$rs2), (AND GPR:$rs1, GPR:$rs2)>;
+def : Pat<(xor GPR:$rs1, GPR:$rs2), (XOR GPR:$rs1, GPR:$rs2)>;
+def : Pat<(or  GPR:$rs1, GPR:$rs2), (OR  GPR:$rs1, GPR:$rs2)>;
+def : Pat<(shl GPR:$rs1, GPR:$rs2), (LSL GPR:$rs1, GPR:$rs2)>;
+def : Pat<(srl GPR:$rs1, GPR:$rs2), (LSR GPR:$rs1, GPR:$rs2)>;
+def : Pat<(sra GPR:$rs1, GPR:$rs2), (ASR GPR:$rs1, GPR:$rs2)>;
+
+def : Pat<(add GPR:$rs1, simm10:$imm), (ADDI GPR:$rs1, simm10:$imm)>;
+def : Pat<(and GPR:$rs1, simm10:$imm), (ANDI GPR:$rs1, simm10:$imm)>;
+def : Pat<(xor GPR:$rs1, simm10:$imm), (XORI GPR:$rs1, simm10:$imm)>;
+def : Pat<(or  GPR:$rs1, simm10:$imm), (ORI  GPR:$rs1, simm10:$imm)>;
+def : Pat<(shl GPR:$rs1, uimm4:$imm),  (LSLI GPR:$rs1, uimm4:$imm)>;
+def : Pat<(srl GPR:$rs1, uimm4:$imm),  (LSRI GPR:$rs1, uimm4:$imm)>;
+def : Pat<(sra GPR:$rs1, uimm4:$imm),  (ASRI GPR:$rs1, uimm4:$imm)>;
