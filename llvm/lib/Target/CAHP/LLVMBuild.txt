@@ -17,5 +17,6 @@ has_disassembler = 1
 type = Library
 name = CAHPCodeGen
 parent = CAHP
-required_libraries = AsmPrinter Core CodeGen MC CAHPAsmPrinter CAHPDesc CAHPInfo Support Target
+required_libraries = AsmPrinter CAHPAsmPrinter CAHPDesc CAHPInfo
+  CodeGen Core MC SelectionDAG Support Target
 add_to_library_groups = CAHP
