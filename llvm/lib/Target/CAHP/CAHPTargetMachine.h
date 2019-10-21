@@ -5,6 +5,7 @@
 #ifndef LLVM_LIB_TARGET_CAHP_CAHPTARGETMACHINE_H
 #define LLVM_LIB_TARGET_CAHP_CAHPTARGETMACHINE_H
 
+#include "CAHPSubtarget.h"
 #include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "llvm/IR/DataLayout.h"
@@ -13,12 +14,17 @@
 namespace llvm {
 class CAHPTargetMachine : public LLVMTargetMachine {
   std::unique_ptr<TargetLoweringObjectFile> TLOF;
+  CAHPSubtarget Subtarget;
 
 public:
   CAHPTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
                     StringRef FS, const TargetOptions &Options,
                     Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
                     CodeGenOpt::Level OL, bool JIT);
+
+  const CAHPSubtarget *getSubtargetImpl(const Function &) const override {
+    return &Subtarget;
+  }
 
   TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
