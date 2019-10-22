@@ -27,13 +27,13 @@ def uimm4 : Operand<i16>, ImmLeaf<i16, [{return isUInt<16>(Imm);}]> {
   let EncoderMethod = "getImmOpValue";
 }
 
-def simm6 : Operand<i16> {
+def simm6 : Operand<i16>, ImmLeaf<i16, [{return isInt<6>(Imm);}]> {
   let ParserMatchClass = SImmAsmOperand<6>;
   let DecoderMethod = "decodeSImmOperand<6>";
   let EncoderMethod = "getImmOpValue";
 }
 
-def simm10 : Operand<i16>, ImmLeaf<i16, [{return isInt<16>(Imm);}]> {
+def simm10 : Operand<i16>, ImmLeaf<i16, [{return isInt<10>(Imm);}]> {
   let ParserMatchClass = SImmAsmOperand<10>;
   let DecoderMethod = "decodeSImmOperand<10>";
   let EncoderMethod = "getImmOpValue";
@@ -50,6 +50,25 @@ def uimm7_lsb0 : Operand<i16> {
   let DecoderMethod = "decodeUImmOperand<7>";
   let EncoderMethod = "getImmOpValue";
 }
+
+// Standalone (codegen-only) immleaf patterns.
+def simm16    : ImmLeaf<i16, [{return isInt<16>(Imm);}]>;
+def simm16hi6 : ImmLeaf<i16, [{return isShiftedInt<6, 10>(Imm);}]>;
+
+// Extract least significant 10 bits from an immediate value and sign extend
+// them.
+def LO10Sext : SDNodeXForm<imm, [{
+  return CurDAG->getTargetConstant(SignExtend64<10>(N->getZExtValue()),
+                                   SDLoc(N), N->getValueType(0));
+}]>;
+
+// Extract the most significant 6 bits from an immediate value. Add 1 if bit
+// 9 is 1, to compensate for the low 10 bits in the matching immediate addi
+// or ld/st being negative.
+def HI6 : SDNodeXForm<imm, [{
+  return CurDAG->getTargetConstant(((N->getZExtValue()+0x200) >> 10) & 0x3f,
+                                   SDLoc(N), N->getValueType(0));
+}]>;
 
 // 24-bit M-instructions.
 
@@ -243,6 +262,11 @@ def PseudoRET : Pseudo<(outs), (ins), [(RetFlag)]>,
                 PseudoInstExpansion<(JR X0)>;
 
 // Codegen patterns.
+
+def : Pat<(simm6:$imm), (LSI simm6:$imm)>;
+def : Pat<(simm10:$imm), (LI simm10:$imm)>;
+def : Pat<(simm16hi6:$imm), (LUI (HI6 imm:$imm))>;
+def : Pat<(simm16:$imm), (ADDI (LUI (HI6 imm:$imm)), (LO10Sext imm:$imm))>;
 
 def : Pat<(add GPR:$rs1, GPR:$rs2), (ADD GPR:$rs1, GPR:$rs2)>;
 def : Pat<(sub GPR:$rs1, GPR:$rs2), (SUB GPR:$rs1, GPR:$rs2)>;
