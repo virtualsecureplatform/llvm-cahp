@@ -9,7 +9,6 @@ define i16 @addi(i16 %a) nounwind {
 ; CAHP:       # %bb.0:
 ; CAHP-NEXT:    addi a0, a0, 1
 ; CAHP-NEXT:    jr ra
-; TODO: check support for materialising larger constants
   %1 = add i16 %a, 1
   ret i16 %1
 }
