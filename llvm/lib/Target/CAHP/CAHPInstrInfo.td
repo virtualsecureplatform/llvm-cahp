@@ -82,9 +82,9 @@ let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in {
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in {
-  def SW  : CAHPInst24MStore<0b011101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
+  def SW  : CAHPInst24MStore<0b011101, (outs), (ins GPR:$rs, GPR:$rd, simm10:$imm),
                             "sw",  "$rs, ${imm}(${rd})">;
-  def SB  : CAHPInst24MStore<0b001101, (outs GPR:$rd), (ins GPR:$rs, simm10:$imm),
+  def SB  : CAHPInst24MStore<0b001101, (outs), (ins GPR:$rs, GPR:$rd, simm10:$imm),
                             "sb",  "$rs, ${imm}(${rd})">;
 }
 
@@ -267,6 +267,24 @@ def : Pat<(simm6:$imm), (LSI simm6:$imm)>;
 def : Pat<(simm10:$imm), (LI simm10:$imm)>;
 def : Pat<(simm16hi6:$imm), (LUI (HI6 imm:$imm))>;
 def : Pat<(simm16:$imm), (ADDI (LUI (HI6 imm:$imm)), (LO10Sext imm:$imm))>;
+
+multiclass LdPat<PatFrag LoadOp, CAHPInst Inst> {
+  def : Pat<(LoadOp GPR:$rs1), (Inst GPR:$rs1, 0)>;
+  def : Pat<(LoadOp (add GPR:$rs1, simm10:$imm)),
+            (Inst GPR:$rs1, simm10:$imm)>;
+}
+defm : LdPat<load, LW>;
+defm : LdPat<extloadi8,  LB>;
+defm : LdPat<sextloadi8, LB>;
+defm : LdPat<zextloadi8, LBU>;
+
+multiclass StPat<PatFrag StoreOp, CAHPInst Inst> {
+  def : Pat<(StoreOp GPR:$rs, GPR:$rd), (Inst GPR:$rs, GPR:$rd, 0)>;
+  def : Pat<(StoreOp GPR:$rs, (add GPR:$rd, simm10:$imm)),
+            (Inst    GPR:$rs, GPR:$rd, simm10:$imm)>;
+}
+defm : StPat<store, SW>;
+defm : StPat<truncstorei8, SB>;
 
 def : Pat<(add GPR:$rs1, GPR:$rs2), (ADD GPR:$rs1, GPR:$rs2)>;
 def : Pat<(sub GPR:$rs1, GPR:$rs2), (SUB GPR:$rs1, GPR:$rs2)>;
