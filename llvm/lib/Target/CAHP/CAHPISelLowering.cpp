@@ -37,6 +37,9 @@ CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
 
   setStackPointerRegisterToSaveRestore(CAHP::X1);
 
+  for (auto N : {ISD::EXTLOAD, ISD::SEXTLOAD, ISD::ZEXTLOAD})
+    setLoadExtAction(N, MVT::i16, MVT::i1, Promote);
+
   // TODO: add all necessary setOperationAction calls.
 
   setBooleanContents(ZeroOrOneBooleanContent);

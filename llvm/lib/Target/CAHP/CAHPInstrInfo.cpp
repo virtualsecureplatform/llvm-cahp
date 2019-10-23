@@ -20,3 +20,13 @@
 using namespace llvm;
 
 CAHPInstrInfo::CAHPInstrInfo() : CAHPGenInstrInfo() {}
+
+void CAHPInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
+                                MachineBasicBlock::iterator MBBI,
+                                const DebugLoc &DL, unsigned DstReg,
+                                unsigned SrcReg, bool KillSrc) const {
+  assert(CAHP::GPRRegClass.contains(DstReg, SrcReg) &&
+         "Impossible reg-to-reg copy");
+
+  BuildMI(MBB, MBBI, DL, get(CAHP::MOV), DstReg).addReg(SrcReg);
+}
