@@ -5,15 +5,21 @@
 #ifndef LLVM_LIB_TARGET_CAHP_CAHP_H
 #define LLVM_LIB_TARGET_CAHP_CAHP_H
 
-#include "MCTargetDesc/CAHPMCTargetDesc.h"
-#include "llvm/Target/TargetMachine.h"
+#include "MCTargetDesc/CAHPBaseInfo.h"
 
 namespace llvm {
+class AsmPrinter;
 class CAHPTargetMachine;
+class FunctionPass;
 class MCInst;
+class MCOperand;
 class MachineInstr;
+class MachineOperand;
 
-void LowerCAHPMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI);
+void LowerCAHPMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
+                                   const AsmPrinter &AP);
+bool LowerCAHPMachineOperandToMCOperand(const MachineOperand &MO,
+                                        MCOperand &MCOp, const AsmPrinter &AP);
 
 FunctionPass *createCAHPISelDag(CAHPTargetMachine &TM);
 } // namespace llvm

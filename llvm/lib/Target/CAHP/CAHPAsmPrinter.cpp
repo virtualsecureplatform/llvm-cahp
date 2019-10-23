@@ -47,7 +47,7 @@ void CAHPAsmPrinter::EmitInstruction(const MachineInstr *MI) {
     return;
 
   MCInst TmpInst;
-  LowerCAHPMachineInstrToMCInst(MI, TmpInst);
+  LowerCAHPMachineInstrToMCInst(MI, TmpInst, *this);
   EmitToStreamer(*OutStreamer, TmpInst);
 }
 
