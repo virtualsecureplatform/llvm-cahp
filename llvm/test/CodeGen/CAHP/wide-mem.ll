@@ -14,3 +14,22 @@ define i32 @load_i32(i32 *%a) nounwind {
   %1 = load i32, i32* %a
   ret i32 %1
 }
+
+@val32 = local_unnamed_addr global i32 2863311, align 8
+
+; TODO: codegen on this should be improved. It shouldn't be necessary to
+; generate two addi
+define i32 @load_i32_global() nounwind {
+; CAHP-LABEL: load_i32_global:
+; CAHP:       # %bb.0:
+; CAHP-NEXT:	lui	a0, %hi(val32)
+; CAHP-NEXT:	addi	a0, a0, %lo(val32)
+; CAHP-NEXT:	lw	a0, 0(a0)
+; CAHP-NEXT:	lui	a1, %hi(val32+2)
+; CAHP-NEXT:	addi	a1, a1, %lo(val32+2)
+; CAHP-NEXT:	lw	a1, 0(a1)
+; CAHP-NEXT:	jr	ra
+
+  %1 = load i32, i32* @val32
+  ret i32 %1
+}
