@@ -111,3 +111,28 @@ define i16 @lw_sw_constant(i16 %a) nounwind {
   store i16 %a, i16* %1
   ret i16 %2
 }
+
+; Check load and store to a global
+@G = global i16 0
+
+define i16 @lw_sw_global(i16 %a) nounwind {
+; CAHP-LABEL: lw_sw_global:
+; CAHP:       # %bb.0:
+; CAHP-NEXT:	lui	a1, %hi(G)
+; CAHP-NEXT:	addi	a2, a1, %lo(G)
+; CAHP-NEXT:	lw	a1, 0(a2)
+; CAHP-NEXT:	sw	a0, 0(a2)
+; CAHP-NEXT:	lui	a2, %hi(G+18)
+; CAHP-NEXT:	addi	a2, a2, %lo(G+18)
+; CAHP-NEXT:	lw	a3, 0(a2)
+; CAHP-NEXT:	sw	a0, 0(a2)
+; CAHP-NEXT:	mov	a0, a1
+; CAHP-NEXT:	jr	ra
+
+  %1 = load volatile i16, i16* @G
+  store i16 %a, i16* @G
+  %2 = getelementptr i16, i16* @G, i16 9
+  %3 = load volatile i16, i16* %2
+  store i16 %a, i16* %2
+  ret i16 %1
+}
