@@ -2,6 +2,7 @@
 // is distributed under the Apache License v2.0 with LLVM Exceptions (see
 // LICENSE.TXT for details). This file is licensed under the same license.
 
+#include "MCTargetDesc/CAHPFixupKinds.h"
 #include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/MC/MCELFObjectWriter.h"
 #include "llvm/MC/MCFixup.h"
@@ -33,8 +34,19 @@ unsigned CAHPELFObjectWriter::getRelocType(MCContext &Ctx,
                                            const MCValue &Target,
                                            const MCFixup &Fixup,
                                            bool IsPCRel) const {
-  // TODO: emit correct relocations.
-  report_fatal_error("invalid fixup kind!");
+  // Determine the type of the relocation
+  switch ((unsigned)Fixup.getKind()) {
+  default:
+    llvm_unreachable("invalid fixup kind!");
+  case FK_Data_2:
+    return ELF::R_CAHP_16;
+  case CAHP::fixup_cahp_hi6:
+    return ELF::R_CAHP_HI6;
+  case CAHP::fixup_cahp_lo10:
+    return ELF::R_CAHP_LO10;
+  case CAHP::fixup_cahp_pcrel_11:
+    return ELF::R_CAHP_PCREL_11;
+  }
 }
 
 std::unique_ptr<MCObjectTargetWriter>
