@@ -2,4 +2,8 @@
 #error "ELF_RELOC must be defined"
 #endif
 
-ELF_RELOC(R_CAHP_NONE, 0)
+ELF_RELOC(R_CAHP_NONE,     0)
+ELF_RELOC(R_CAHP_16,       1)
+ELF_RELOC(R_CAHP_HI6,      2)
+ELF_RELOC(R_CAHP_LO10,     3)
+ELF_RELOC(R_CAHP_PCREL_11, 4)
