@@ -39,7 +39,13 @@ def simm10 : Operand<i16>, ImmLeaf<i16, [{return isInt<10>(Imm);}]> {
   let EncoderMethod = "getImmOpValue";
 }
 
-def simm11 : Operand<i16> {
+def simm10_branch : Operand<OtherVT> {
+  let ParserMatchClass = SImmAsmOperand<10>;
+  let DecoderMethod = "decodeSImmOperand<10>";
+  let EncoderMethod = "getImmOpValue";
+}
+
+def simm11 : Operand<OtherVT> {
   let ParserMatchClass = SImmAsmOperand<11>;
   let DecoderMethod = "decodeSImmOperand<11>";
   let EncoderMethod = "getImmOpValue";
@@ -141,17 +147,17 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0,
     isBranch = 1, isTerminator = 1 in {
-  def BEQ  : CAHPInst24J<0b001111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+  def BEQ  : CAHPInst24J<0b001111, (ins GPR:$rs1, GPR:$rs2, simm10_branch:$imm),
                          "beq",  "$rs1, $rs2, $imm">;
-  def BNE  : CAHPInst24J<0b101111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+  def BNE  : CAHPInst24J<0b101111, (ins GPR:$rs1, GPR:$rs2, simm10_branch:$imm),
                          "bne",  "$rs1, $rs2, $imm">;
-  def BLT  : CAHPInst24J<0b110111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+  def BLT  : CAHPInst24J<0b110111, (ins GPR:$rs1, GPR:$rs2, simm10_branch:$imm),
                          "blt",  "$rs1, $rs2, $imm">;
-  def BLTU : CAHPInst24J<0b010111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+  def BLTU : CAHPInst24J<0b010111, (ins GPR:$rs1, GPR:$rs2, simm10_branch:$imm),
                          "bltu", "$rs1, $rs2, $imm">;
-  def BLE  : CAHPInst24J<0b111111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+  def BLE  : CAHPInst24J<0b111111, (ins GPR:$rs1, GPR:$rs2, simm10_branch:$imm),
                          "ble",  "$rs1, $rs2, $imm">;
-  def BLEU : CAHPInst24J<0b011111, (ins GPR:$rs1, GPR:$rs2, simm10:$imm),
+  def BLEU : CAHPInst24J<0b011111, (ins GPR:$rs1, GPR:$rs2, simm10_branch:$imm),
                          "bleu", "$rs1, $rs2, $imm">;
 }
 
@@ -302,3 +308,31 @@ def : Pat<(or  GPR:$rs1, simm10:$imm), (ORI  GPR:$rs1, simm10:$imm)>;
 def : Pat<(shl GPR:$rs1, uimm4:$imm),  (LSLI GPR:$rs1, uimm4:$imm)>;
 def : Pat<(srl GPR:$rs1, uimm4:$imm),  (LSRI GPR:$rs1, uimm4:$imm)>;
 def : Pat<(sra GPR:$rs1, uimm4:$imm),  (ASRI GPR:$rs1, uimm4:$imm)>;
+
+// Match `(brcond (CondOp ..), ..)` and lower to the appropriate CAHP branch
+// instruction.
+class BccPat<PatFrag CondOp, CAHPInst Inst>
+    : Pat<(brcond (CondOp GPR:$rs1, GPR:$rs2), bb:$imm),
+          (Inst GPR:$rs1, GPR:$rs2, simm10_branch:$imm)>;
+def : BccPat<seteq, BEQ>;
+def : BccPat<setne, BNE>;
+def : BccPat<setlt, BLT>;
+def : BccPat<setle, BLE>;
+def : BccPat<setult, BLTU>;
+def : BccPat<setule, BLEU>;
+
+class BccSwapPat<PatFrag CondOp, CAHPInst InstBcc>
+    : Pat<(brcond (CondOp GPR:$rs1, GPR:$rs2), bb:$imm),
+          (InstBcc GPR:$rs2, GPR:$rs1, bb:$imm)>;
+// Condition codes that don't have matching CAHP branch instructions, but
+// are trivially supported by swapping the two input operands
+def : BccSwapPat<setgt, BLT>;
+def : BccSwapPat<setge, BLE>;
+def : BccSwapPat<setugt, BLTU>;
+def : BccSwapPat<setuge, BLEU>;
+
+// An extra pattern is needed for a brcond without a setcc (i.e. where the
+// condition was calculated elsewhere).
+def : Pat<(brcond GPR:$cond, bb:$imm), (BNE GPR:$cond, (LSI 0), bb:$imm)>;
+
+def : Pat<(br bb:$imm), (JS simm11:$imm)>;
