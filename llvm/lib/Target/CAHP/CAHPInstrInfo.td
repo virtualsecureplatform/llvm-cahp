@@ -4,8 +4,19 @@
 
 include "CAHPInstrFormats.td"
 
-def RetFlag : SDNode<"CAHPISD::RET_FLAG", SDTNone,
-                     [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+def SDT_CAHPCall         : SDTypeProfile<0, -1, [SDTCisVT<0, i16>]>;
+def SDT_CAHPCallSeqStart : SDCallSeqStart<[SDTCisVT<0, i16>, SDTCisVT<1, i16>]>;
+def SDT_CAHPCallSeqEnd   : SDCallSeqEnd<[SDTCisVT<0, i16>, SDTCisVT<1, i16>]>;
+
+def Call         : SDNode<"CAHPISD::CALL", SDT_CAHPCall,
+                          [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue,
+                           SDNPVariadic]>;
+def CallSeqStart : SDNode<"ISD::CALLSEQ_START", SDT_CAHPCallSeqStart,
+                          [SDNPHasChain, SDNPOutGlue]>;
+def CallSeqEnd   : SDNode<"ISD::CALLSEQ_END", SDT_CAHPCallSeqEnd,
+                          [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue]>;
+def RetFlag      : SDNode<"CAHPISD::RET_FLAG", SDTNone,
+                          [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
 
 class ImmAsmOperand<string prefix, int width, string suffix> : AsmOperandClass {
   let Name = prefix # "Imm" # width # suffix;
@@ -243,7 +254,7 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0,
 // 16-bit J-instructions.
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
-  let isCall = 1, Defs = [X0] in
+  let isCall = 1, Defs = [/* RA */ X0] in
   def JALR : CAHPInst16JR<0b10110, (ins GPR:$rs),     "jalr", "$rs">;
 
   let isBranch = 1, isBarrier = 1, isTerminator = 1, isIndirectBranch = 1 in
@@ -252,7 +263,7 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
   let isBranch = 1, isTerminator = 1, isBarrier = 1 in
   def JS   : CAHPInst16JI<0b01110, (ins simm11:$imm), "js",   "$imm">;
 
-  let isCall = 1, Defs = [X0] in
+  let isCall = 1, Defs = [/* RA */ X0] in
   def JSAL : CAHPInst16JI<0b11110, (ins simm11:$imm), "jsal", "$imm">;
 }
 
@@ -266,6 +277,14 @@ def NOP : CAHPInst16<(outs), (ins), "nop", ""> {
 let isBarrier = 1, isReturn = 1, isTerminator = 1 in
 def PseudoRET : Pseudo<(outs), (ins), [(RetFlag)]>,
                 PseudoInstExpansion<(JR X0)>;
+
+// Pessimistically assume the stack pointer will be clobbered
+let Defs = [/* SP */ X1], Uses = [/* SP */ X1] in {
+def ADJCALLSTACKDOWN : Pseudo<(outs), (ins i16imm:$amt1, i16imm:$amt2),
+                              [(CallSeqStart timm:$amt1, timm:$amt2)]>;
+def ADJCALLSTACKUP   : Pseudo<(outs), (ins i16imm:$amt1, i16imm:$amt2),
+                              [(CallSeqEnd timm:$amt1, timm:$amt2)]>;
+} // Defs = [X1], Uses = [X1]
 
 // Codegen patterns.
 
@@ -336,3 +355,5 @@ def : BccSwapPat<setuge, BLEU>;
 def : Pat<(brcond GPR:$cond, bb:$imm), (BNE GPR:$cond, (LSI 0), bb:$imm)>;
 
 def : Pat<(br bb:$imm), (JS simm11:$imm)>;
+def : Pat<(Call GPR:$rs), (JALR GPR:$rs)>;
+def : Pat<(Call tglobaladdr:$dst), (JSAL tglobaladdr:$dst)>;

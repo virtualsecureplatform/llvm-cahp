@@ -19,7 +19,8 @@
 
 using namespace llvm;
 
-CAHPInstrInfo::CAHPInstrInfo() : CAHPGenInstrInfo() {}
+CAHPInstrInfo::CAHPInstrInfo()
+    : CAHPGenInstrInfo(CAHP::ADJCALLSTACKDOWN, CAHP::ADJCALLSTACKUP) {}
 
 void CAHPInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
                                 MachineBasicBlock::iterator MBBI,

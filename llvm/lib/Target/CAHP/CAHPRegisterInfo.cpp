@@ -72,3 +72,9 @@ void CAHPRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 Register CAHPRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
   return CAHP::X2;
 }
+
+const uint32_t *
+CAHPRegisterInfo::getCallPreservedMask(const MachineFunction & /*MF*/,
+                                       CallingConv::ID /*CC*/) const {
+  return CSR_RegMask;
+}
