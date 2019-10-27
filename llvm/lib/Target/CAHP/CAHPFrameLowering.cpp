@@ -18,3 +18,31 @@ void CAHPFrameLowering::emitPrologue(MachineFunction &MF,
 
 void CAHPFrameLowering::emitEpilogue(MachineFunction &MF,
                                      MachineBasicBlock &MBB) const {}
+
+int CAHPFrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
+                                              unsigned &FrameReg) const {
+  const MachineFrameInfo &MFI = MF.getFrameInfo();
+  const TargetRegisterInfo *RI = MF.getSubtarget().getRegisterInfo();
+
+  // Callee-saved registers should be referenced relative to the stack
+  // pointer (positive offset), otherwise use the frame pointer (negative
+  // offset).
+  const std::vector<CalleeSavedInfo> &CSI = MFI.getCalleeSavedInfo();
+  int MinCSFI = 0;
+  int MaxCSFI = -1;
+
+  int Offset = MFI.getObjectOffset(FI) - getOffsetOfLocalArea() +
+               MFI.getOffsetAdjustment();
+
+  if (CSI.size()) {
+    MinCSFI = CSI[0].getFrameIdx();
+    MaxCSFI = CSI[CSI.size() - 1].getFrameIdx();
+  }
+
+  FrameReg = RI->getFrameRegister(MF);
+  if (FI >= MinCSFI && FI <= MaxCSFI) {         // callee-saved register?
+    FrameReg = CAHP::X1;                        // sp
+    Offset += MF.getFrameInfo().getStackSize(); // turn the Offset positive
+  }
+  return Offset;
+}
