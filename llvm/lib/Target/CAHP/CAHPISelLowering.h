@@ -12,10 +12,18 @@
 namespace llvm {
 class CAHPSubtarget;
 namespace CAHPISD {
-enum NodeType : unsigned { FIRST_NUMBER = ISD::BUILTIN_OP_END, RET_FLAG };
+enum NodeType : unsigned {
+  FIRST_NUMBER = ISD::BUILTIN_OP_END,
+
+  CALL,
+  RET_FLAG,
+};
 }
 
 class CAHPTargetLowering : public TargetLowering {
+private:
+  const CAHPSubtarget &Subtarget;
+
 public:
   explicit CAHPTargetLowering(const TargetMachine &TM,
                               const CAHPSubtarget &STI);
@@ -37,6 +45,8 @@ private:
                       const SmallVectorImpl<ISD::OutputArg> &Outs,
                       const SmallVectorImpl<SDValue> &OutVals, const SDLoc &DL,
                       SelectionDAG &DAG) const override;
+  SDValue LowerCall(TargetLowering::CallLoweringInfo &CLI,
+                    SmallVectorImpl<SDValue> &InVals) const override;
   bool shouldConvertConstantLoadToIntImm(const APInt &Imm,
                                          Type *Ty) const override {
     return true;
