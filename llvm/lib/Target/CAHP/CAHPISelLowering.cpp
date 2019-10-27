@@ -28,7 +28,7 @@ using namespace llvm;
 
 CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
                                        const CAHPSubtarget &STI)
-    : TargetLowering(TM) {
+    : TargetLowering(TM), Subtarget(STI) {
 
   // Set up the register classes.
   addRegisterClass(MVT::i16, &CAHP::GPRRegClass);
@@ -48,8 +48,8 @@ CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
   setBooleanContents(ZeroOrOneBooleanContent);
 
   // Function alignments (log2).
-  setMinFunctionAlignment(1);
-  setPrefFunctionAlignment(1);
+  setMinFunctionAlignment(0);
+  setPrefFunctionAlignment(0);
 }
 
 SDValue CAHPTargetLowering::LowerOperation(SDValue Op,
@@ -132,6 +132,134 @@ SDValue CAHPTargetLowering::LowerFormalArguments(
   return Chain;
 }
 
+// Lower a call to a callseq_start + CALL + callseq_end chain, and add input
+// and output parameter nodes.
+SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
+                                      SmallVectorImpl<SDValue> &InVals) const {
+  SelectionDAG &DAG = CLI.DAG;
+  SDLoc &DL = CLI.DL;
+  SmallVectorImpl<ISD::OutputArg> &Outs = CLI.Outs;
+  SmallVectorImpl<SDValue> &OutVals = CLI.OutVals;
+  SmallVectorImpl<ISD::InputArg> &Ins = CLI.Ins;
+  SDValue Chain = CLI.Chain;
+  SDValue Callee = CLI.Callee;
+  CLI.IsTailCall = false;
+  CallingConv::ID CallConv = CLI.CallConv;
+  bool IsVarArg = CLI.IsVarArg;
+  EVT PtrVT = getPointerTy(DAG.getDataLayout());
+
+  if (IsVarArg) {
+    report_fatal_error("LowerCall with varargs not implemented");
+  }
+
+  MachineFunction &MF = DAG.getMachineFunction();
+
+  // Analyze the operands of the call, assigning locations to each operand.
+  SmallVector<CCValAssign, 16> ArgLocs;
+  CCState ArgCCInfo(CallConv, IsVarArg, MF, ArgLocs, *DAG.getContext());
+  ArgCCInfo.AnalyzeCallOperands(Outs, CC_CAHP);
+
+  // Get a count of how many bytes are to be pushed on the stack.
+  unsigned NumBytes = ArgCCInfo.getNextStackOffset();
+
+  for (auto &Arg : Outs) {
+    if (!Arg.Flags.isByVal())
+      continue;
+    report_fatal_error("Passing arguments byval not yet implemented");
+  }
+
+  Chain = DAG.getCALLSEQ_START(Chain, NumBytes, 0, CLI.DL);
+
+  // Copy argument values to their designated locations.
+  SmallVector<std::pair<unsigned, SDValue>, 8> RegsToPass;
+  for (unsigned I = 0, E = ArgLocs.size(); I != E; ++I) {
+    CCValAssign &VA = ArgLocs[I];
+    SDValue ArgValue = OutVals[I];
+
+    // Promote the value if needed.
+    // For now, only handle fully promoted arguments.
+    switch (VA.getLocInfo()) {
+    case CCValAssign::Full:
+      break;
+    default:
+      llvm_unreachable("Unknown loc info!");
+    }
+
+    if (VA.isRegLoc()) {
+      // Queue up the argument copies and emit them at the end.
+      RegsToPass.push_back(std::make_pair(VA.getLocReg(), ArgValue));
+    } else {
+      assert(VA.isMemLoc() && "Argument not register or memory");
+      report_fatal_error("Passing arguments via the stack not yet implemented");
+    }
+  }
+
+  SDValue Glue;
+
+  // Build a sequence of copy-to-reg nodes, chained and glued together.
+  for (auto &Reg : RegsToPass) {
+    Chain = DAG.getCopyToReg(Chain, DL, Reg.first, Reg.second, Glue);
+    Glue = Chain.getValue(1);
+  }
+
+  if (isa<GlobalAddressSDNode>(Callee)) {
+    // GlobalAddressSDNode *S = dyn_cast<GlobalAddressSDNode>(Callee);
+    // Callee = DAG.getTargetGlobalAddress(S->getGlobal(), DL, PtrVT, 0, 0);
+    Callee = lowerGlobalAddress(Callee, DAG);
+  } else if (isa<ExternalSymbolSDNode>(Callee)) {
+    report_fatal_error(
+        "lowerExternalSymbol, needed for lowerCall, not yet handled");
+  }
+
+  // The first call operand is the chain and the second is the target address.
+  SmallVector<SDValue, 8> Ops;
+  Ops.push_back(Chain);
+  Ops.push_back(Callee);
+
+  // Add argument registers to the end of the list so that they are
+  // known live into the call.
+  for (auto &Reg : RegsToPass)
+    Ops.push_back(DAG.getRegister(Reg.first, Reg.second.getValueType()));
+
+  // Add a register mask operand representing the call-preserved registers.
+  const TargetRegisterInfo *TRI = Subtarget.getRegisterInfo();
+  const uint32_t *Mask = TRI->getCallPreservedMask(MF, CallConv);
+  assert(Mask && "Missing call preserved mask for calling convention");
+  Ops.push_back(DAG.getRegisterMask(Mask));
+
+  // Glue the call to the argument copies, if any.
+  if (Glue.getNode())
+    Ops.push_back(Glue);
+
+  // Emit the call.
+  SDVTList NodeTys = DAG.getVTList(MVT::Other, MVT::Glue);
+  Chain = DAG.getNode(CAHPISD::CALL, DL, NodeTys, Ops);
+  Glue = Chain.getValue(1);
+
+  // Mark the end of the call, which is glued to the call itself.
+  Chain = DAG.getCALLSEQ_END(Chain, DAG.getConstant(NumBytes, DL, PtrVT, true),
+                             DAG.getConstant(0, DL, PtrVT, true), Glue, DL);
+  Glue = Chain.getValue(1);
+
+  // Assign locations to each value returned by this call.
+  SmallVector<CCValAssign, 16> RVLocs;
+  CCState RetCCInfo(CallConv, IsVarArg, MF, RVLocs, *DAG.getContext());
+  RetCCInfo.AnalyzeCallResult(Ins, RetCC_CAHP);
+
+  // Copy all of the result registers out of their specified physreg.
+  for (auto &VA : RVLocs) {
+    // Copy the value out, gluing the copy to the end of the call sequence.
+    SDValue RetValue =
+        DAG.getCopyFromReg(Chain, DL, VA.getLocReg(), VA.getLocVT(), Glue);
+    Chain = RetValue.getValue(1);
+    Glue = RetValue.getValue(2);
+
+    InVals.push_back(Chain.getValue(0));
+  }
+
+  return Chain;
+}
+
 SDValue
 CAHPTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
                                 bool IsVarArg,
@@ -180,6 +308,8 @@ const char *CAHPTargetLowering::getTargetNodeName(unsigned Opcode) const {
   switch ((CAHPISD::NodeType)Opcode) {
   case CAHPISD::FIRST_NUMBER:
     break;
+  case CAHPISD::CALL:
+    return "CAHPISD::CALL";
   case CAHPISD::RET_FLAG:
     return "CAHPISD::RET_FLAG";
   }
