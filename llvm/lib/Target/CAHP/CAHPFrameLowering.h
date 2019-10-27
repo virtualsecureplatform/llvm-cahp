@@ -11,17 +11,29 @@ namespace llvm {
 class CAHPSubtarget;
 
 class CAHPFrameLowering : public TargetFrameLowering {
+private:
+  const CAHPSubtarget &STI;
+
+  void determineFrameLayout(MachineFunction &MF) const;
+  void adjustReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
+                 const DebugLoc &DL, unsigned DestReg, unsigned SrcReg,
+                 int64_t Val, MachineInstr::MIFlag Flag) const;
+
 public:
   explicit CAHPFrameLowering(const CAHPSubtarget &STI)
       : TargetFrameLowering(StackGrowsDown,
                             /*StackAlignment=*/2,
-                            /*LocalAreaOffset=*/0) {}
+                            /*LocalAreaOffset=*/0),
+        STI(STI) {}
 
   void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
   void emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
 
   int getFrameIndexReference(const MachineFunction &MF, int FI,
                              unsigned &FrameReg) const override;
+
+  void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
+                            RegScavenger *RS) const override;
 
   bool hasFP(const MachineFunction &MF) const override;
 
