@@ -30,3 +30,33 @@ void CAHPInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
 
   BuildMI(MBB, MBBI, DL, get(CAHP::MOV), DstReg).addReg(SrcReg);
 }
+
+void CAHPInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
+                                        MachineBasicBlock::iterator I,
+                                        unsigned SrcReg, bool IsKill, int FI,
+                                        const TargetRegisterClass *RC,
+                                        const TargetRegisterInfo *TRI) const {
+  DebugLoc DL;
+  if (I != MBB.end())
+    DL = I->getDebugLoc();
+
+  if (!CAHP::GPRRegClass.hasSubClassEq(RC))
+    llvm_unreachable("Can't store this register to stack slot");
+
+  BuildMI(MBB, I, DL, get(CAHP::SW)).addReg(SrcReg).addFrameIndex(FI).addImm(0);
+}
+
+void CAHPInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
+                                         MachineBasicBlock::iterator I,
+                                         unsigned DstReg, int FI,
+                                         const TargetRegisterClass *RC,
+                                         const TargetRegisterInfo *TRI) const {
+  DebugLoc DL;
+  if (I != MBB.end())
+    DL = I->getDebugLoc();
+
+  if (!CAHP::GPRRegClass.hasSubClassEq(RC))
+    llvm_unreachable("Can't load this register from stack slot");
+
+  BuildMI(MBB, I, DL, get(CAHP::LW), DstReg).addFrameIndex(FI).addImm(0);
+}
