@@ -7,6 +7,9 @@ include "CAHPInstrFormats.td"
 def SDT_CAHPCall         : SDTypeProfile<0, -1, [SDTCisVT<0, i16>]>;
 def SDT_CAHPCallSeqStart : SDCallSeqStart<[SDTCisVT<0, i16>, SDTCisVT<1, i16>]>;
 def SDT_CAHPCallSeqEnd   : SDCallSeqEnd<[SDTCisVT<0, i16>, SDTCisVT<1, i16>]>;
+def SDT_CAHPSelectCC     : SDTypeProfile<1, 5, [SDTCisSameAs<1, 2>,
+                                                SDTCisSameAs<0, 4>,
+                                                SDTCisSameAs<4, 5>]>;
 
 def Call         : SDNode<"CAHPISD::CALL", SDT_CAHPCall,
                           [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue,
@@ -17,6 +20,8 @@ def CallSeqEnd   : SDNode<"ISD::CALLSEQ_END", SDT_CAHPCallSeqEnd,
                           [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue]>;
 def RetFlag      : SDNode<"CAHPISD::RET_FLAG", SDTNone,
                           [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+def SelectCC     : SDNode<"CAHPISD::SELECT_CC", SDT_CAHPSelectCC,
+                          [SDNPInGlue]>;
 
 class ImmAsmOperand<string prefix, int width, string suffix> : AsmOperandClass {
   let Name = prefix # "Imm" # width # suffix;
@@ -285,6 +290,13 @@ def ADJCALLSTACKDOWN : Pseudo<(outs), (ins i16imm:$amt1, i16imm:$amt2),
 def ADJCALLSTACKUP   : Pseudo<(outs), (ins i16imm:$amt1, i16imm:$amt2),
                               [(CallSeqEnd timm:$amt1, timm:$amt2)]>;
 } // Defs = [X1], Uses = [X1]
+
+let usesCustomInserter = 1 in
+def Select_GPR_Using_CC_GPR
+    : Pseudo<(outs GPR:$dst),
+             (ins GPR:$lhs, GPR:$rhs, i16imm:$imm, GPR:$src, GPR:$src2),
+             [(set i16:$dst, (SelectCC GPR:$lhs, GPR:$rhs,
+              (i16 imm:$imm), GPR:$src, GPR:$src2))]>;
 
 // Codegen patterns.
 
