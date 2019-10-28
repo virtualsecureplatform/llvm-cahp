@@ -46,6 +46,8 @@ void CAHPRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 
   MachineInstr &MI = *II;
   MachineFunction &MF = *MI.getParent()->getParent();
+  MachineRegisterInfo &MRI = MF.getRegInfo();
+  const CAHPInstrInfo *TII = MF.getSubtarget<CAHPSubtarget>().getInstrInfo();
   DebugLoc DL = MI.getDebugLoc();
 
   int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
@@ -54,10 +56,20 @@ void CAHPRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
       getFrameLowering(MF)->getFrameIndexReference(MF, FrameIndex, FrameReg) +
       MI.getOperand(FIOperandNum + 1).getImm();
 
-  // Offsets must be directly encoded in a 10-bit immediate field
-  if (!isInt<10>(Offset)) {
+  if (!isInt<16>(Offset))
     report_fatal_error(
-        "Frame offsets outside of the signed 10-bit range not supported");
+        "Frame offsets outside of the signed 16-bit range not supported");
+
+  MachineBasicBlock &MBB = *MI.getParent();
+
+  if (!isInt<10>(Offset)) {
+    unsigned ScratchReg = MRI.createVirtualRegister(&CAHP::GPRRegClass);
+    TII->movImm16(MBB, II, DL, ScratchReg, Offset);
+    BuildMI(MBB, II, DL, TII->get(CAHP::ADD), ScratchReg)
+        .addReg(ScratchReg)
+        .addReg(FrameReg);
+    Offset = 0;
+    FrameReg = ScratchReg;
   }
 
   MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false);

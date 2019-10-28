@@ -51,6 +51,7 @@ void CAHPFrameLowering::adjustReg(MachineBasicBlock &MBB,
   if (DestReg == SrcReg && Val == 0)
     return;
 
+  MachineRegisterInfo &MRI = MBB.getParent()->getRegInfo();
   const CAHPInstrInfo *TII = STI.getInstrInfo();
 
   if (isInt<10>(Val)) {
@@ -58,8 +59,22 @@ void CAHPFrameLowering::adjustReg(MachineBasicBlock &MBB,
         .addReg(SrcReg)
         .addImm(Val)
         .setMIFlag(Flag);
+  } else if (isInt<16>(Val)) {
+    unsigned Opc = CAHP::ADD;
+    bool isSub = Val < 0;
+    if (isSub) {
+      Val = -Val;
+      Opc = CAHP::SUB;
+    }
+
+    unsigned ScratchReg = MRI.createVirtualRegister(&CAHP::GPRRegClass);
+    TII->movImm16(MBB, MBBI, DL, ScratchReg, Val, Flag);
+    BuildMI(MBB, MBBI, DL, TII->get(Opc), DestReg)
+        .addReg(SrcReg)
+        .addReg(ScratchReg)
+        .setMIFlag(Flag);
   } else {
-    report_fatal_error("adjustReg cannot yet handle adjustments >10 bits");
+    report_fatal_error("adjustReg cannot yet handle adjustments >16 bits");
   }
 }
 
