@@ -10,7 +10,11 @@ def SDT_CAHPCallSeqEnd   : SDCallSeqEnd<[SDTCisVT<0, i16>, SDTCisVT<1, i16>]>;
 def SDT_CAHPSelectCC     : SDTypeProfile<1, 5, [SDTCisSameAs<1, 2>,
                                                 SDTCisSameAs<0, 4>,
                                                 SDTCisSameAs<4, 5>]>;
+def SDT_CAHPBrCC         : SDTypeProfile<0, 4, [SDTCisSameAs<0, 1>,
+                                                SDTCisVT<3, OtherVT>]>;
 
+def BrCC         : SDNode<"CAHPISD::BR_CC", SDT_CAHPBrCC,
+                          [SDNPHasChain, SDNPOutGlue, SDNPInGlue]>;
 def Call         : SDNode<"CAHPISD::CALL", SDT_CAHPCall,
                           [SDNPHasChain, SDNPOptInGlue, SDNPOutGlue,
                            SDNPVariadic]>;
@@ -99,6 +103,28 @@ def AddrFI : ComplexPattern<iPTR, 1, "SelectAddrFI", [frameindex], []>;
 def IsOrAdd: PatFrag<(ops node:$A, node:$B), (or node:$A, node:$B), [{
   return isOrEquivalentToAdd(N);
 }]>;
+
+// Conditional code predicates - used for pattern matching for jump instructions
+def CC_EQ  : PatLeaf<(i16 imm),
+                     [{return (N->getZExtValue() == ISD::SETEQ);}]>;
+def CC_NE  : PatLeaf<(i16 imm),
+                     [{return (N->getZExtValue() == ISD::SETNE);}]>;
+def CC_GE  : PatLeaf<(i16 imm),
+                     [{return (N->getZExtValue() == ISD::SETGE);}]>;
+def CC_GT  : PatLeaf<(i16 imm),
+                     [{return (N->getZExtValue() == ISD::SETGT);}]>;
+def CC_GTU : PatLeaf<(i16 imm),
+                     [{return (N->getZExtValue() == ISD::SETUGT);}]>;
+def CC_GEU : PatLeaf<(i16 imm),
+                     [{return (N->getZExtValue() == ISD::SETUGE);}]>;
+def CC_LE  : PatLeaf<(i16 imm),
+                     [{return (N->getZExtValue() == ISD::SETLE);}]>;
+def CC_LT  : PatLeaf<(i16 imm),
+                     [{return (N->getZExtValue() == ISD::SETLT);}]>;
+def CC_LTU : PatLeaf<(i16 imm),
+                     [{return (N->getZExtValue() == ISD::SETULT);}]>;
+def CC_LEU : PatLeaf<(i16 imm),
+                         [{return (N->getZExtValue() == ISD::SETULE);}]>;
 
 // 24-bit M-instructions.
 
@@ -366,25 +392,25 @@ def : Pat<(sra GPR:$rs1, uimm4:$imm),  (ASRI GPR:$rs1, uimm4:$imm)>;
 
 // Match `(brcond (CondOp ..), ..)` and lower to the appropriate CAHP branch
 // instruction.
-class BccPat<PatFrag CondOp, CAHPInst Inst>
-    : Pat<(brcond (CondOp GPR:$rs1, GPR:$rs2), bb:$imm),
+class BccPat<PatLeaf Cond, CAHPInst Inst>
+    : Pat<(BrCC GPR:$rs1, GPR:$rs2, Cond, bb:$imm),
           (Inst GPR:$rs1, GPR:$rs2, simm10_branch:$imm)>;
-def : BccPat<seteq, BEQ>;
-def : BccPat<setne, BNE>;
-def : BccPat<setlt, BLT>;
-def : BccPat<setle, BLE>;
-def : BccPat<setult, BLTU>;
-def : BccPat<setule, BLEU>;
+def : BccPat<CC_EQ, BEQ>;
+def : BccPat<CC_NE, BNE>;
+def : BccPat<CC_LT, BLT>;
+def : BccPat<CC_LE, BLE>;
+def : BccPat<CC_LTU, BLTU>;
+def : BccPat<CC_LEU, BLEU>;
 
-class BccSwapPat<PatFrag CondOp, CAHPInst InstBcc>
-    : Pat<(brcond (CondOp GPR:$rs1, GPR:$rs2), bb:$imm),
-          (InstBcc GPR:$rs2, GPR:$rs1, bb:$imm)>;
+class BccSwapPat<PatLeaf Cond, CAHPInst Inst>
+    : Pat<(BrCC GPR:$rs1, GPR:$rs2, Cond, bb:$imm),
+          (Inst GPR:$rs2, GPR:$rs1, bb:$imm)>;
 // Condition codes that don't have matching CAHP branch instructions, but
 // are trivially supported by swapping the two input operands
-def : BccSwapPat<setgt, BLT>;
-def : BccSwapPat<setge, BLE>;
-def : BccSwapPat<setugt, BLTU>;
-def : BccSwapPat<setuge, BLEU>;
+def : BccSwapPat<CC_GT, BLT>;
+def : BccSwapPat<CC_GE, BLE>;
+def : BccSwapPat<CC_GTU, BLTU>;
+def : BccSwapPat<CC_GEU, BLEU>;
 
 // An extra pattern is needed for a brcond without a setcc (i.e. where the
 // condition was calculated elsewhere).
