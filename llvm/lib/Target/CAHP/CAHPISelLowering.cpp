@@ -120,18 +120,31 @@ SDValue CAHPTargetLowering::lowerGlobalAddress(SDValue Op,
   const GlobalValue *GV = N->getGlobal();
   int64_t Offset = N->getOffset();
 
-  if (!isPositionIndependent()) {
-    SDValue GAHi =
-        DAG.getTargetGlobalAddress(GV, DL, Ty, Offset, CAHPII::MO_HI);
-    SDValue GALo =
-        DAG.getTargetGlobalAddress(GV, DL, Ty, Offset, CAHPII::MO_LO);
-    SDValue MNHi = SDValue(DAG.getMachineNode(CAHP::LUI, DL, Ty, GAHi), 0);
-    SDValue MNLo =
-        SDValue(DAG.getMachineNode(CAHP::ADDI, DL, Ty, MNHi, GALo), 0);
-    return MNLo;
-  } else {
+  if (isPositionIndependent())
     report_fatal_error("Unable to lowerGlobalAddress");
-  }
+
+  SDValue GAHi = DAG.getTargetGlobalAddress(GV, DL, Ty, Offset, CAHPII::MO_HI);
+  SDValue GALo = DAG.getTargetGlobalAddress(GV, DL, Ty, Offset, CAHPII::MO_LO);
+  SDValue MNHi = SDValue(DAG.getMachineNode(CAHP::LUI, DL, Ty, GAHi), 0);
+  SDValue MNLo = SDValue(DAG.getMachineNode(CAHP::ADDI, DL, Ty, MNHi, GALo), 0);
+  return MNLo;
+}
+
+SDValue CAHPTargetLowering::LowerExternalSymbol(SDValue Op,
+                                                SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  EVT Ty = Op.getValueType();
+  ExternalSymbolSDNode *N = cast<ExternalSymbolSDNode>(Op);
+  const char *Sym = N->getSymbol();
+
+  if (isPositionIndependent())
+    report_fatal_error("Unable to LowerExternalSymbol");
+
+  SDValue GAHi = DAG.getTargetExternalSymbol(Sym, Ty, CAHPII::MO_HI);
+  SDValue GALo = DAG.getTargetExternalSymbol(Sym, Ty, CAHPII::MO_LO);
+  SDValue MNHi = SDValue(DAG.getMachineNode(CAHP::LUI, DL, Ty, GAHi), 0);
+  SDValue MNLo = SDValue(DAG.getMachineNode(CAHP::ADDI, DL, Ty, MNHi, GALo), 0);
+  return MNLo;
 }
 
 SDValue CAHPTargetLowering::LowerSELECT(SDValue Op, SelectionDAG &DAG) const {
@@ -370,8 +383,7 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
     // Callee = DAG.getTargetGlobalAddress(S->getGlobal(), DL, PtrVT, 0, 0);
     Callee = lowerGlobalAddress(Callee, DAG);
   } else if (isa<ExternalSymbolSDNode>(Callee)) {
-    report_fatal_error(
-        "lowerExternalSymbol, needed for lowerCall, not yet handled");
+    Callee = LowerExternalSymbol(Callee, DAG);
   }
 
   // The first call operand is the chain and the second is the target address.
