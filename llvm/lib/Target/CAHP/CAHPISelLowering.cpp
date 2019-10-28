@@ -59,7 +59,7 @@ CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
 // Changes the condition code and swaps operands if necessary, so the SetCC
 // operation matches one of the comparisons supported directly in the CAHP
 // ISA.
-static void normaliseSetCC(SDValue &LHS, SDValue &RHS, ISD::CondCode &CC) {
+static void normalizeSetCC(SDValue &LHS, SDValue &RHS, ISD::CondCode &CC) {
   switch (CC) {
   default:
     break;
@@ -75,7 +75,7 @@ static void normaliseSetCC(SDValue &LHS, SDValue &RHS, ISD::CondCode &CC) {
 
 // Return the CAHP branch opcode that matches the given DAG integer
 // condition code. The CondCode must be one of those supported by the CAHP
-// ISA (see normaliseSetCC).
+// ISA (see normalizeSetCC).
 static unsigned getBranchOpcodeForIntCondCode(ISD::CondCode CC) {
   switch (CC) {
   default:
@@ -162,7 +162,7 @@ SDValue CAHPTargetLowering::LowerSELECT(SDValue Op, SelectionDAG &DAG) const {
     auto CC = cast<CondCodeSDNode>(CondV.getOperand(2));
     ISD::CondCode CCVal = CC->get();
 
-    normaliseSetCC(LHS, RHS, CCVal);
+    normalizeSetCC(LHS, RHS, CCVal);
 
     SDValue TargetCC = DAG.getConstant(CCVal, DL, MVT::i16);
     SDVTList VTs = DAG.getVTList(Op.getValueType(), MVT::Glue);
@@ -254,7 +254,7 @@ SDValue CAHPTargetLowering::LowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
   SDLoc DL(Op);
 
   ISD::CondCode CC = cast<CondCodeSDNode>(Cond)->get();
-  normaliseSetCC(LHS, RHS, CC);
+  normalizeSetCC(LHS, RHS, CC);
 
   // Create new SelectionDAG nodes
   return DAG.getNode(CAHPISD::BR_CC, DL, Op.getValueType(), Chain, LHS, RHS,
