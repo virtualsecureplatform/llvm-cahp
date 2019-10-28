@@ -15,6 +15,7 @@ namespace CAHPISD {
 enum NodeType : unsigned {
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
 
+  BR_CC,
   CALL,
   SELECT_CC,
   RET_FLAG,
@@ -58,6 +59,7 @@ private:
   }
 
   SDValue lowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerSELECT(SDValue Op, SelectionDAG &DAG) const;
 };
 } // namespace llvm

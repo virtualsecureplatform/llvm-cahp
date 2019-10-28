@@ -43,7 +43,8 @@ CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
 
   // TODO: add all necessary setOperationAction calls.
   setOperationAction(ISD::GlobalAddress, MVT::i16, Custom);
-  setOperationAction(ISD::BR_CC, MVT::i16, Expand);
+  setOperationAction(ISD::BRCOND, MVT::Other, Expand);
+  setOperationAction(ISD::BR_CC, MVT::i16, Custom);
   setOperationAction(ISD::SELECT, MVT::i16, Custom);
   setOperationAction(ISD::SELECT_CC, MVT::i16, Expand);
 
@@ -98,6 +99,9 @@ SDValue CAHPTargetLowering::LowerOperation(SDValue Op,
   switch (Op.getOpcode()) {
   default:
     report_fatal_error("unimplemented operand");
+
+  case ISD::BR_CC:
+    return LowerBR_CC(Op, DAG);
 
   case ISD::GlobalAddress:
     return lowerGlobalAddress(Op, DAG);
@@ -225,6 +229,22 @@ CAHPTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
 
   MI.eraseFromParent(); // The pseudo instruction is gone now.
   return TailMBB;
+}
+
+SDValue CAHPTargetLowering::LowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
+  SDValue Chain = Op.getOperand(0);
+  SDValue Cond = Op.getOperand(1);
+  SDValue LHS = Op.getOperand(2);
+  SDValue RHS = Op.getOperand(3);
+  SDValue Dest = Op.getOperand(4);
+  SDLoc DL(Op);
+
+  ISD::CondCode CC = cast<CondCodeSDNode>(Cond)->get();
+  normaliseSetCC(LHS, RHS, CC);
+
+  // Create new SelectionDAG nodes
+  return DAG.getNode(CAHPISD::BR_CC, DL, Op.getValueType(), Chain, LHS, RHS,
+                     DAG.getConstant(CC, DL, MVT::i16), Dest);
 }
 
 // Calling Convention Implementation.
@@ -450,6 +470,8 @@ const char *CAHPTargetLowering::getTargetNodeName(unsigned Opcode) const {
   switch ((CAHPISD::NodeType)Opcode) {
   case CAHPISD::FIRST_NUMBER:
     break;
+  case CAHPISD::BR_CC:
+    return "CAHPISD::BR_CC";
   case CAHPISD::CALL:
     return "CAHPISD::CALL";
   case CAHPISD::SELECT_CC:
