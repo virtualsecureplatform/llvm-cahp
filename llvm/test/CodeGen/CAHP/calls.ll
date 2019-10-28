@@ -7,11 +7,13 @@ declare i16 @external_function(i16)
 define i16 @test_call_external(i16 %a) nounwind {
 ; CAHP-LABEL: test_call_external:
 ; CAHP:       # %bb.0:
+; CAHP-NEXT:	addi	sp, sp, -2
 ; CAHP-NEXT:	sw	ra, 0(sp)
 ; CAHP-NEXT:	lui	a1, %hi(external_function)
 ; CAHP-NEXT:	addi	a1, a1, %lo(external_function)
 ; CAHP-NEXT:	jalr	a1
 ; CAHP-NEXT:	lw	ra, 0(sp)
+; CAHP-NEXT:	addi	sp, sp, 2
 ; CAHP-NEXT:	jr	ra
   %1 = call i16 @external_function(i16 %a)
   ret i16 %1
@@ -29,11 +31,13 @@ define i16 @defined_function(i16 %a) nounwind {
 define i16 @test_call_defined(i16 %a) nounwind {
 ; CAHP-LABEL: test_call_defined:
 ; CAHP:       # %bb.0:
+; CAHP-NEXT:	addi	sp, sp, -2
 ; CAHP-NEXT:	sw	ra, 0(sp)
 ; CAHP-NEXT:	lui	a1, %hi(defined_function)
 ; CAHP-NEXT:	addi	a1, a1, %lo(defined_function)
 ; CAHP-NEXT:	jalr	a1
 ; CAHP-NEXT:	lw	ra, 0(sp)
+; CAHP-NEXT:	addi	sp, sp, 2
 ; CAHP-NEXT:	jr	ra
   %1 = call i16 @defined_function(i16 %a) nounwind
   ret i16 %1
@@ -42,11 +46,13 @@ define i16 @test_call_defined(i16 %a) nounwind {
 define i16 @test_call_indirect(i16 (i16)* %a, i16 %b) nounwind {
 ; CAHP-LABEL: test_call_indirect:
 ; CAHP:       # %bb.0:
+; CAHP-NEXT:	addi	sp, sp, -2
 ; CAHP-NEXT:	sw	ra, 0(sp)
 ; CAHP-NEXT:	mov	a2, a0
 ; CAHP-NEXT:	mov	a0, a1
 ; CAHP-NEXT:	jalr	a2
 ; CAHP-NEXT:	lw	ra, 0(sp)
+; CAHP-NEXT:	addi	sp, sp, 2
 ; CAHP-NEXT:	jr	ra
   %1 = call i16 %a(i16 %b)
   ret i16 %1

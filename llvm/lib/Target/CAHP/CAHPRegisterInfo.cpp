@@ -53,8 +53,6 @@ void CAHPRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
   int Offset =
       getFrameLowering(MF)->getFrameIndexReference(MF, FrameIndex, FrameReg) +
       MI.getOperand(FIOperandNum + 1).getImm();
-  assert(MF.getSubtarget().getFrameLowering()->hasFP(MF) &&
-         "eliminateFrameIndex currently requires hasFP");
 
   // Offsets must be directly encoded in a 10-bit immediate field
   if (!isInt<10>(Offset)) {
@@ -67,7 +65,9 @@ void CAHPRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 }
 
 Register CAHPRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
-  return CAHP::X2;
+  const TargetFrameLowering *TFI = getFrameLowering(MF);
+  // Return FP if any, SP otherwise.
+  return TFI->hasFP(MF) ? CAHP::X2 /* FP */ : CAHP::X1 /* SP */;
 }
 
 const uint32_t *
