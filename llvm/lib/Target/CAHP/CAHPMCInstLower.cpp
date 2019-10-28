@@ -17,7 +17,7 @@
 
 using namespace llvm;
 
-static MCOperand lowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym,
+static MCOperand LowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym,
                                     const AsmPrinter &AP) {
   MCContext &Ctx = AP.OutContext;
   CAHPMCExpr::VariantKind Kind;
@@ -75,11 +75,11 @@ bool llvm::LowerCAHPMachineOperandToMCOperand(const MachineOperand &MO,
     break;
 
   case MachineOperand::MO_GlobalAddress:
-    MCOp = lowerSymbolOperand(MO, AP.getSymbol(MO.getGlobal()), AP);
+    MCOp = LowerSymbolOperand(MO, AP.getSymbol(MO.getGlobal()), AP);
     break;
 
   case MachineOperand::MO_ExternalSymbol:
-    MCOp = lowerSymbolOperand(
+    MCOp = LowerSymbolOperand(
         MO, AP.GetExternalSymbolSymbol(MO.getSymbolName()), AP);
     break;
   }
