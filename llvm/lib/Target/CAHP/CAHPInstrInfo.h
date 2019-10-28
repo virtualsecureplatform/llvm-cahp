@@ -29,6 +29,11 @@ public:
                             MachineBasicBlock::iterator I, unsigned DstReg,
                             int FI, const TargetRegisterClass *RC,
                             const TargetRegisterInfo *TRI) const override;
+
+  // Materializes the given int16 Val into DstReg.
+  void movImm16(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
+                const DebugLoc &DL, unsigned DstReg, uint64_t Val,
+                MachineInstr::MIFlag Flag = MachineInstr::NoFlags) const;
 };
 } // namespace llvm
 
