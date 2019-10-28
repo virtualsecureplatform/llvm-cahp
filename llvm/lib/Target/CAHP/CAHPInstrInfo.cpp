@@ -61,3 +61,21 @@ void CAHPInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
 
   BuildMI(MBB, I, DL, get(CAHP::LW), DstReg).addFrameIndex(FI).addImm(0);
 }
+
+void CAHPInstrInfo::movImm16(MachineBasicBlock &MBB,
+                             MachineBasicBlock::iterator MBBI,
+                             const DebugLoc &DL, unsigned DstReg, uint64_t Val,
+                             MachineInstr::MIFlag Flag) const {
+  assert(isInt<16>(Val) && "Can only materialize 16-bit constants");
+
+  // TODO: If the value can be materialized using only one instruction, only
+  // insert a single instruction.
+
+  uint64_t Hi6 = ((Val + 0x200) >> 10) & 0x3f;
+  uint64_t Lo10 = SignExtend64<10>(Val);
+  BuildMI(MBB, MBBI, DL, get(CAHP::LUI), DstReg).addImm(Hi6).setMIFlag(Flag);
+  BuildMI(MBB, MBBI, DL, get(CAHP::ADDI), DstReg)
+      .addReg(DstReg)
+      .addImm(Lo10)
+      .setMIFlag(Flag);
+}
