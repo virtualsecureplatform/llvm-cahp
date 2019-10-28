@@ -47,6 +47,7 @@ CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::BR_CC, MVT::i16, Custom);
   setOperationAction(ISD::SELECT, MVT::i16, Custom);
   setOperationAction(ISD::SELECT_CC, MVT::i16, Expand);
+  setOperationAction(ISD::SETCC, MVT::i16, Expand);
 
   setBooleanContents(ZeroOrOneBooleanContent);
 
