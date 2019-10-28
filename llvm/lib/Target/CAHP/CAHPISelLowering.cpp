@@ -105,14 +105,14 @@ SDValue CAHPTargetLowering::LowerOperation(SDValue Op,
     return LowerBR_CC(Op, DAG);
 
   case ISD::GlobalAddress:
-    return lowerGlobalAddress(Op, DAG);
+    return LowerGlobalAddress(Op, DAG);
 
   case ISD::SELECT:
     return LowerSELECT(Op, DAG);
   }
 }
 
-SDValue CAHPTargetLowering::lowerGlobalAddress(SDValue Op,
+SDValue CAHPTargetLowering::LowerGlobalAddress(SDValue Op,
                                                SelectionDAG &DAG) const {
   SDLoc DL(Op);
   EVT Ty = Op.getValueType();
@@ -121,7 +121,7 @@ SDValue CAHPTargetLowering::lowerGlobalAddress(SDValue Op,
   int64_t Offset = N->getOffset();
 
   if (isPositionIndependent())
-    report_fatal_error("Unable to lowerGlobalAddress");
+    report_fatal_error("Unable to LowerGlobalAddress");
 
   SDValue GAHi = DAG.getTargetGlobalAddress(GV, DL, Ty, Offset, CAHPII::MO_HI);
   SDValue GALo = DAG.getTargetGlobalAddress(GV, DL, Ty, Offset, CAHPII::MO_LO);
@@ -381,7 +381,7 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
   if (isa<GlobalAddressSDNode>(Callee)) {
     // GlobalAddressSDNode *S = dyn_cast<GlobalAddressSDNode>(Callee);
     // Callee = DAG.getTargetGlobalAddress(S->getGlobal(), DL, PtrVT, 0, 0);
-    Callee = lowerGlobalAddress(Callee, DAG);
+    Callee = LowerGlobalAddress(Callee, DAG);
   } else if (isa<ExternalSymbolSDNode>(Callee)) {
     Callee = LowerExternalSymbol(Callee, DAG);
   }
