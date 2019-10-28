@@ -92,6 +92,14 @@ def HI6 : SDNodeXForm<imm, [{
                                    SDLoc(N), N->getValueType(0));
 }]>;
 
+// Addressing modes.
+// Necessary because a frameindex can't be matched directly in a pattern.
+def AddrFI : ComplexPattern<iPTR, 1, "SelectAddrFI", [frameindex], []>;
+
+def IsOrAdd: PatFrag<(ops node:$A, node:$B), (or node:$A, node:$B), [{
+  return isOrEquivalentToAdd(N);
+}]>;
+
 // 24-bit M-instructions.
 
 let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in {
@@ -300,6 +308,12 @@ def Select_GPR_Using_CC_GPR
 
 // Codegen patterns.
 
+/// FrameIndex calculations
+def : Pat<(add     (i16 AddrFI:$Rs), simm10:$imm),
+          (ADDI    (i16 AddrFI:$Rs), simm10:$imm)>;
+def : Pat<(IsOrAdd (i16 AddrFI:$Rs), simm10:$imm),
+          (ADDI    (i16 AddrFI:$Rs), simm10:$imm)>;
+
 def : Pat<(simm6:$imm), (LSI simm6:$imm)>;
 def : Pat<(simm10:$imm), (LI simm10:$imm)>;
 def : Pat<(simm16hi6:$imm), (LUI (HI6 imm:$imm))>;
@@ -307,8 +321,13 @@ def : Pat<(simm16:$imm), (ADDI (LUI (HI6 imm:$imm)), (LO10Sext imm:$imm))>;
 
 multiclass LdPat<PatFrag LoadOp, CAHPInst Inst> {
   def : Pat<(LoadOp GPR:$rs1), (Inst GPR:$rs1, 0)>;
+  def : Pat<(LoadOp AddrFI:$rs1), (LW AddrFI:$rs1, 0)>;
   def : Pat<(LoadOp (add GPR:$rs1, simm10:$imm)),
             (Inst GPR:$rs1, simm10:$imm)>;
+  def : Pat<(LoadOp (add AddrFI:$rs1, simm10:$imm)),
+            (Inst AddrFI:$rs1, simm10:$imm)>;
+  def : Pat<(LoadOp (IsOrAdd AddrFI:$rs1, simm10:$imm)),
+            (Inst AddrFI:$rs1, simm10:$imm)>;
 }
 defm : LdPat<load, LW>;
 defm : LdPat<extloadi8,  LB>;
@@ -317,8 +336,13 @@ defm : LdPat<zextloadi8, LBU>;
 
 multiclass StPat<PatFrag StoreOp, CAHPInst Inst> {
   def : Pat<(StoreOp GPR:$rs, GPR:$rd), (Inst GPR:$rs, GPR:$rd, 0)>;
+  def : Pat<(StoreOp GPR:$rs, AddrFI:$rd), (Inst GPR:$rs, AddrFI:$rd, 0)>;
   def : Pat<(StoreOp GPR:$rs, (add GPR:$rd, simm10:$imm)),
             (Inst    GPR:$rs, GPR:$rd, simm10:$imm)>;
+  def : Pat<(StoreOp GPR:$rs, (add AddrFI:$rd, simm10:$imm)),
+            (Inst    GPR:$rs, AddrFI:$rd, simm10:$imm)>;
+  def : Pat<(StoreOp GPR:$rs, (IsOrAdd AddrFI:$rd, simm10:$imm)),
+            (Inst    GPR:$rs, AddrFI:$rd, simm10:$imm)>;
 }
 defm : StPat<store, SW>;
 defm : StPat<truncstorei8, SB>;
