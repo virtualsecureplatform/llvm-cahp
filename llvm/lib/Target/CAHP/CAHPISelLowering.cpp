@@ -45,6 +45,7 @@ CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::GlobalAddress, MVT::i16, Custom);
   setOperationAction(ISD::BRCOND, MVT::Other, Expand);
   setOperationAction(ISD::BR_CC, MVT::i16, Custom);
+  setOperationAction(ISD::BR_JT, MVT::Other, Expand);
   setOperationAction(ISD::SELECT, MVT::i16, Custom);
   setOperationAction(ISD::SELECT_CC, MVT::i16, Expand);
   setOperationAction(ISD::SETCC, MVT::i16, Expand);
@@ -54,6 +55,9 @@ CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
   // Function alignments (log2).
   setMinFunctionAlignment(0);
   setPrefFunctionAlignment(0);
+
+  // Effectively disable jump table generation.
+  setMinimumJumpTableEntries(INT_MAX);
 }
 
 // Changes the condition code and swaps operands if necessary, so the SetCC
