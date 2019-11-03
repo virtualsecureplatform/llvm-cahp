@@ -74,6 +74,7 @@ add_clang_library(clangBasic
   Targets/ARM.cpp
   Targets/AVR.cpp
   Targets/BPF.cpp
+  Targets/CAHP.cpp
   Targets/Hexagon.cpp
   Targets/Lanai.cpp
   Targets/Le64.cpp
@@ -104,4 +105,3 @@ add_clang_library(clangBasic
   DEPENDS
   omp_gen
   )
-
