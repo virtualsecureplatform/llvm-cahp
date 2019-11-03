@@ -19,6 +19,7 @@
 #include "Targets/ARM.h"
 #include "Targets/AVR.h"
 #include "Targets/BPF.h"
+#include "Targets/CAHP.h"
 #include "Targets/Hexagon.h"
 #include "Targets/Lanai.h"
 #include "Targets/Le64.h"
@@ -361,6 +362,9 @@ TargetInfo *AllocateTarget(const llvm::Triple &Triple,
   case llvm::Triple::amdgcn:
   case llvm::Triple::r600:
     return new AMDGPUTargetInfo(Triple, Opts);
+
+  case llvm::Triple::cahp:
+    return new CAHPTargetInfo(Triple, Opts);
 
   case llvm::Triple::riscv32:
     // TODO: add cases for FreeBSD, NetBSD, RTEMS once tested.
