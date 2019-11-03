@@ -35,7 +35,7 @@ define i16 @lbu(i8 *%a) nounwind {
 ; CAHP:       # %bb.0:
 ; CAHP-NEXT:    lbu a1, 0(a0)
 ; CAHP-NEXT:    lbu a0, 4(a0)
-; CAHP-NEXT:    add a0, a0, a1
+; CAHP-NEXT:    add2 a0, a1
 ; CAHP-NEXT:    jr ra
   %1 = getelementptr i8, i8* %a, i16 4
   %2 = load i8, i8* %1
@@ -79,7 +79,7 @@ define i16 @load_sext_zext_anyext_i1(i1 *%a) nounwind {
 ; CAHP-NEXT:    lb a1, 0(a0)
 ; CAHP-NEXT:    lbu a1, 1(a0)
 ; CAHP-NEXT:    lbu a0, 2(a0)
-; CAHP-NEXT:    sub a0, a0, a1
+; CAHP-NEXT:    sub2 a0, a1
 ; CAHP-NEXT:    jr ra
   ; sextload i1
   %1 = getelementptr i1, i1* %a, i16 1
