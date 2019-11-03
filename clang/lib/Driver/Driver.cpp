@@ -13,6 +13,7 @@
 #include "ToolChains/AVR.h"
 #include "ToolChains/Ananas.h"
 #include "ToolChains/BareMetal.h"
+#include "ToolChains/CAHP.h"
 #include "ToolChains/CSKYToolChain.h"
 #include "ToolChains/Clang.h"
 #include "ToolChains/CloudABI.h"
@@ -6131,6 +6132,9 @@ const ToolChain &Driver::getToolChain(const ArgList &Args,
       case llvm::Triple::msp430:
         TC =
             std::make_unique<toolchains::MSP430ToolChain>(*this, Target, Args);
+        break;
+      case llvm::Triple::cahp:
+        TC = llvm::make_unique<toolchains::CAHPToolChain>(*this, Target, Args);
         break;
       case llvm::Triple::riscv32:
       case llvm::Triple::riscv64:
