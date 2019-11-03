@@ -10,10 +10,10 @@
 define i16 @test() nounwind {
 ; CAHP-LABEL: test:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi	sp, sp, -24
-; CAHP-NEXT:	sw	ra, 22(sp)
-; CAHP-NEXT:	sw	fp, 20(sp)
-; CAHP-NEXT:	sw	s0, 18(sp)
+; CAHP-NEXT:	addi2	sp, -24
+; CAHP-NEXT:	swsp	ra, 22(sp)
+; CAHP-NEXT:	swsp	fp, 20(sp)
+; CAHP-NEXT:	swsp	s0, 18(sp)
 ; CAHP-NEXT:	addi	fp, sp, 24
 ; CAHP-NEXT:	lsi	s0, 0
 ; CAHP-NEXT:	sw	s0, -16(fp)
@@ -27,10 +27,10 @@ define i16 @test() nounwind {
 ; CAHP-NEXT:	jalr	a1
 ; CAHP-NEXT:	mov	a0, s0
 ; CAHP-NEXT:	addi	sp, fp, -24
-; CAHP-NEXT:	lw	s0, 18(sp)
-; CAHP-NEXT:	lw	fp, 20(sp)
-; CAHP-NEXT:	lw	ra, 22(sp)
-; CAHP-NEXT:	addi	sp, sp, 24
+; CAHP-NEXT:	lwsp	s0, 18(sp)
+; CAHP-NEXT:	lwsp	fp, 20(sp)
+; CAHP-NEXT:	lwsp	ra, 22(sp)
+; CAHP-NEXT:	addi2	sp, 24
 ; CAHP-NEXT:	jr	ra
 
   %key = alloca %struct.key_t, align 2
