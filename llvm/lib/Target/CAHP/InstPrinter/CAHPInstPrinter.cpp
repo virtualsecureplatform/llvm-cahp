@@ -6,6 +6,7 @@
 #include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCInst.h"
+#include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/MCSymbol.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/FormattedStream.h"
@@ -18,7 +19,7 @@ using namespace llvm;
 
 void CAHPInstPrinter::printInst(const MCInst *MI, raw_ostream &O,
                                 StringRef Annot, const MCSubtargetInfo &STI) {
-  printInstruction(MI, O);
+  printInstruction(MI, STI, O);
   printAnnotation(O, Annot);
 }
 
@@ -27,7 +28,8 @@ void CAHPInstPrinter::printRegName(raw_ostream &O, unsigned RegNo) const {
 }
 
 void CAHPInstPrinter::printOperand(const MCInst *MI, unsigned OpNo,
-                                   raw_ostream &O, const char *Modifier) {
+                                   const MCSubtargetInfo &STI, raw_ostream &O,
+                                   const char *Modifier) {
   assert((Modifier == 0 || Modifier[0] == 0) && "No modifiers supported");
   const MCOperand &MO = MI->getOperand(OpNo);
 
