@@ -41,14 +41,19 @@ public:
 // instructions) auto-generated.
 #include "CAHPGenMCPseudoLowering.inc"
 
+#define GEN_COMPRESS_INSTR
+#include "CAHPGenCompressInstEmitter.inc"
+
 void CAHPAsmPrinter::EmitInstruction(const MachineInstr *MI) {
   // Do any auto-generated pseudo lowerings.
   if (emitPseudoExpansionLowering(*OutStreamer, MI))
     return;
 
-  MCInst TmpInst;
+  MCInst TmpInst, CInst;
   LowerCAHPMachineInstrToMCInst(MI, TmpInst, *this);
-  EmitToStreamer(*OutStreamer, TmpInst);
+  bool Res = compressInst(CInst, TmpInst, *TM.getMCSubtargetInfo(),
+                          OutStreamer->getContext());
+  EmitToStreamer(*OutStreamer, Res ? CInst : TmpInst);
 }
 
 // Force static initialization.
