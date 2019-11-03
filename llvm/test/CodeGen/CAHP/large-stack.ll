@@ -11,39 +11,39 @@ define void @test() nounwind {
 ; CAHP-WITHFP:       # %bb.0:
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
 ; CAHP-WITHFP-NEXT:	addi	a0, a0, -68
-; CAHP-WITHFP-NEXT:	sub	sp, sp, a0
+; CAHP-WITHFP-NEXT:	sub2	sp, a0
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
 ; CAHP-WITHFP-NEXT:	addi	a0, a0, -70
-; CAHP-WITHFP-NEXT:	add	a0, a0, sp
+; CAHP-WITHFP-NEXT:	add2	a0, sp
 ; CAHP-WITHFP-NEXT:	sw	ra, 0(a0)
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
 ; CAHP-WITHFP-NEXT:	addi	a0, a0, -72
-; CAHP-WITHFP-NEXT:	add	a0, a0, sp
+; CAHP-WITHFP-NEXT:	add2	a0, sp
 ; CAHP-WITHFP-NEXT:	sw	fp, 0(a0)
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
 ; CAHP-WITHFP-NEXT:	addi	a0, a0, -68
 ; CAHP-WITHFP-NEXT:	add	fp, sp, a0
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
 ; CAHP-WITHFP-NEXT:	addi	a0, a0, -72
-; CAHP-WITHFP-NEXT:	add	a0, a0, sp
+; CAHP-WITHFP-NEXT:	add2	a0, sp
 ; CAHP-WITHFP-NEXT:	lw	fp, 0(a0)
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
 ; CAHP-WITHFP-NEXT:	addi	a0, a0, -70
-; CAHP-WITHFP-NEXT:	add	a0, a0, sp
+; CAHP-WITHFP-NEXT:	add2	a0, sp
 ; CAHP-WITHFP-NEXT:	lw	ra, 0(a0)
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
 ; CAHP-WITHFP-NEXT:	addi	a0, a0, -68
-; CAHP-WITHFP-NEXT:	add	sp, sp, a0
+; CAHP-WITHFP-NEXT:	add2	sp, a0
 ; CAHP-WITHFP-NEXT:	jr	ra
 
 ; CAHP-FPELIM-LABEL: test:
 ; CAHP-FPELIM:       # %bb.0:
 ; CAHP-FPELIM-NEXT:	lui	a0, 3
 ; CAHP-FPELIM-NEXT:	addi	a0, a0, -72
-; CAHP-FPELIM-NEXT:	sub	sp, sp, a0
+; CAHP-FPELIM-NEXT:	sub2	sp, a0
 ; CAHP-FPELIM-NEXT:	lui	a0, 3
 ; CAHP-FPELIM-NEXT:	addi	a0, a0, -72
-; CAHP-FPELIM-NEXT:	add	sp, sp, a0
+; CAHP-FPELIM-NEXT:	add2	sp, a0
 ; CAHP-FPELIM-NEXT:	jr	ra
 
   %tmp = alloca [ 3000 x i8 ] , align 2

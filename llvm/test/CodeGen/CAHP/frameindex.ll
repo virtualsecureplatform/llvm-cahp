@@ -7,15 +7,15 @@ declare i16 @bar(i16*)
 define i16 @foo() {
 ; CAHP-LABEL: foo:
 ; CAHP: # %bb.0:
-; CAHP-NEXT:	addi	sp, sp, -4
-; CAHP-NEXT:	sw	ra, 2(sp)
+; CAHP-NEXT:	addi2	sp, -4
+; CAHP-NEXT:	swsp	ra, 2(sp)
 ; CAHP-NEXT:	lui	a0, %hi(bar)
 ; CAHP-NEXT:	addi	a1, a0, %lo(bar)
 ; CAHP-NEXT:	addi	a0, sp, 0
 ; CAHP-NEXT:	jalr	a1
-; CAHP-NEXT:	lw	a0, 0(sp)
-; CAHP-NEXT:	lw	ra, 2(sp)
-; CAHP-NEXT:	addi	sp, sp, 4
+; CAHP-NEXT:	lwsp	a0, 0(sp)
+; CAHP-NEXT:	lwsp	ra, 2(sp)
+; CAHP-NEXT:	addi2	sp, 4
 ; CAHP-NEXT:	jr	ra
   %1 = alloca i16
   %2 = call i16 @bar(i16* %1)
