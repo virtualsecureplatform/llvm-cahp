@@ -31,8 +31,13 @@ def CAHPAsmParser : AsmParser {
   let ShouldEmitMatchRegisterAltName = 1;
 }
 
+def CAHPAsmWriter : AsmWriter {
+  int PassSubtarget = 1;
+}
+
 def CAHP : Target {
   let InstructionSet = CAHPInstrInfo;
   let AssemblyParsers = [CAHPAsmParser];
+  let AssemblyWriters = [CAHPAsmWriter];
   let AllowRegisterRenaming = 1;
 }
