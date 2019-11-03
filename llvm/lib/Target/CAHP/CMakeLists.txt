@@ -2,6 +2,7 @@ set(LLVM_TARGET_DEFINITIONS CAHP.td)
 
 tablegen(LLVM CAHPGenAsmMatcher.inc -gen-asm-matcher)
 tablegen(LLVM CAHPGenAsmWriter.inc -gen-asm-writer)
+tablegen(LLVM CAHPGenCompressInstEmitter.inc -gen-cahp-compress-inst-emitter)
 tablegen(LLVM CAHPGenCallingConv.inc -gen-callingconv)
 tablegen(LLVM CAHPGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM CAHPGenDisassemblerTables.inc -gen-disassembler)
