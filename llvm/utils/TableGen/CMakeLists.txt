@@ -37,6 +37,8 @@ add_tablegen(llvm-tblgen LLVM
   AsmWriterEmitter.cpp
   Attributes.cpp
   CallingConvEmitter.cpp
+  CAHPCompressInstEmitter.cpp
+  CodeBeadsGen.cpp
   CodeEmitterGen.cpp
   CodeGenMapTable.cpp
   CompressInstEmitter.cpp
