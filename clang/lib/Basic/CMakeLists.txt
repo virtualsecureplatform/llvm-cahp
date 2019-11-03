@@ -97,6 +97,7 @@ add_clang_library(clangBasic
   Targets/ARM.cpp
   Targets/AVR.cpp
   Targets/BPF.cpp
+  Targets/CAHP.cpp
   Targets/CSKY.cpp
   Targets/DirectX.cpp
   Targets/Hexagon.cpp
@@ -131,7 +132,6 @@ add_clang_library(clangBasic
   omp_gen
   ClangDriverOptions
   )
-
 target_link_libraries(clangBasic
   PRIVATE
   ${LLVM_ATOMIC_LIB}
