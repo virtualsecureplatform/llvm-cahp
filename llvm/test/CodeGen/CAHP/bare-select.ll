@@ -5,7 +5,7 @@
 define i16 @bare_select(i1 %a, i16 %b, i16 %c) {
 ; CAHP-LABEL: bare_select:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	andi	a0, a0, 1
+; CAHP-NEXT:	andi2	a0, 1
 ; CAHP-NEXT:	lsi	a3, 0
 ; CAHP-NEXT:	bne	a0, a3, .LBB0_2
 ; CAHP-NEXT:# %bb.1:

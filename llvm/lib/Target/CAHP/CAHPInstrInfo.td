@@ -45,18 +45,36 @@ def uimm4 : Operand<i16>, ImmLeaf<i16, [{return isUInt<16>(Imm);}]> {
   let ParserMatchClass = UImmAsmOperand<4>;
   let DecoderMethod = "decodeUImmOperand<4>";
   let EncoderMethod = "getImmOpValue";
+  let MCOperandPredicate = [{
+    int64_t Imm;
+    if (!MCOp.evaluateAsConstantImm(Imm))
+      return false;
+    return isUInt<4>(Imm);
+  }];
 }
 
 def simm6 : Operand<i16>, ImmLeaf<i16, [{return isInt<6>(Imm);}]> {
   let ParserMatchClass = SImmAsmOperand<6>;
   let DecoderMethod = "decodeSImmOperand<6>";
   let EncoderMethod = "getImmOpValue";
+  let MCOperandPredicate = [{
+    int64_t Imm;
+    if (!MCOp.evaluateAsConstantImm(Imm))
+      return false;
+    return isInt<6>(Imm);
+  }];
 }
 
 def simm10 : Operand<i16>, ImmLeaf<i16, [{return isInt<10>(Imm);}]> {
   let ParserMatchClass = SImmAsmOperand<10>;
   let DecoderMethod = "decodeSImmOperand<10>";
   let EncoderMethod = "getImmOpValue";
+  let MCOperandPredicate = [{
+    int64_t Imm;
+    if (!MCOp.evaluateAsConstantImm(Imm))
+      return false;
+    return isInt<10>(Imm);
+  }];
 }
 
 def simm10_branch : Operand<OtherVT> {
@@ -75,6 +93,12 @@ def uimm7_lsb0 : Operand<i16> {
   let ParserMatchClass = UImmAsmOperand<7, "Lsb0">;
   let DecoderMethod = "decodeUImmOperand<7>";
   let EncoderMethod = "getImmOpValue";
+  let MCOperandPredicate = [{
+    int64_t Imm;
+    if (!MCOp.evaluateAsConstantImm(Imm))
+      return false;
+    return isShiftedUInt<6, 1>(Imm);
+  }];
 }
 
 // Standalone (codegen-only) immleaf patterns.
@@ -419,3 +443,42 @@ def : Pat<(brcond GPR:$cond, bb:$imm), (BNE GPR:$cond, (LSI 0), bb:$imm)>;
 def : Pat<(br bb:$imm), (JS simm11:$imm)>;
 def : Pat<(Call GPR:$rs), (JALR GPR:$rs)>;
 def : Pat<(Call tglobaladdr:$dst), (JSAL tglobaladdr:$dst)>;
+
+// Compress patterns
+
+class CompressPat<dag input, dag output> {
+  dag Input  = input;
+  dag Output    = output;
+  list<Predicate> Predicates = [];
+}
+
+multiclass CompPatRRRComm<CAHPInst24 Inst24, CAHPInst16 Inst16> {
+  def : CompressPat<(Inst24 GPR:$rs1, GPR:$rs1, GPR:$rs2),
+                    (Inst16 GPR:$rs1, GPR:$rs2)>;
+  def : CompressPat<(Inst24 GPR:$rs1, GPR:$rs2, GPR:$rs1),
+                    (Inst16 GPR:$rs1, GPR:$rs2)>;
+}
+defm : CompPatRRRComm<ADD, ADD2>;
+defm : CompPatRRRComm<AND, AND2>;
+defm : CompPatRRRComm<XOR, XOR2>;
+defm : CompPatRRRComm<OR,  OR2>;
+
+class CompPatRRRNonComm<CAHPInst24 Inst24, CAHPInst16 Inst16>
+  : CompressPat<(Inst24 GPR:$rs1, GPR:$rs1, GPR:$rs2),
+                (Inst16 GPR:$rs1, GPR:$rs2)> {
+}
+def : CompPatRRRNonComm<SUB, SUB2>;
+def : CompPatRRRNonComm<LSL, LSL2>;
+def : CompPatRRRNonComm<LSR, LSR2>;
+def : CompPatRRRNonComm<ASR, ASR2>;
+
+def : CompressPat<(LSLI GPR:$rs1, GPR:$rs1, uimm4:$imm), (LSLI2 GPR:$rs1, uimm4:$imm)>;
+def : CompressPat<(LSRI GPR:$rs1, GPR:$rs1, uimm4:$imm), (LSRI2 GPR:$rs1, uimm4:$imm)>;
+def : CompressPat<(ASRI GPR:$rs1, GPR:$rs1, uimm4:$imm), (ASRI2 GPR:$rs1, uimm4:$imm)>;
+def : CompressPat<(ADDI GPR:$rs1, GPR:$rs1, simm6:$imm), (ADDI2 GPR:$rs1, simm6:$imm)>;
+def : CompressPat<(ANDI GPR:$rs1, GPR:$rs1, simm6:$imm), (ANDI2 GPR:$rs1, simm6:$imm)>;
+
+def : CompressPat<(LW   GPR:$rd, SP:$rs, uimm7_lsb0:$imm),
+                  (LWSP GPR:$rd, SP:$rs, uimm7_lsb0:$imm)>;
+def : CompressPat<(SW   GPR:$rd, SP:$rs, uimm7_lsb0:$imm),
+                  (SWSP GPR:$rd, SP:$rs, uimm7_lsb0:$imm)>;
