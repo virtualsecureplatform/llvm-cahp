@@ -57,3 +57,34 @@ define i16 @test_call_indirect(i16 (i16)* %a, i16 %b) nounwind {
   %1 = call i16 %a(i16 %b)
   ret i16 %1
 }
+
+define fastcc i16 @fastcc_function(i16 %a, i16 %b) nounwind {
+; CAHP-LABEL: fastcc_function:
+; CAHP:       # %bb.0:
+; CAHP-NEXT:	add2	a0, a1
+; CAHP-NEXT:	jr	ra
+
+ %1 = add i16 %a, %b
+ ret i16 %1
+}
+
+define i16 @test_call_fastcc(i16 %a, i16 %b) nounwind {
+; CAHP-LABEL: test_call_fastcc:
+; CAHP:       # %bb.0:
+; CAHP-NEXT:	addi2	sp, -4
+; CAHP-NEXT:	swsp	ra, 2(sp)
+; CAHP-NEXT:	swsp	s0, 0(sp)
+; CAHP-NEXT:	mov	s0, a0
+; CAHP-NEXT:	lui	a0, %hi(fastcc_function)
+; CAHP-NEXT:	addi	a2, a0, %lo(fastcc_function)
+; CAHP-NEXT:	mov	a0, s0
+; CAHP-NEXT:	jalr	a2
+; CAHP-NEXT:	mov	a0, s0
+; CAHP-NEXT:	lwsp	s0, 0(sp)
+; CAHP-NEXT:	lwsp	ra, 2(sp)
+; CAHP-NEXT:	addi2	sp, 4
+; CAHP-NEXT:	jr	ra
+
+  %1 = call fastcc i16 @fastcc_function(i16 %a, i16 %b)
+  ret i16 %a
+}
