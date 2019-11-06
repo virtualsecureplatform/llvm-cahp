@@ -5,40 +5,35 @@
 define void @jt(i16 %in, i16* %out) {
 ; CAHP-LABEL: jt:
 ; CAHP:       # %bb.0: # %entry
-; CAHP-NEXT:	lsi	a2, 2
-; CAHP-NEXT:	blt	a2, a0, .LBB0_3
-; CAHP-NEXT:	js	.LBB0_1
-; CAHP-NEXT:.LBB0_1:                                # %entry
-; CAHP-NEXT:	lsi	a3, 1
-; CAHP-NEXT:	beq	a0, a3, .LBB0_5
-; CAHP-NEXT:	js	.LBB0_2
-; CAHP-NEXT:.LBB0_2:                                # %entry
-; CAHP-NEXT:	beq	a0, a2, .LBB0_6
-; CAHP-NEXT:	js	.LBB0_9
-; CAHP-NEXT:.LBB0_6:                                # %bb2
-; CAHP-NEXT:	lsi	a0, 3
-; CAHP-NEXT:	sw	a0, 0(a1)
-; CAHP-NEXT:	js	.LBB0_9
-; CAHP-NEXT:.LBB0_3:                                # %entry
-; CAHP-NEXT:	lsi	a3, 3
-; CAHP-NEXT:	beq	a0, a3, .LBB0_7
-; CAHP-NEXT:	js	.LBB0_4
-; CAHP-NEXT:.LBB0_4:                                # %entry
-; CAHP-NEXT:	lsi	a2, 4
-; CAHP-NEXT:	beq	a0, a2, .LBB0_8
-; CAHP-NEXT:	js	.LBB0_9
-; CAHP-NEXT:.LBB0_8:                                # %bb4
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	sw	a0, 0(a1)
-; CAHP-NEXT:.LBB0_9:                                # %exit
-; CAHP-NEXT:	jr	ra
-; CAHP-NEXT:.LBB0_5:                                # %bb1
-; CAHP-NEXT:	lsi	a0, 4
-; CAHP-NEXT:	sw	a0, 0(a1)
-; CAHP-NEXT:	js	.LBB0_9
-; CAHP-NEXT:.LBB0_7:                                # %bb3
-; CAHP-NEXT:	sw	a2, 0(a1)
-; CAHP-NEXT:	js	.LBB0_9
+; CAHP-NEXT: 	lsi	a2, 2
+; CAHP-NEXT: 	blt	a2, a0, .LBB0_4
+; CAHP-NEXT: # %bb.1:                                # %entry
+; CAHP-NEXT: 	lsi	a3, 1
+; CAHP-NEXT: 	beq	a0, a3, .LBB0_8
+; CAHP-NEXT: # %bb.2:                                # %entry
+; CAHP-NEXT: 	bne	a0, a2, .LBB0_10
+; CAHP-NEXT: # %bb.3:                                # %bb2
+; CAHP-NEXT: 	lsi	a0, 3
+; CAHP-NEXT: 	sw	a0, 0(a1)
+; CAHP-NEXT: 	jr	ra
+; CAHP-NEXT: .LBB0_4:                                # %entry
+; CAHP-NEXT: 	lsi	a3, 3
+; CAHP-NEXT: 	beq	a0, a3, .LBB0_9
+; CAHP-NEXT: # %bb.5:                                # %entry
+; CAHP-NEXT: 	lsi	a2, 4
+; CAHP-NEXT: 	bne	a0, a2, .LBB0_10
+; CAHP-NEXT: # %bb.6:                                # %bb4
+; CAHP-NEXT: 	lsi	a0, 1
+; CAHP-NEXT: 	sw	a0, 0(a1)
+; CAHP-NEXT: 	jr	ra
+; CAHP-NEXT: .LBB0_8:                                # %bb1
+; CAHP-NEXT: 	lsi	a0, 4
+; CAHP-NEXT: 	sw	a0, 0(a1)
+; CAHP-NEXT: 	jr	ra
+; CAHP-NEXT: .LBB0_9:                                # %bb3
+; CAHP-NEXT: 	sw	a2, 0(a1)
+; CAHP-NEXT: .LBB0_10:                               # %exit
+; CAHP-NEXT: 	jr	ra
 
 entry:
   switch i16 %in, label %exit [
