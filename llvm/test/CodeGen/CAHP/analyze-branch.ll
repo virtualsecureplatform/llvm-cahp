@@ -53,8 +53,8 @@ define void @test_bcc_fallthrough_nottaken(i16 %in) nounwind {
 ; CAHP-NEXT:	addi2	sp, -2
 ; CAHP-NEXT:	swsp	ra, 0(sp)
 ; CAHP-NEXT:	li	a1, 42
-; CAHP-NEXT:	beq	a0, a1, .LBB1_1
-; CAHP-NEXT:# %bb.3:                                # %false
+; CAHP-NEXT:	beq	a0, a1, .LBB1_3
+; CAHP-NEXT:# %bb.1:                                # %false
 ; CAHP-NEXT:	lui	a0, %hi(test_false)
 ; CAHP-NEXT:	addi	a0, a0, %lo(test_false)
 ; CAHP-NEXT:.LBB1_2:                                # %true
@@ -62,7 +62,7 @@ define void @test_bcc_fallthrough_nottaken(i16 %in) nounwind {
 ; CAHP-NEXT:	lwsp	ra, 0(sp)
 ; CAHP-NEXT:	addi2	sp, 2
 ; CAHP-NEXT:	jr	ra
-; CAHP-NEXT:.LBB1_1:                                # %true
+; CAHP-NEXT:.LBB1_3:                                # %true
 ; CAHP-NEXT:	lui	a0, %hi(test_true)
 ; CAHP-NEXT:	addi	a0, a0, %lo(test_true)
 ; CAHP-NEXT:	js	.LBB1_2
