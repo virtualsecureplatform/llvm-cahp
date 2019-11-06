@@ -40,6 +40,10 @@ public:
   EmitInstrWithCustomInserter(MachineInstr &MI,
                               MachineBasicBlock *BB) const override;
 
+  std::pair<unsigned, const TargetRegisterClass *>
+  getRegForInlineAsmConstraint(const TargetRegisterInfo *TRI,
+                               StringRef Constraint, MVT VT) const override;
+
 private:
   // Lower incoming arguments, copy physregs into vregs
   SDValue LowerFormalArguments(SDValue Chain, CallingConv::ID CallConv,
