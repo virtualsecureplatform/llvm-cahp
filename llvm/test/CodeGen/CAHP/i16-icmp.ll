@@ -8,12 +8,12 @@
 define i16 @icmp_eq(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: icmp_eq:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	beq	a2, a1, .LBB0_2
-; CAHP-NEXT:# %bb.1:
+; CAHP-NEXT:	beq	a0, a1, .LBB0_1
+; CAHP-NEXT:# %bb.2:
 ; CAHP-NEXT:	lsi	a0, 0
-; CAHP-NEXT:.LBB0_2:
+; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:.LBB0_1:
+; CAHP-NEXT:	lsi	a0, 1
 ; CAHP-NEXT:	jr	ra
 
   %1 = icmp eq i16 %a, %b
@@ -24,12 +24,12 @@ define i16 @icmp_eq(i16 %a, i16 %b) nounwind {
 define i16 @icmp_ne(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: icmp_ne:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	bne	a2, a1, .LBB1_2
-; CAHP-NEXT:# %bb.1:
+; CAHP-NEXT:	bne	a0, a1, .LBB1_1
+; CAHP-NEXT:# %bb.2:
 ; CAHP-NEXT:	lsi	a0, 0
-; CAHP-NEXT:.LBB1_2:
+; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:.LBB1_1:
+; CAHP-NEXT:	lsi	a0, 1
 ; CAHP-NEXT:	jr	ra
 
   %1 = icmp ne i16 %a, %b
@@ -40,13 +40,14 @@ define i16 @icmp_ne(i16 %a, i16 %b) nounwind {
 define i16 @icmp_ugt(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: icmp_ugt:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	bltu	a1, a2, .LBB2_2
-; CAHP-NEXT:# %bb.1:
+; CAHP-NEXT:	bltu	a1, a0, .LBB2_1
+; CAHP-NEXT:# %bb.2:
 ; CAHP-NEXT:	lsi	a0, 0
-; CAHP-NEXT:.LBB2_2:
 ; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:.LBB2_1:
+; CAHP-NEXT:	lsi	a0, 1
+; CAHP-NEXT:	jr	ra
+
   %1 = icmp ugt i16 %a, %b
   %2 = zext i1 %1 to i16
   ret i16 %2
@@ -55,12 +56,12 @@ define i16 @icmp_ugt(i16 %a, i16 %b) nounwind {
 define i16 @icmp_uge(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: icmp_uge:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	bleu	a1, a2, .LBB3_2
-; CAHP-NEXT:# %bb.1:
+; CAHP-NEXT:	bleu	a1, a0, .LBB3_1
+; CAHP-NEXT:# %bb.2:
 ; CAHP-NEXT:	lsi	a0, 0
-; CAHP-NEXT:.LBB3_2:
+; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:.LBB3_1:
+; CAHP-NEXT:	lsi	a0, 1
 ; CAHP-NEXT:	jr	ra
 
   %1 = icmp uge i16 %a, %b
@@ -71,12 +72,12 @@ define i16 @icmp_uge(i16 %a, i16 %b) nounwind {
 define i16 @icmp_ult(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: icmp_ult:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	bltu	a2, a1, .LBB4_2
-; CAHP-NEXT:# %bb.1:
+; CAHP-NEXT:	bltu	a0, a1, .LBB4_1
+; CAHP-NEXT:# %bb.2:
 ; CAHP-NEXT:	lsi	a0, 0
-; CAHP-NEXT:.LBB4_2:
+; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:.LBB4_1:
+; CAHP-NEXT:	lsi	a0, 1
 ; CAHP-NEXT:	jr	ra
 
   %1 = icmp ult i16 %a, %b
@@ -87,12 +88,12 @@ define i16 @icmp_ult(i16 %a, i16 %b) nounwind {
 define i16 @icmp_ule(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: icmp_ule:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	bleu	a2, a1, .LBB5_2
-; CAHP-NEXT:# %bb.1:
+; CAHP-NEXT:	bleu	a0, a1, .LBB5_1
+; CAHP-NEXT:# %bb.2:
 ; CAHP-NEXT:	lsi	a0, 0
-; CAHP-NEXT:.LBB5_2:
+; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:.LBB5_1:
+; CAHP-NEXT:	lsi	a0, 1
 ; CAHP-NEXT:	jr	ra
 
   %1 = icmp ule i16 %a, %b
@@ -103,12 +104,12 @@ define i16 @icmp_ule(i16 %a, i16 %b) nounwind {
 define i16 @icmp_sgt(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: icmp_sgt:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	blt	a1, a2, .LBB6_2
-; CAHP-NEXT:# %bb.1:
+; CAHP-NEXT:	blt	a1, a0, .LBB6_1
+; CAHP-NEXT:# %bb.2:
 ; CAHP-NEXT:	lsi	a0, 0
-; CAHP-NEXT:.LBB6_2:
+; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:.LBB6_1:
+; CAHP-NEXT:	lsi	a0, 1
 ; CAHP-NEXT:	jr	ra
 
   %1 = icmp sgt i16 %a, %b
@@ -119,12 +120,12 @@ define i16 @icmp_sgt(i16 %a, i16 %b) nounwind {
 define i16 @icmp_sge(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: icmp_sge:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	ble	a1, a2, .LBB7_2
-; CAHP-NEXT:# %bb.1:
+; CAHP-NEXT:	ble	a1, a0, .LBB7_1
+; CAHP-NEXT:# %bb.2:
 ; CAHP-NEXT:	lsi	a0, 0
-; CAHP-NEXT:.LBB7_2:
+; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:.LBB7_1:
+; CAHP-NEXT:	lsi	a0, 1
 ; CAHP-NEXT:	jr	ra
 
   %1 = icmp sge i16 %a, %b
@@ -135,12 +136,12 @@ define i16 @icmp_sge(i16 %a, i16 %b) nounwind {
 define i16 @icmp_slt(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: icmp_slt:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	blt	a2, a1, .LBB8_2
-; CAHP-NEXT:# %bb.1:
+; CAHP-NEXT:	blt	a0, a1, .LBB8_1
+; CAHP-NEXT:# %bb.2:
 ; CAHP-NEXT:	lsi	a0, 0
-; CAHP-NEXT:.LBB8_2:
+; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:.LBB8_1:
+; CAHP-NEXT:	lsi	a0, 1
 ; CAHP-NEXT:	jr	ra
 
   %1 = icmp slt i16 %a, %b
@@ -151,12 +152,12 @@ define i16 @icmp_slt(i16 %a, i16 %b) nounwind {
 define i16 @icmp_sle(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: icmp_sle:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	lsi	a0, 1
-; CAHP-NEXT:	ble	a2, a1, .LBB9_2
-; CAHP-NEXT:# %bb.1:
+; CAHP-NEXT:	ble	a0, a1, .LBB9_1
+; CAHP-NEXT:# %bb.2:
 ; CAHP-NEXT:	lsi	a0, 0
-; CAHP-NEXT:.LBB9_2:
+; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:.LBB9_1:
+; CAHP-NEXT:	lsi	a0, 1
 ; CAHP-NEXT:	jr	ra
 
   %1 = icmp sle i16 %a, %b

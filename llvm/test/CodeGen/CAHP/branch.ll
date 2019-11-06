@@ -5,49 +5,39 @@
 define void @foo(i16 %a, i16 *%b, i1 %c) {
 ; CAHP-LABEL: foo:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	lw	a2, 0(a1)
-; CAHP-NEXT:	beq	a2, a0, .LBB0_11
-; CAHP-NEXT:	js	.LBB0_1
-; CAHP-NEXT:.LBB0_1:
-; CAHP-NEXT:	lw	a2, 0(a1)
-; CAHP-NEXT:	bne	a2, a0, .LBB0_11
-; CAHP-NEXT:	js	.LBB0_2
-; CAHP-NEXT:.LBB0_2:
-; CAHP-NEXT:	lw	a2, 0(a1)
-; CAHP-NEXT:	blt	a2, a0, .LBB0_11
-; CAHP-NEXT:	js	.LBB0_3
-; CAHP-NEXT:.LBB0_3:
-; CAHP-NEXT:	lw	a2, 0(a1)
-; CAHP-NEXT:	ble	a2, a0, .LBB0_11
-; CAHP-NEXT:	js	.LBB0_4
-; CAHP-NEXT:.LBB0_4:
-; CAHP-NEXT:	lw	a2, 0(a1)
-; CAHP-NEXT:	bltu	a2, a0, .LBB0_11
-; CAHP-NEXT:	js	.LBB0_5
-; CAHP-NEXT:.LBB0_5:
-; CAHP-NEXT:	lw	a2, 0(a1)
-; CAHP-NEXT:	bleu	a2, a0, .LBB0_11
-; CAHP-NEXT:	js	.LBB0_6
-; CAHP-NEXT:.LBB0_6:
-; CAHP-NEXT:	lw	a2, 0(a1)
-; CAHP-NEXT:	blt	a0, a2, .LBB0_11
-; CAHP-NEXT:	js	.LBB0_7
-; CAHP-NEXT:.LBB0_7:
-; CAHP-NEXT:	lw	a2, 0(a1)
-; CAHP-NEXT:	ble	a0, a2, .LBB0_11
-; CAHP-NEXT:	js	.LBB0_8
-; CAHP-NEXT:.LBB0_8:
-; CAHP-NEXT:	lw	a2, 0(a1)
-; CAHP-NEXT:	bltu	a0, a2, .LBB0_11
-; CAHP-NEXT:	js	.LBB0_9
-; CAHP-NEXT:.LBB0_9:
-; CAHP-NEXT:	lw	a2, 0(a1)
-; CAHP-NEXT:	bleu	a0, a2, .LBB0_11
-; CAHP-NEXT:	js	.LBB0_10
-; CAHP-NEXT:.LBB0_10:
-; CAHP-NEXT:	lw	a0, 0(a1)
-; CAHP-NEXT:.LBB0_11:                               # %end
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT: 	lw	a2, 0(a1)
+; CAHP-NEXT: 	beq	a2, a0, .LBB0_11
+; CAHP-NEXT: # %bb.1:                                # %test2
+; CAHP-NEXT: 	lw	a2, 0(a1)
+; CAHP-NEXT: 	bne	a2, a0, .LBB0_11
+; CAHP-NEXT: # %bb.2:                                # %test3
+; CAHP-NEXT: 	lw	a2, 0(a1)
+; CAHP-NEXT: 	blt	a2, a0, .LBB0_11
+; CAHP-NEXT: # %bb.3:                                # %test4
+; CAHP-NEXT: 	lw	a2, 0(a1)
+; CAHP-NEXT: 	ble	a2, a0, .LBB0_11
+; CAHP-NEXT: # %bb.4:                                # %test5
+; CAHP-NEXT: 	lw	a2, 0(a1)
+; CAHP-NEXT: 	bltu	a2, a0, .LBB0_11
+; CAHP-NEXT: # %bb.5:                                # %test6
+; CAHP-NEXT: 	lw	a2, 0(a1)
+; CAHP-NEXT: 	bleu	a2, a0, .LBB0_11
+; CAHP-NEXT: # %bb.6:                                # %test7
+; CAHP-NEXT: 	lw	a2, 0(a1)
+; CAHP-NEXT: 	blt	a0, a2, .LBB0_11
+; CAHP-NEXT: # %bb.7:                                # %test8
+; CAHP-NEXT: 	lw	a2, 0(a1)
+; CAHP-NEXT: 	ble	a0, a2, .LBB0_11
+; CAHP-NEXT: # %bb.8:                                # %test9
+; CAHP-NEXT: 	lw	a2, 0(a1)
+; CAHP-NEXT: 	bltu	a0, a2, .LBB0_11
+; CAHP-NEXT: # %bb.9:                                # %test10
+; CAHP-NEXT: 	lw	a2, 0(a1)
+; CAHP-NEXT: 	bleu	a0, a2, .LBB0_11
+; CAHP-NEXT: # %bb.10:                               # %test12
+; CAHP-NEXT: 	lw	a0, 0(a1)
+; CAHP-NEXT: .LBB0_11:                               # %end
+; CAHP-NEXT: 	jr	ra
 
   %val1 = load volatile i16, i16* %b
   %tst1 = icmp eq i16 %val1, %a
