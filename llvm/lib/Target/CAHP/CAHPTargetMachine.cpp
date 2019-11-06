@@ -58,6 +58,7 @@ public:
   }
 
   bool addInstSelector() override;
+  void addPreEmitPass() override;
 };
 } // namespace
 
@@ -70,3 +71,5 @@ bool CAHPPassConfig::addInstSelector() {
 
   return false;
 }
+
+void CAHPPassConfig::addPreEmitPass() { addPass(&BranchRelaxationPassID); }

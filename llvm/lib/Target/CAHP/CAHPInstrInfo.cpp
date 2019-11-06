@@ -164,7 +164,9 @@ bool CAHPInstrInfo::analyzeBranch(MachineBasicBlock &MBB,
 
 unsigned CAHPInstrInfo::removeBranch(MachineBasicBlock &MBB,
                                      int *BytesRemoved) const {
-  assert(!BytesRemoved && "Code size not handled");
+  if (BytesRemoved)
+    *BytesRemoved = 0;
+
   MachineBasicBlock::iterator I = MBB.getLastNonDebugInstr();
   if (I == MBB.end())
     return 0;
@@ -175,6 +177,8 @@ unsigned CAHPInstrInfo::removeBranch(MachineBasicBlock &MBB,
 
   // Remove the branch.
   I->eraseFromParent();
+  if (BytesRemoved)
+    *BytesRemoved += getInstSizeInBytes(*I);
 
   I = MBB.end();
 
@@ -186,6 +190,8 @@ unsigned CAHPInstrInfo::removeBranch(MachineBasicBlock &MBB,
 
   // Remove the branch.
   I->eraseFromParent();
+  if (BytesRemoved)
+    *BytesRemoved += getInstSizeInBytes(*I);
   return 2;
 }
 
@@ -194,7 +200,8 @@ unsigned CAHPInstrInfo::removeBranch(MachineBasicBlock &MBB,
 unsigned CAHPInstrInfo::insertBranch(
     MachineBasicBlock &MBB, MachineBasicBlock *TBB, MachineBasicBlock *FBB,
     ArrayRef<MachineOperand> Cond, const DebugLoc &DL, int *BytesAdded) const {
-  assert(!BytesAdded && "Code size not handled.");
+  if (BytesAdded)
+    *BytesAdded = 0;
 
   // Shouldn't be a fall through.
   assert(TBB && "InsertBranch must not be told to insert a fallthrough");
@@ -203,20 +210,27 @@ unsigned CAHPInstrInfo::insertBranch(
 
   // Unconditional branch.
   if (Cond.empty()) {
-    BuildMI(&MBB, DL, get(CAHP::JS)).addMBB(TBB);
+    MachineInstr &MI = *BuildMI(&MBB, DL, get(CAHP::JS)).addMBB(TBB);
+    if (BytesAdded)
+      *BytesAdded = getInstSizeInBytes(MI);
     return 1;
   }
 
   // Either a one or two-way conditional branch.
   unsigned Opc = Cond[0].getImm();
-  BuildMI(&MBB, DL, get(Opc)).add(Cond[1]).add(Cond[2]).addMBB(TBB);
+  MachineInstr &CondMI =
+      *BuildMI(&MBB, DL, get(Opc)).add(Cond[1]).add(Cond[2]).addMBB(TBB);
+  if (BytesAdded)
+    *BytesAdded += getInstSizeInBytes(CondMI);
 
   // One-way conditional branch.
   if (!FBB)
     return 1;
 
   // Two-way conditional branch.
-  BuildMI(&MBB, DL, get(CAHP::JS)).addMBB(FBB);
+  MachineInstr &MI = *BuildMI(&MBB, DL, get(CAHP::JS)).addMBB(FBB);
+  if (BytesAdded)
+    *BytesAdded += getInstSizeInBytes(MI);
   return 2;
 }
 
@@ -256,4 +270,54 @@ bool CAHPInstrInfo::reverseBranchCondition(
   }
 
   return false;
+}
+
+MachineBasicBlock *
+CAHPInstrInfo::getBranchDestBlock(const MachineInstr &MI) const {
+  assert(MI.getDesc().isBranch() && "Unexpected opcode!");
+  // The branch target is always the last operand.
+  int NumOp = MI.getNumExplicitOperands();
+  return MI.getOperand(NumOp - 1).getMBB();
+}
+
+bool CAHPInstrInfo::isBranchOffsetInRange(unsigned BranchOp,
+                                          int64_t BrOffset) const {
+  switch (BranchOp) {
+  default:
+    llvm_unreachable("Unexpected opcode!");
+
+  case CAHP::BEQ:
+  case CAHP::BNE:
+  case CAHP::BLT:
+  case CAHP::BLE:
+  case CAHP::BLTU:
+  case CAHP::BLEU:
+    return isInt<10>(BrOffset);
+
+  case CAHP::JSAL:
+  case CAHP::JS:
+    return isInt<11>(BrOffset);
+  }
+}
+
+unsigned CAHPInstrInfo::getInstSizeInBytes(const MachineInstr &MI) const {
+  unsigned Opcode = MI.getOpcode();
+
+  switch (Opcode) {
+  default:
+    return get(Opcode).getSize();
+
+  case TargetOpcode::EH_LABEL:
+  case TargetOpcode::IMPLICIT_DEF:
+  case TargetOpcode::KILL:
+  case TargetOpcode::DBG_VALUE:
+    return 0;
+
+  case TargetOpcode::INLINEASM: {
+    const MachineFunction &MF = *MI.getParent()->getParent();
+    const auto &TM = static_cast<const CAHPTargetMachine &>(MF.getTarget());
+    return getInlineAsmLength(MI.getOperand(0).getSymbolName(),
+                              *TM.getMCAsmInfo());
+  }
+  }
 }

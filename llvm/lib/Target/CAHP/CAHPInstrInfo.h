@@ -50,6 +50,13 @@ public:
 
   bool
   reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
+
+  unsigned getInstSizeInBytes(const MachineInstr &MI) const override;
+
+  bool isBranchOffsetInRange(unsigned BranchOpc,
+                             int64_t BrOffset) const override;
+
+  MachineBasicBlock *getBranchDestBlock(const MachineInstr &MI) const override;
 };
 } // namespace llvm
 
