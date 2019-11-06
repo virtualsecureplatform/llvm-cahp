@@ -498,3 +498,21 @@ const char *CAHPTargetLowering::getTargetNodeName(unsigned Opcode) const {
   }
   return nullptr;
 }
+
+std::pair<unsigned, const TargetRegisterClass *>
+CAHPTargetLowering::getRegForInlineAsmConstraint(const TargetRegisterInfo *TRI,
+                                                 StringRef Constraint,
+                                                 MVT VT) const {
+  // First, see if this is a constraint that directly corresponds to a
+  // CAHP register class.
+  if (Constraint.size() == 1) {
+    switch (Constraint[0]) {
+    case 'r':
+      return std::make_pair(0U, &CAHP::GPRRegClass);
+    default:
+      break;
+    }
+  }
+
+  return TargetLowering::getRegForInlineAsmConstraint(TRI, Constraint, VT);
+}
