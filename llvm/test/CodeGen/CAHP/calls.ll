@@ -9,9 +9,7 @@ define i16 @test_call_external(i16 %a) nounwind {
 ; CAHP:       # %bb.0:
 ; CAHP-NEXT:	addi2	sp, -2
 ; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	lui	a1, %hi(external_function)
-; CAHP-NEXT:	addi	a1, a1, %lo(external_function)
-; CAHP-NEXT:	jalr	a1
+; CAHP-NEXT:	jsal	external_function
 ; CAHP-NEXT:	lwsp	ra, 0(sp)
 ; CAHP-NEXT:	addi2	sp, 2
 ; CAHP-NEXT:	jr	ra
@@ -33,9 +31,7 @@ define i16 @test_call_defined(i16 %a) nounwind {
 ; CAHP:       # %bb.0:
 ; CAHP-NEXT:	addi2	sp, -2
 ; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	lui	a1, %hi(defined_function)
-; CAHP-NEXT:	addi	a1, a1, %lo(defined_function)
-; CAHP-NEXT:	jalr	a1
+; CAHP-NEXT:	jsal	defined_function
 ; CAHP-NEXT:	lwsp	ra, 0(sp)
 ; CAHP-NEXT:	addi2	sp, 2
 ; CAHP-NEXT:	jr	ra
@@ -75,10 +71,7 @@ define i16 @test_call_fastcc(i16 %a, i16 %b) nounwind {
 ; CAHP-NEXT:	swsp	ra, 2(sp)
 ; CAHP-NEXT:	swsp	s0, 0(sp)
 ; CAHP-NEXT:	mov	s0, a0
-; CAHP-NEXT:	lui	a0, %hi(fastcc_function)
-; CAHP-NEXT:	addi	a2, a0, %lo(fastcc_function)
-; CAHP-NEXT:	mov	a0, s0
-; CAHP-NEXT:	jalr	a2
+; CAHP-NEXT:	jsal	fastcc_function
 ; CAHP-NEXT:	mov	a0, s0
 ; CAHP-NEXT:	lwsp	s0, 0(sp)
 ; CAHP-NEXT:	lwsp	ra, 2(sp)
