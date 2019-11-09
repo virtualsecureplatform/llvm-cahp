@@ -11,6 +11,7 @@
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCInst.h"
+#include "llvm/MC/MCInstBuilder.h"
 #include "llvm/MC/MCInstrDesc.h"
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
@@ -58,6 +59,11 @@ public:
   unsigned getImmOpValue(const MCInst &MI, unsigned OpNo,
                          SmallVectorImpl<MCFixup> &Fixups,
                          const MCSubtargetInfo &STI) const;
+
+private:
+  void expandHlt(const MCInst &MI, raw_ostream &OS,
+                 SmallVectorImpl<MCFixup> &Fixups,
+                 const MCSubtargetInfo &STI) const;
 };
 } // end anonymous namespace
 
@@ -67,10 +73,26 @@ MCCodeEmitter *llvm::createCAHPMCCodeEmitter(const MCInstrInfo &MCII,
   return new CAHPMCCodeEmitter(Ctx, MCII);
 }
 
+void CAHPMCCodeEmitter::expandHlt(const MCInst &MI, raw_ostream &OS,
+                                  SmallVectorImpl<MCFixup> &Fixups,
+                                  const MCSubtargetInfo &STI) const {
+  // Emit `js 0`
+  MCInst TmpInst = MCInstBuilder(CAHP::JS).addImm(0);
+  uint16_t Bits = getBinaryCodeForInstr(TmpInst, Fixups, STI);
+  support::endian::write<uint16_t>(OS, Bits, support::little);
+}
+
 void CAHPMCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
                                           SmallVectorImpl<MCFixup> &Fixups,
                                           const MCSubtargetInfo &STI) const {
   const MCInstrDesc &Desc = MCII.get(MI.getOpcode());
+
+  if (MI.getOpcode() == CAHP::PseudoHLT) {
+    expandHlt(MI, OS, Fixups, STI);
+    MCNumEmitted += 2;
+    return;
+  }
+
   // Get byte count of instruction.
   unsigned Size = Desc.getSize();
 

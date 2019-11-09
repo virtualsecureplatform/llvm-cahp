@@ -362,6 +362,11 @@ def Select_GPR_Using_CC_GPR
              [(set i16:$dst, (SelectCC GPR:$lhs, GPR:$rhs,
               (i16 imm:$imm), GPR:$src, GPR:$src2))]>;
 
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isCodeGenOnly = 0 in
+def PseudoHLT : Pseudo16<(outs), (ins), []> {
+  let AsmString = "hlt";
+}
+
 // Codegen patterns.
 
 /// FrameIndex calculations
