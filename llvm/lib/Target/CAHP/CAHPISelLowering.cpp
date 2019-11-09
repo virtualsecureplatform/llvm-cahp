@@ -52,6 +52,12 @@ CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
   for (auto VT : {MVT::i1, MVT::i8})
     setOperationAction(ISD::SIGN_EXTEND_INREG, VT, Expand);
 
+  setOperationAction(ISD::MUL, MVT::i16, Expand);
+  setOperationAction(ISD::SMUL_LOHI, MVT::i16, Expand);
+  setOperationAction(ISD::UMUL_LOHI, MVT::i16, Expand);
+  setOperationAction(ISD::MULHS, MVT::i16, Expand);
+  setOperationAction(ISD::MULHU, MVT::i16, Expand);
+
   setBooleanContents(ZeroOrOneBooleanContent);
 
   // Function alignments (log2).
