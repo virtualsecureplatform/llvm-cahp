@@ -43,7 +43,8 @@ static MCOperand LowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym,
     ME = MCBinaryExpr::createAdd(
         ME, MCConstantExpr::create(MO.getOffset(), Ctx), Ctx);
 
-  ME = CAHPMCExpr::create(ME, Kind, Ctx);
+  if (Kind != CAHPMCExpr::VK_CAHP_None)
+    ME = CAHPMCExpr::create(ME, Kind, Ctx);
   return MCOperand::createExpr(ME);
 }
 
