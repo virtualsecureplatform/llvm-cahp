@@ -83,7 +83,13 @@ def simm10_branch : Operand<OtherVT> {
   let EncoderMethod = "getImmOpValue";
 }
 
-def simm11 : Operand<OtherVT> {
+def simm11 : Operand<i16>, ImmLeaf<i16, [{return isInt<11>(Imm);}]> {
+  let ParserMatchClass = SImmAsmOperand<11>;
+  let DecoderMethod = "decodeSImmOperand<11>";
+  let EncoderMethod = "getImmOpValue";
+}
+
+def simm11_branch : Operand<OtherVT> {
   let ParserMatchClass = SImmAsmOperand<11>;
   let DecoderMethod = "decodeSImmOperand<11>";
   let EncoderMethod = "getImmOpValue";
@@ -324,7 +330,7 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
   def JR   : CAHPInst16JR<0b00110, (ins GPR:$rs),     "jr",   "$rs">;
 
   let isBranch = 1, isTerminator = 1, isBarrier = 1 in
-  def JS   : CAHPInst16JI<0b01110, (ins simm11:$imm), "js",   "$imm">;
+  def JS   : CAHPInst16JI<0b01110, (ins simm11_branch:$imm), "js", "$imm">;
 
   let isCall = 1, Defs = [/* RA */ X0] in
   def JSAL : CAHPInst16JI<0b11110, (ins simm11:$imm), "jsal", "$imm">;
@@ -440,9 +446,10 @@ def : BccSwapPat<CC_GEU, BLEU>;
 // condition was calculated elsewhere).
 def : Pat<(brcond GPR:$cond, bb:$imm), (BNE GPR:$cond, (LSI 0), bb:$imm)>;
 
-def : Pat<(br bb:$imm), (JS simm11:$imm)>;
+def : Pat<(br bb:$imm), (JS simm11_branch:$imm)>;
 def : Pat<(Call GPR:$rs), (JALR GPR:$rs)>;
 def : Pat<(Call tglobaladdr:$dst), (JSAL tglobaladdr:$dst)>;
+def : Pat<(Call texternalsym:$dst), (JSAL texternalsym:$dst)>;
 
 // Compress patterns
 
