@@ -21,10 +21,8 @@ define i16 @test() nounwind {
 ; CAHP-NEXT:	sw	s0, -20(fp)
 ; CAHP-NEXT:	sw	s0, -22(fp)
 ; CAHP-NEXT:	sw	s0, -24(fp)
-; CAHP-NEXT:	lui	a0, %hi(test1)
-; CAHP-NEXT:	addi	a1, a0, %lo(test1)
 ; CAHP-NEXT:	addi	a0, fp, -22
-; CAHP-NEXT:	jalr	a1
+; CAHP-NEXT:	jsal	test1
 ; CAHP-NEXT:	mov	a0, s0
 ; CAHP-NEXT:	addi	sp, fp, -24
 ; CAHP-NEXT:	lwsp	s0, 18(sp)
