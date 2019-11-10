@@ -53,6 +53,9 @@ void CAHP::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   CmdArgs.push_back(
       Args.MakeArgString("--script=" + ToolChain.GetFilePath("cahp.lds")));
 
+  // To make the output as small as possible.
+  CmdArgs.push_back("--nmagic");
+
   CmdArgs.push_back("-o");
   CmdArgs.push_back(Output.getFilename());
   C.addCommand(llvm::make_unique<Command>(JA, *this, Args.MakeArgString(Linker),
