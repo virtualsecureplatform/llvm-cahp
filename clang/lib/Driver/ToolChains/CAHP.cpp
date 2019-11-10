@@ -14,24 +14,41 @@ using namespace clang::driver::tools;
 using namespace clang;
 using namespace llvm::opt;
 
+CAHPToolChain::CAHPToolChain(const Driver &D, const llvm::Triple &Triple,
+                             const llvm::opt::ArgList &Args)
+    : Generic_ELF(D, Triple, Args) {
+  if (!D.SysRoot.empty())
+    getFilePaths().push_back(D.SysRoot);
+}
+
 Tool *CAHPToolChain::buildLinker() const {
   return new tools::CAHP::Linker(*this);
 }
 
 void CAHP::Linker::ConstructJob(Compilation &C, const JobAction &JA,
-                                 const InputInfo &Output,
-                                 const InputInfoList &Inputs,
-                                 const ArgList &Args,
-                                 const char *LinkingOutput) const {
+                                const InputInfo &Output,
+                                const InputInfoList &Inputs,
+                                const ArgList &Args,
+                                const char *LinkingOutput) const {
   const ToolChain &ToolChain = getToolChain();
+  const Driver &D = ToolChain.getDriver();
   ArgStringList CmdArgs;
 
+  if (!D.SysRoot.empty())
+    CmdArgs.push_back(Args.MakeArgString("--sysroot=" + D.SysRoot));
   std::string Linker = getToolChain().GetProgramPath(getShortName());
 
-  AddLinkerInputs(ToolChain, Inputs, Args, CmdArgs, JA);
+  bool WantCRTs =
+      !Args.hasArg(options::OPT_nostdlib, options::OPT_nostartfiles);
 
-  // The beginning of .text section should be placed address 0.
-  CmdArgs.push_back("-Ttext=0");
+  if (WantCRTs) {
+    CmdArgs.push_back(Args.MakeArgString(ToolChain.GetFilePath("crt0.o")));
+  }
+
+  Args.AddAllArgs(CmdArgs, options::OPT_L);
+  ToolChain.AddFilePathLibArgs(Args, CmdArgs);
+
+  AddLinkerInputs(ToolChain, Inputs, Args, CmdArgs, JA);
 
   CmdArgs.push_back("-o");
   CmdArgs.push_back(Output.getFilename());
