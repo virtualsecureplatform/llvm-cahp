@@ -50,6 +50,11 @@ void CAHP::Linker::ConstructJob(Compilation &C, const JobAction &JA,
 
   AddLinkerInputs(ToolChain, Inputs, Args, CmdArgs, JA);
 
+  if (!Args.hasArg(options::OPT_nostdlib) &&
+      !Args.hasArg(options::OPT_nodefaultlibs)) {
+    CmdArgs.push_back("-lc");
+  }
+
   CmdArgs.push_back(
       Args.MakeArgString("--script=" + ToolChain.GetFilePath("cahp.lds")));
 
