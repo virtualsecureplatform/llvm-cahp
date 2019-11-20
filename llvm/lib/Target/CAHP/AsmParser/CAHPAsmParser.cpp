@@ -192,9 +192,11 @@ public:
     else
       IsValid = CAHPAsmParser::classifySymbolRef(getImm(), VK, Imm);
 
-    return IsValid &&
-           (VK == CAHPMCExpr::VK_CAHP_None || VK == CAHPMCExpr::VK_CAHP_LO);
+    return IsValid && ((IsConstantImm && VK == CAHPMCExpr::VK_CAHP_None) ||
+                       VK == CAHPMCExpr::VK_CAHP_LO);
   }
+
+  bool isBareSImm10() const { return isBareImm(isInt<10>); }
 
   bool isSImm11() const { return isBareImm(isInt<11>); }
 
@@ -364,9 +366,14 @@ bool CAHPAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
 
     CASE_MATCH_INVALID_UIMM(4);
     CASE_MATCH_INVALID_SIMM(6);
-    CASE_MATCH_INVALID_SIMM(10);
     CASE_MATCH_INVALID_SIMM(11);
     CASE_MATCH_INVALID_UIMM_LSB0(7);
+
+  case Match_InvalidSImm10:
+    return generateImmOutOfRangeError(
+        Operands, ErrorInfo, -(1 << 9), (1 << 9) - 1,
+        "operand must be a symbol with %lo modifier or an integer in "
+        "the range");
   }
 
   llvm_unreachable("Unknown match type detected!");
