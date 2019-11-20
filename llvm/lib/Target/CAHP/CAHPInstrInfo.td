@@ -78,7 +78,7 @@ def simm10 : Operand<i16>, ImmLeaf<i16, [{return isInt<10>(Imm);}]> {
 }
 
 def simm10_branch : Operand<OtherVT> {
-  let ParserMatchClass = SImmAsmOperand<10>;
+  let ParserMatchClass = ImmAsmOperand<"BareS", 10, "">;
   let DecoderMethod = "decodeSImmOperand<10>";
   let EncoderMethod = "getImmOpValue";
 }

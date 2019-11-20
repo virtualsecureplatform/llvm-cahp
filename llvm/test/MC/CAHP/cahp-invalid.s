@@ -1,17 +1,18 @@
 # RUN: not llvm-mc -triple cahp < %s 2>&1 | FileCheck %s
 
 # Out of range immediates
-lw a4, 512(a2) # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
-lb a4, -513(a2) # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
-lbu a4, -513(a2) # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-512, 511]
-sw a4, -513(a2) # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
-sb a4, 512(a2) # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
-li t0, -513 # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
-li s0, 512 # CHECK: :[[@LINE]]:8: error: immediate must be an integer in the range [-512, 511]
-addi a0, a1, 512 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-512, 511]
-addi a0, a1, -513 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-512, 511]
-andi a0, a1, 512 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-512, 511]
-xori a0, a1, -513 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [-512, 511]
+#operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+lw a4, 512(a2) # CHECK: :[[@LINE]]:8: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+lb a4, -513(a2) # CHECK: :[[@LINE]]:8: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+lbu a4, -513(a2) # CHECK: :[[@LINE]]:9: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+sw a4, -513(a2) # CHECK: :[[@LINE]]:8: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+sb a4, 512(a2) # CHECK: :[[@LINE]]:8: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+li t0, -513 # CHECK: :[[@LINE]]:8: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+li s0, 512 # CHECK: :[[@LINE]]:8: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+addi a0, a1, 512 # CHECK: :[[@LINE]]:14: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+addi a0, a1, -513 # CHECK: :[[@LINE]]:14: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+andi a0, a1, 512 # CHECK: :[[@LINE]]:14: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+xori a0, a1, -513 # CHECK: :[[@LINE]]:14: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
 lsli a0, a1, 16 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
 asri a0, a1, -1 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
 lwsp a4, 128(sp) # CHECK: :[[@LINE]]:10: error: immediate must be a multiple of 2 bytes in the range [0, 126]
@@ -45,7 +46,8 @@ mov x13 # CHECK: :[[@LINE]]:1: error: too few operands for instruction
 
 # Illegal operand modifier
 lsli a0, a0, %lo(1) # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
-ori a0, a1, %hi(foo) # CHECK: :[[@LINE]]:13: error: immediate must be an integer in the range [-512, 511]
+ori a0, a1, %hi(foo) # CHECK: :[[@LINE]]:13: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
 lui a0, %lo(1) # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
 addi t0, sp, %modifer(255) # CHECK: :[[@LINE]]:15: error: unrecognized operand modifier
 addi t1, %lo(t2), 1 # CHECK: :[[@LINE]]:10: error: invalid operand for instruction
+addi a0, a1, foo # CHECK: :[[@LINE]]:14: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
