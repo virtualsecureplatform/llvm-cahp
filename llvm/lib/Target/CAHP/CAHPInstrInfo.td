@@ -41,7 +41,7 @@ class UImmAsmOperand<int width, string suffix = "">
     : ImmAsmOperand<"U", width, suffix> {
 }
 
-def uimm4 : Operand<i16>, ImmLeaf<i16, [{return isUInt<16>(Imm);}]> {
+def uimm4 : Operand<i16>, ImmLeaf<i16, [{return isUInt<4>(Imm);}]> {
   let ParserMatchClass = UImmAsmOperand<4>;
   let DecoderMethod = "decodeUImmOperand<4>";
   let EncoderMethod = "getImmOpValue";
