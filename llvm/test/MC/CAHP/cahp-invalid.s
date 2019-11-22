@@ -17,10 +17,10 @@ lsli a0, a1, 16 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in t
 asri a0, a1, -1 # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
 lwsp a4, 128(sp) # CHECK: :[[@LINE]]:10: error: immediate must be a multiple of 2 bytes in the range [0, 126]
 swsp a3, -2(sp) # CHECK: :[[@LINE]]:10: error: immediate must be a multiple of 2 bytes in the range [0, 126]
-lsi a5, 32 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
-lsi a5, -33 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
-lui a5, 32 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
-lui a5, -33 # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
+lsi a5, 32 # CHECK: :[[@LINE]]:9: error: operand must be a symbol with %hi modifier or an integer in the range [-32, 31]
+lsi a5, -33 # CHECK: :[[@LINE]]:9: error: operand must be a symbol with %hi modifier or an integer in the range [-32, 31]
+lui a5, 32 # CHECK: :[[@LINE]]:9: error: operand must be a symbol with %hi modifier or an integer in the range [-32, 31]
+lui a5, -33 # CHECK: :[[@LINE]]:9: error: operand must be a symbol with %hi modifier or an integer in the range [-32, 31]
 js 1024 # CHECK: :[[@LINE]]:4: error: immediate must be an integer in the range [-1024, 1023]
 js -1025 # CHECK: :[[@LINE]]:4: error: immediate must be an integer in the range [-1024, 1023]
 
@@ -47,7 +47,8 @@ mov x13 # CHECK: :[[@LINE]]:1: error: too few operands for instruction
 # Illegal operand modifier
 lsli a0, a0, %lo(1) # CHECK: :[[@LINE]]:14: error: immediate must be an integer in the range [0, 15]
 ori a0, a1, %hi(foo) # CHECK: :[[@LINE]]:13: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
-lui a0, %lo(1) # CHECK: :[[@LINE]]:9: error: immediate must be an integer in the range [-32, 31]
+lui a0, %lo(1) # CHECK: :[[@LINE]]:9: error: operand must be a symbol with %hi modifier or an integer in the range [-32, 31]
 addi t0, sp, %modifer(255) # CHECK: :[[@LINE]]:15: error: unrecognized operand modifier
 addi t1, %lo(t2), 1 # CHECK: :[[@LINE]]:10: error: invalid operand for instruction
 addi a0, a1, foo # CHECK: :[[@LINE]]:14: error: operand must be a symbol with %lo modifier or an integer in the range [-512, 511]
+addi2 a0, foo # CHECK: :[[@LINE]]:11: error: operand must be a symbol with %hi modifier or an integer in the range [-32, 31]
