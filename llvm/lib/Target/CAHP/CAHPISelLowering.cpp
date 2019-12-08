@@ -292,21 +292,36 @@ SDValue CAHPTargetLowering::LowerFormalArguments(
   CCInfo.AnalyzeFormalArguments(Ins, CC_CAHP);
 
   for (auto &VA : ArgLocs) {
-    if (!VA.isRegLoc())
-      report_fatal_error("Defined with too many args");
+    SDValue ArgVal;
+    if (VA.isRegLoc()) {
+      // Arguments passed in registers.
+      EVT RegVT = VA.getLocVT();
+      if (RegVT != MVT::i16) {
+        LLVM_DEBUG(dbgs() << "LowerFormalArguments Unhandled argument type: "
+                          << RegVT.getEVTString() << "\n");
+        report_fatal_error("unhandled argument type");
+      }
+      const unsigned VReg = RegInfo.createVirtualRegister(&CAHP::GPRRegClass);
+      RegInfo.addLiveIn(VA.getLocReg(), VReg);
+      ArgVal = DAG.getCopyFromReg(Chain, DL, VReg, RegVT);
+    } else {
+      assert(VA.isMemLoc());
+      assert(VA.getValVT() == MVT::i16);
+      assert(VA.getLocVT() == MVT::i16);
 
-    // Arguments passed in registers.
-    EVT RegVT = VA.getLocVT();
-    if (RegVT != MVT::i16) {
-      LLVM_DEBUG(dbgs() << "LowerFormalArguments Unhandled argument type: "
-                        << RegVT.getEVTString() << "\n");
-      report_fatal_error("unhandled argument type");
+      // Create the frame index object for this incoming parameter.
+      int FI =
+          MF.getFrameInfo().CreateFixedObject(2, VA.getLocMemOffset(), true);
+
+      // Create the SelectionDAG nodes corresponding to a load from this
+      // parameter.
+      SDValue FIN = DAG.getFrameIndex(FI, MVT::i16);
+      ArgVal = DAG.getLoad(
+          VA.getLocVT(), DL, Chain, FIN,
+          MachinePointerInfo::getFixedStack(DAG.getMachineFunction(), FI));
     }
-    const unsigned VReg = RegInfo.createVirtualRegister(&CAHP::GPRRegClass);
-    RegInfo.addLiveIn(VA.getLocReg(), VReg);
-    SDValue ArgIn = DAG.getCopyFromReg(Chain, DL, VReg, RegVT);
 
-    InVals.push_back(ArgIn);
+    InVals.push_back(ArgVal);
   }
   return Chain;
 }
@@ -351,6 +366,8 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
 
   // Copy argument values to their designated locations.
   SmallVector<std::pair<unsigned, SDValue>, 8> RegsToPass;
+  SmallVector<SDValue, 8> MemOpChains;
+  SDValue StackPtr;
   for (unsigned I = 0, E = ArgLocs.size(); I != E; ++I) {
     CCValAssign &VA = ArgLocs[I];
     SDValue ArgValue = OutVals[I];
@@ -369,9 +386,23 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
       RegsToPass.push_back(std::make_pair(VA.getLocReg(), ArgValue));
     } else {
       assert(VA.isMemLoc() && "Argument not register or memory");
-      report_fatal_error("Passing arguments via the stack not yet implemented");
+
+      if (!StackPtr.getNode())
+        StackPtr = DAG.getCopyFromReg(Chain, DL, CAHP::X1, MVT::i16);
+
+      SDValue Address =
+          DAG.getNode(ISD::ADD, DL, MVT::i16, StackPtr,
+                      DAG.getIntPtrConstant(VA.getLocMemOffset(), DL));
+
+      MemOpChains.push_back(
+          DAG.getStore(Chain, DL, ArgValue, Address, MachinePointerInfo()));
     }
   }
+
+  // Transform all store nodes into one single node because all store nodes are
+  // independent of each other.
+  if (!MemOpChains.empty())
+    Chain = DAG.getNode(ISD::TokenFactor, DL, MVT::Other, MemOpChains);
 
   SDValue Glue;
 
