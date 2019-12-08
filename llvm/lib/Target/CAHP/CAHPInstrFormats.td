@@ -93,8 +93,8 @@ class CAHPInst24R<bits<8> opcode, dag outs, dag ins, string opcodestr, string ar
   let Inst{7-0} = opcode;
 }
 
-// 24-bit I-instruction format.
-class CAHPInst24I<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
+// 24-bit I-instruction format for 10bit immediate.
+class CAHPInst24I_10<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
 : CAHPInst24<outs, ins, opcodestr, argstr> {
   bits<4> rd;
   bits<4> rs1;
@@ -104,6 +104,21 @@ class CAHPInst24I<bits<6> opcode, dag outs, dag ins, string opcodestr, string ar
   let Inst{15-12} = rs1;
   let Inst{11-8} = rd;
   let Inst{7-6} = imm{9-8};
+  let Inst{5-0} = opcode;
+}
+
+// 24-bit I-instruction format for 4bit immediate.
+class CAHPInst24I_4<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPInst24<outs, ins, opcodestr, argstr> {
+  bits<4> rd;
+  bits<4> rs1;
+  bits<4> imm;
+
+  let Inst{23-20} = 0;
+  let Inst{19-16} = imm{3-0};
+  let Inst{15-12} = rs1;
+  let Inst{11-8} = rd;
+  let Inst{7-6} = 0;
   let Inst{5-0} = opcode;
 }
 
@@ -149,8 +164,8 @@ class CAHPInst16R<bits<8> opcode, dag outs, dag ins, string opcodestr, string ar
   let Inst{7-0} = opcode;
 }
 
-// 16-bit I-instruction format.
-class CAHPInst16I<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
+// 16-bit I-instruction format for 6bit immediate.
+class CAHPInst16I_6<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
 : CAHPInst16<outs, ins, opcodestr, argstr> {
   bits<4> rd;
   bits<6> imm;
@@ -158,6 +173,18 @@ class CAHPInst16I<bits<6> opcode, dag outs, dag ins, string opcodestr, string ar
   let Inst{15-12} = imm{3-0};
   let Inst{11-8} = rd;
   let Inst{7-6} = imm{5-4};
+  let Inst{5-0} = opcode;
+}
+
+// 16-bit I-instruction format for 4bit immediate.
+class CAHPInst16I_4<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPInst16<outs, ins, opcodestr, argstr> {
+  bits<4> rd;
+  bits<4> imm;
+
+  let Inst{15-12} = imm{3-0};
+  let Inst{11-8} = rd;
+  let Inst{7-6} = 0;
   let Inst{5-0} = opcode;
 }
 
