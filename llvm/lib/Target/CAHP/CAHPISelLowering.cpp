@@ -356,10 +356,27 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
   // Get a count of how many bytes are to be pushed on the stack.
   unsigned NumBytes = ArgCCInfo.getNextStackOffset();
 
-  for (auto &Arg : Outs) {
-    if (!Arg.Flags.isByVal())
+  // Create local copies for byval args
+  SmallVector<SDValue, 8> ByValArgs;
+  for (unsigned i = 0, e = Outs.size(); i != e; ++i) {
+    ISD::ArgFlagsTy Flags = Outs[i].Flags;
+    if (!Flags.isByVal())
       continue;
-    report_fatal_error("Passing arguments byval not yet implemented");
+
+    SDValue Arg = OutVals[i];
+    unsigned Size = Flags.getByValSize();
+    unsigned Align = Flags.getByValAlign();
+
+    int FI = MF.getFrameInfo().CreateStackObject(Size, Align,
+                                                 /*isSillSlot=*/false);
+    SDValue FIPtr = DAG.getFrameIndex(FI, MVT::i16);
+    SDValue SizeNode = DAG.getConstant(Size, DL, MVT::i16);
+
+    Chain = DAG.getMemcpy(Chain, DL, FIPtr, Arg, SizeNode, Align,
+                          /*IsVolatile=*/false,
+                          /*AlwaysInline=*/false, CLI.IsTailCall,
+                          MachinePointerInfo(), MachinePointerInfo());
+    ByValArgs.push_back(FIPtr);
   }
 
   Chain = DAG.getCALLSEQ_START(Chain, NumBytes, 0, CLI.DL);
@@ -368,9 +385,10 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
   SmallVector<std::pair<unsigned, SDValue>, 8> RegsToPass;
   SmallVector<SDValue, 8> MemOpChains;
   SDValue StackPtr;
-  for (unsigned I = 0, E = ArgLocs.size(); I != E; ++I) {
+  for (unsigned I = 0, J = 0, E = ArgLocs.size(); I != E; ++I) {
     CCValAssign &VA = ArgLocs[I];
     SDValue ArgValue = OutVals[I];
+    ISD::ArgFlagsTy Flags = Outs[I].Flags;
 
     // Promote the value if needed.
     // For now, only handle fully promoted arguments.
@@ -380,6 +398,9 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
     default:
       llvm_unreachable("Unknown loc info!");
     }
+
+    if (Flags.isByVal())
+      ArgValue = ByValArgs[J++];
 
     if (VA.isRegLoc()) {
       // Queue up the argument copies and emit them at the end.
