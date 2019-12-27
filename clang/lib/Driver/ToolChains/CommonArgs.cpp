@@ -9,6 +9,7 @@
 #include "CommonArgs.h"
 #include "Arch/AArch64.h"
 #include "Arch/ARM.h"
+#include "Arch/CAHP.h"
 #include "Arch/Mips.h"
 #include "Arch/PPC.h"
 #include "Arch/SystemZ.h"
@@ -335,6 +336,9 @@ std::string tools::getCPUName(const ArgList &Args, const llvm::Triple &T,
   case llvm::Triple::wasm32:
   case llvm::Triple::wasm64:
     return getWebAssemblyTargetCPU(Args);
+
+  case llvm::Triple::cahp:
+    return cahp::getCAHPTargetCPU(Args);
   }
 }
 
