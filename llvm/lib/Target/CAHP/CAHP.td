@@ -8,6 +8,7 @@ include "llvm/Target/Target.td"
 // Register file, calling conventions, instruction descriptions.
 //===----------------------------------------------------------------------===//
 
+include "CAHPSchedule.td"
 include "CAHPRegisterInfo.td"
 include "CAHPCallingConv.td"
 include "CAHPInstrInfo.td"
@@ -16,7 +17,7 @@ include "CAHPInstrInfo.td"
 // CAHP processors supported.
 //===----------------------------------------------------------------------===//
 
-def : ProcessorModel<"generic-cahp", NoSchedModel, []>;
+def : ProcessorModel<"generic", NoSchedModel, []>;
 
 //===----------------------------------------------------------------------===//
 // Define the CAHP target.

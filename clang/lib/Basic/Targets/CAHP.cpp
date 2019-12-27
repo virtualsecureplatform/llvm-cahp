@@ -26,8 +26,20 @@ ArrayRef<TargetInfo::GCCRegAlias> CAHPTargetInfo::getGCCRegAliases() const {
 }
 
 void CAHPTargetInfo::getTargetDefines(const LangOptions &Opts,
-                                       MacroBuilder &Builder) const {
+                                      MacroBuilder &Builder) const {
 
   Builder.defineMacro("__cahp__");
   Builder.defineMacro("__cahpv3__");
+}
+
+bool CAHPTargetInfo::isValidCPUName(StringRef Name) const {
+  if (Name == "generic")
+    return true;
+
+  CPUKind CPU = llvm::StringSwitch<CPUKind>(Name).Default(CK_NONE);
+  return CPU != CK_NONE;
+}
+
+bool CAHPTargetInfo::setCPU(const std::string &Name) {
+  return isValidCPUName(Name);
 }
