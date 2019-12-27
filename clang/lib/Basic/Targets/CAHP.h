@@ -15,8 +15,11 @@ namespace targets {
 
 // CAHP Target
 class LLVM_LIBRARY_VISIBILITY CAHPTargetInfo : public TargetInfo {
-protected:
-  std::string ABI;
+  // Class for CAHP.
+  // The CPU profiles supported by the CAHP backend
+  enum CPUKind {
+    CK_NONE,
+  };
 
 public:
   CAHPTargetInfo(const llvm::Triple &Triple, const TargetOptions &)
@@ -61,6 +64,9 @@ public:
 
   void getTargetDefines(const LangOptions &Opts,
                         MacroBuilder &Builder) const override;
+
+  bool isValidCPUName(StringRef Name) const override;
+  bool setCPU(const std::string &Name) override;
 
   ArrayRef<Builtin::Info> getTargetBuiltins() const override { return None; }
 
