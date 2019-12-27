@@ -175,7 +175,7 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in {
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isMoveImm = 1 in
-def LI  : CAHPInst24MLoad <0b110101, (outs GPR:$rd), (ins simm10:$imm),
+def LI  : CAHPInst24MLoadI <0b110101, (outs GPR:$rd), (ins simm10:$imm),
                            "li", "$rd, $imm"> {
   let rs = 0;
 }
@@ -244,7 +244,7 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 0,
 // 16-bit M-instructions.
 
 let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in
-def LWSP : CAHPInst16Load <0b010100, (outs GPR:$rd), (ins SP:$rs, uimm7_lsb0:$imm),
+def LWSP : CAHPInst16MLoad <0b010100, (outs GPR:$rd), (ins SP:$rs, uimm7_lsb0:$imm),
                            "lwsp", "$rd, ${imm}(${rs})"> {
   bits<7> imm;
   let Inst{15-12} = imm{4-1};
@@ -252,7 +252,7 @@ def LWSP : CAHPInst16Load <0b010100, (outs GPR:$rd), (ins SP:$rs, uimm7_lsb0:$im
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
-def SWSP : CAHPInst16Store<0b011100, (outs), (ins GPR:$rs, SP:$rd, uimm7_lsb0:$imm),
+def SWSP : CAHPInst16MStore<0b011100, (outs), (ins GPR:$rs, SP:$rd, uimm7_lsb0:$imm),
                            "swsp", "$rs, ${imm}(${rd})"> {
   bits<7> imm;
   let Inst{15-12} = imm{4-1};
@@ -260,7 +260,7 @@ def SWSP : CAHPInst16Store<0b011100, (outs), (ins GPR:$rs, SP:$rd, uimm7_lsb0:$i
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isMoveImm = 1 in
-def LSI  : CAHPInst16Load <0b110100, (outs GPR:$rd), (ins simm6:$imm),
+def LSI  : CAHPInst16MLoadI <0b110100, (outs GPR:$rd), (ins simm6:$imm),
                            "lsi",  "$rd, $imm"> {
   bits<6> imm;
   let Inst{15-12} = imm{3-0};
@@ -268,7 +268,7 @@ def LSI  : CAHPInst16Load <0b110100, (outs GPR:$rd), (ins simm6:$imm),
 }
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0, isMoveImm = 1 in
-def LUI  : CAHPInst16Load <0b000100, (outs GPR:$rd), (ins simm6:$imm),
+def LUI  : CAHPInst16MLoadI <0b000100, (outs GPR:$rd), (ins simm6:$imm),
                            "lui",  "$rd, $imm"> {
   bits<6> imm;
   let Inst{15-12} = imm{3-0};

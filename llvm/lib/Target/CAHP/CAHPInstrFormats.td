@@ -54,7 +54,20 @@ class Pseudo24<dag outs, dag ins, list<dag> pattern>
 
 // 24-bit M-instruction format.
 class CAHPInst24MLoad<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
-: CAHPInst24<outs, ins, opcodestr, argstr> {
+: CAHPInst24<outs, ins, opcodestr, argstr>, Sched<[WriteLDST]> {
+  bits<4> rd;
+  bits<4> rs;
+  bits<10> imm;
+
+  let Inst{23-16} = imm{7-0};
+  let Inst{15-12} = rs;
+  let Inst{11-8} = rd;
+  let Inst{7-6} = imm{9-8};
+  let Inst{5-0} = opcode;
+}
+
+class CAHPInst24MLoadI<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPInst24<outs, ins, opcodestr, argstr>, Sched<[WriteALU]> {
   bits<4> rd;
   bits<4> rs;
   bits<10> imm;
@@ -67,7 +80,7 @@ class CAHPInst24MLoad<bits<6> opcode, dag outs, dag ins, string opcodestr, strin
 }
 
 class CAHPInst24MStore<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
-: CAHPInst24<outs, ins, opcodestr, argstr> {
+: CAHPInst24<outs, ins, opcodestr, argstr>, Sched<[WriteLDST]> {
   bits<4> rs;
   bits<4> rd;
   bits<10> imm;
@@ -81,7 +94,7 @@ class CAHPInst24MStore<bits<6> opcode, dag outs, dag ins, string opcodestr, stri
 
 // 24-bit R-instruction format.
 class CAHPInst24R<bits<8> opcode, dag outs, dag ins, string opcodestr, string argstr>
-: CAHPInst24<outs, ins, opcodestr, argstr> {
+: CAHPInst24<outs, ins, opcodestr, argstr>, Sched<[WriteALU]> {
   bits<4> rd;
   bits<4> rs1;
   bits<4> rs2;
@@ -95,7 +108,7 @@ class CAHPInst24R<bits<8> opcode, dag outs, dag ins, string opcodestr, string ar
 
 // 24-bit I-instruction format for 10bit immediate.
 class CAHPInst24I_10<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
-: CAHPInst24<outs, ins, opcodestr, argstr> {
+: CAHPInst24<outs, ins, opcodestr, argstr>, Sched<[WriteALU]> {
   bits<4> rd;
   bits<4> rs1;
   bits<10> imm;
@@ -109,7 +122,7 @@ class CAHPInst24I_10<bits<6> opcode, dag outs, dag ins, string opcodestr, string
 
 // 24-bit I-instruction format for 4bit immediate.
 class CAHPInst24I_4<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
-: CAHPInst24<outs, ins, opcodestr, argstr> {
+: CAHPInst24<outs, ins, opcodestr, argstr>, Sched<[WriteALU]> {
   bits<4> rd;
   bits<4> rs1;
   bits<4> imm;
@@ -137,16 +150,24 @@ class CAHPInst24J<bits<6> opcode, dag ins, string opcodestr, string argstr>
 }
 
 // 16-bit M-instruction format.
-class CAHPInst16Load<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
-: CAHPInst16<outs, ins, opcodestr, argstr> {
+class CAHPInst16MLoad<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPInst16<outs, ins, opcodestr, argstr>, Sched<[WriteLDST]> {
   bits<4> rd;
 
   let Inst{11-8} = rd;
   let Inst{5-0} = opcode;
 }
 
-class CAHPInst16Store<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
-: CAHPInst16<outs, ins, opcodestr, argstr> {
+class CAHPInst16MLoadI<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPInst16<outs, ins, opcodestr, argstr>, Sched<[WriteALU]> {
+  bits<4> rd;
+
+  let Inst{11-8} = rd;
+  let Inst{5-0} = opcode;
+}
+
+class CAHPInst16MStore<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPInst16<outs, ins, opcodestr, argstr>, Sched<[WriteLDST]> {
   bits<4> rs;
 
   let Inst{11-8} = rs;
@@ -155,7 +176,7 @@ class CAHPInst16Store<bits<6> opcode, dag outs, dag ins, string opcodestr, strin
 
 // 16-bit R-instruction format.
 class CAHPInst16R<bits<8> opcode, dag outs, dag ins, string opcodestr, string argstr>
-: CAHPInst16<outs, ins, opcodestr, argstr> {
+: CAHPInst16<outs, ins, opcodestr, argstr>, Sched<[WriteALU]> {
   bits<4> rd;
   bits<4> rs;
 
@@ -166,7 +187,7 @@ class CAHPInst16R<bits<8> opcode, dag outs, dag ins, string opcodestr, string ar
 
 // 16-bit I-instruction format for 6bit immediate.
 class CAHPInst16I_6<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
-: CAHPInst16<outs, ins, opcodestr, argstr> {
+: CAHPInst16<outs, ins, opcodestr, argstr>, Sched<[WriteALU]> {
   bits<4> rd;
   bits<6> imm;
 
@@ -178,7 +199,7 @@ class CAHPInst16I_6<bits<6> opcode, dag outs, dag ins, string opcodestr, string 
 
 // 16-bit I-instruction format for 4bit immediate.
 class CAHPInst16I_4<bits<6> opcode, dag outs, dag ins, string opcodestr, string argstr>
-: CAHPInst16<outs, ins, opcodestr, argstr> {
+: CAHPInst16<outs, ins, opcodestr, argstr>, Sched<[WriteALU]> {
   bits<4> rd;
   bits<4> imm;
 
