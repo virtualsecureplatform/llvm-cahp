@@ -9,6 +9,7 @@
 #include "CommonArgs.h"
 #include "Arch/AArch64.h"
 #include "Arch/ARM.h"
+#include "Arch/CAHP.h"
 #include "Arch/CSKY.h"
 #include "Arch/LoongArch.h"
 #include "Arch/M68k.h"
@@ -615,6 +616,9 @@ std::string tools::getCPUName(const Driver &D, const ArgList &Args,
   case llvm::Triple::wasm32:
   case llvm::Triple::wasm64:
     return std::string(getWebAssemblyTargetCPU(Args));
+
+  case llvm::Triple::cahp:
+    return cahp::getCAHPTargetCPU(Args);
 
   case llvm::Triple::loongarch32:
   case llvm::Triple::loongarch64:
