@@ -22,7 +22,7 @@ CAHPSubtarget &CAHPSubtarget::initializeSubtargetDependencies(StringRef CPU,
   // Determine default and user-specified characteristics
   std::string CPUName = CPU;
   if (CPUName.empty())
-    CPUName = "generic-cahp";
+    CPUName = "generic";
   ParseSubtargetFeatures(CPUName, FS);
   return *this;
 }
