@@ -7,9 +7,10 @@
 define i16 @lb(i8 *%a) nounwind {
 ; CAHP-LABEL: lb:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:    lb a1, 0(a0)
-; CAHP-NEXT:    lb a0, 1(a0)
-; CAHP-NEXT:    jr ra
+; CAHP-NEXT:	lb	a1, 1(a0)
+; CAHP-NEXT:	lb	a0, 0(a0)
+; CAHP-NEXT:	mov	a0, a1
+; CAHP-NEXT:	jr	ra
   %1 = getelementptr i8, i8* %a, i16 1
   %2 = load i8, i8* %1
   %3 = sext i8 %2 to i16
@@ -21,9 +22,10 @@ define i16 @lb(i8 *%a) nounwind {
 define i16 @lw(i16 *%a) nounwind {
 ; CAHP-LABEL: lw:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:    lw a1, 0(a0)
-; CAHP-NEXT:    lw a0, 6(a0)
-; CAHP-NEXT:    jr ra
+; CAHP-NEXT:	lw	a1, 6(a0)
+; CAHP-NEXT:	lw	a0, 0(a0)
+; CAHP-NEXT:	mov	a0, a1
+; CAHP-NEXT:	jr	ra
   %1 = getelementptr i16, i16* %a, i16 3
   %2 = load i16, i16* %1
   %3 = load volatile i16, i16* %a
@@ -33,10 +35,10 @@ define i16 @lw(i16 *%a) nounwind {
 define i16 @lbu(i8 *%a) nounwind {
 ; CAHP-LABEL: lbu:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:    lbu a1, 0(a0)
-; CAHP-NEXT:    lbu a0, 4(a0)
-; CAHP-NEXT:    add2 a0, a1
-; CAHP-NEXT:    jr ra
+; CAHP-NEXT:	lbu	a1, 4(a0)
+; CAHP-NEXT:	lbu	a0, 0(a0)
+; CAHP-NEXT:	add2	a0, a1
+; CAHP-NEXT:	jr	ra
   %1 = getelementptr i8, i8* %a, i16 4
   %2 = load i8, i8* %1
   %3 = zext i8 %2 to i16
@@ -51,8 +53,8 @@ define i16 @lbu(i8 *%a) nounwind {
 define void @sb(i8 *%a, i8 %b) nounwind {
 ; CAHP-LABEL: sb:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:    sb a1, 6(a0)
 ; CAHP-NEXT:    sb a1, 0(a0)
+; CAHP-NEXT:    sb a1, 6(a0)
 ; CAHP-NEXT:    jr ra
   store i8 %b, i8* %a
   %1 = getelementptr i8, i8* %a, i16 6
@@ -63,8 +65,8 @@ define void @sb(i8 *%a, i8 %b) nounwind {
 define void @sw(i16 *%a, i16 %b) nounwind {
 ; CAHP-LABEL: sw:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:    sw a1, 16(a0)
 ; CAHP-NEXT:    sw a1, 0(a0)
+; CAHP-NEXT:    sw a1, 16(a0)
 ; CAHP-NEXT:    jr ra
   store i16 %b, i16* %a
   %1 = getelementptr i16, i16* %a, i16 8
@@ -76,11 +78,11 @@ define void @sw(i16 *%a, i16 %b) nounwind {
 define i16 @load_sext_zext_anyext_i1(i1 *%a) nounwind {
 ; CAHP-LABEL: load_sext_zext_anyext_i1:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:    lb a1, 0(a0)
-; CAHP-NEXT:    lbu a1, 1(a0)
-; CAHP-NEXT:    lbu a0, 2(a0)
-; CAHP-NEXT:    sub2 a0, a1
-; CAHP-NEXT:    jr ra
+; CAHP-NEXT:	lbu	a1, 1(a0)
+; CAHP-NEXT:	lbu	a2, 2(a0)
+; CAHP-NEXT:	lb	a0, 0(a0)
+; CAHP-NEXT:	sub	a0, a2, a1
+; CAHP-NEXT:	jr	ra
   ; sextload i1
   %1 = getelementptr i1, i1* %a, i16 1
   %2 = load i1, i1* %1
