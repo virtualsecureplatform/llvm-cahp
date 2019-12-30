@@ -10,42 +10,273 @@ define void @test() nounwind {
 ; CAHP-WITHFP-LABEL: test:
 ; CAHP-WITHFP:       # %bb.0:
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
-; CAHP-WITHFP-NEXT:	addi	a0, a0, -68
+; CAHP-WITHFP-NEXT:	addi	a0, a0, -66
 ; CAHP-WITHFP-NEXT:	sub2	sp, a0
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
-; CAHP-WITHFP-NEXT:	addi	a0, a0, -70
+; CAHP-WITHFP-NEXT:	addi	a0, a0, -68
 ; CAHP-WITHFP-NEXT:	add2	a0, sp
 ; CAHP-WITHFP-NEXT:	sw	ra, 0(a0)
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
-; CAHP-WITHFP-NEXT:	addi	a0, a0, -72
+; CAHP-WITHFP-NEXT:	addi	a0, a0, -70
 ; CAHP-WITHFP-NEXT:	add2	a0, sp
 ; CAHP-WITHFP-NEXT:	sw	fp, 0(a0)
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
-; CAHP-WITHFP-NEXT:	addi	a0, a0, -68
+; CAHP-WITHFP-NEXT:	addi	a0, a0, -66
 ; CAHP-WITHFP-NEXT:	add	fp, sp, a0
-; CAHP-WITHFP-NEXT:	lui	a0, 3
-; CAHP-WITHFP-NEXT:	addi	a0, a0, -72
-; CAHP-WITHFP-NEXT:	add2	a0, sp
-; CAHP-WITHFP-NEXT:	lw	fp, 0(a0)
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
 ; CAHP-WITHFP-NEXT:	addi	a0, a0, -70
 ; CAHP-WITHFP-NEXT:	add2	a0, sp
-; CAHP-WITHFP-NEXT:	lw	ra, 0(a0)
+; CAHP-WITHFP-NEXT:	lw	fp, 0(a0)
 ; CAHP-WITHFP-NEXT:	lui	a0, 3
 ; CAHP-WITHFP-NEXT:	addi	a0, a0, -68
+; CAHP-WITHFP-NEXT:	add2	a0, sp
+; CAHP-WITHFP-NEXT:	lw	ra, 0(a0)
+; CAHP-WITHFP-NEXT:	lui	a0, 3
+; CAHP-WITHFP-NEXT:	addi	a0, a0, -66
 ; CAHP-WITHFP-NEXT:	add2	sp, a0
 ; CAHP-WITHFP-NEXT:	jr	ra
 
 ; CAHP-FPELIM-LABEL: test:
 ; CAHP-FPELIM:       # %bb.0:
 ; CAHP-FPELIM-NEXT:	lui	a0, 3
-; CAHP-FPELIM-NEXT:	addi	a0, a0, -72
+; CAHP-FPELIM-NEXT:	addi	a0, a0, -70
 ; CAHP-FPELIM-NEXT:	sub2	sp, a0
 ; CAHP-FPELIM-NEXT:	lui	a0, 3
-; CAHP-FPELIM-NEXT:	addi	a0, a0, -72
+; CAHP-FPELIM-NEXT:	addi	a0, a0, -70
 ; CAHP-FPELIM-NEXT:	add2	sp, a0
 ; CAHP-FPELIM-NEXT:	jr	ra
 
   %tmp = alloca [ 3000 x i8 ] , align 2
+  ret void
+}
+
+; This test case artificially produces register pressure which should force
+; use of the emergency spill slot.
+
+define void @test_emergency_spill_slot(i16 %a) nounwind {
+; CAHP-LABEL: test_emergency_spill_slot:
+; CAHP:       # %bb.0:
+; CAHP-NEXT:	lui	a1, 6
+; CAHP-NEXT:	addi	a1, a1, -98
+; CAHP-NEXT:	sub2	sp, a1
+; CAHP-NEXT:	lui	a1, 6
+; CAHP-NEXT:	addi	a1, a1, -100
+; CAHP-NEXT:	add2	a1, sp
+; CAHP-NEXT:	sw	ra, 0(a1)
+; CAHP-NEXT:	lui	a1, 6
+; CAHP-NEXT:	addi	a1, a1, -102
+; CAHP-NEXT:	add2	a1, sp
+; CAHP-NEXT:	sw	fp, 0(a1)
+; CAHP-NEXT:	lui	a1, 6
+; CAHP-NEXT:	addi	a1, a1, -104
+; CAHP-NEXT:	add2	a1, sp
+; CAHP-NEXT:	sw	s0, 0(a1)
+; CAHP-NEXT:	lui	a1, 6
+; CAHP-NEXT:	addi	a1, a1, -106
+; CAHP-NEXT:	add2	a1, sp
+; CAHP-NEXT:	sw	s1, 0(a1)
+; CAHP-NEXT:	lui	a1, 6
+; CAHP-NEXT:	addi	a1, a1, -108
+; CAHP-NEXT:	add2	a1, sp
+; CAHP-NEXT:	sw	s2, 0(a1)
+; CAHP-NEXT:	lui	a1, 6
+; CAHP-NEXT:	addi	a1, a1, -110
+; CAHP-NEXT:	add2	a1, sp
+; CAHP-NEXT:	sw	s3, 0(a1)
+; CAHP-NEXT:	lui	a1, 6
+; CAHP-NEXT:	addi	a1, a1, -112
+; CAHP-NEXT:	add2	a1, sp
+; CAHP-NEXT:	sw	s4, 0(a1)
+; CAHP-NEXT:	lui	a1, 6
+; CAHP-NEXT:	addi	a1, a1, -98
+; CAHP-NEXT:	add	fp, sp, a1
+; CAHP-NEXT:	lui	a1, 58
+; CAHP-NEXT:	addi	a1, a1, 100
+; CAHP-NEXT:	add2	a1, fp
+; CAHP-NEXT:	sw	a0, 0(a1)
+; CAHP-NEXT:	lui	a1, 2
+; CAHP-NEXT:	addi	a1, a1, -48
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 128
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	addi	a2, a0, 0
+; CAHP-NEXT:	add	a0, a2, a1
+; CAHP-NEXT:	lui	a1, 58
+; CAHP-NEXT:	addi	a1, a1, 98
+; CAHP-NEXT:	add2	a1, fp
+; CAHP-NEXT:	sw	a0, 0(a1)
+; CAHP-NEXT:	#APP
+; CAHP-NEXT:	nop
+; CAHP-NEXT:	#NO_APP
+; CAHP-NEXT:	sw	a1, -16(fp)
+; CAHP-NEXT:	lui	a1, 58
+; CAHP-NEXT:	addi	a1, a1, 102
+; CAHP-NEXT:	add2	a1, fp
+; CAHP-NEXT:	sw	a0, 0(a1)
+; CAHP-NEXT:	lw	a1, -16(fp)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 104
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	a1, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 106
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	s4, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 108
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	s3, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 110
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	s2, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 112
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	s1, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 114
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	s0, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 116
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	t1, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 118
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	t0, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 120
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	a5, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 122
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	a4, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 124
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	a3, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 126
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	sw	a2, 0(a0)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 100
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	lw	a0, 0(a0)
+; CAHP-NEXT:	lui	a1, 58
+; CAHP-NEXT:	addi	a1, a1, 98
+; CAHP-NEXT:	add2	a1, fp
+; CAHP-NEXT:	lw	a1, 0(a1)
+; CAHP-NEXT:	sw	a0, 0(a1)
+; CAHP-NEXT:	lui	a0, 58
+; CAHP-NEXT:	addi	a0, a0, 126
+; CAHP-NEXT:	add2	a0, fp
+; CAHP-NEXT:	lw	a0, 0(a0)
+; CAHP-NEXT:	lui	a1, 58
+; CAHP-NEXT:	addi	a1, a1, 124
+; CAHP-NEXT:	add2	a1, fp
+; CAHP-NEXT:	lw	a1, 0(a1)
+; CAHP-NEXT:	lui	a2, 58
+; CAHP-NEXT:	addi	a2, a2, 122
+; CAHP-NEXT:	add2	a2, fp
+; CAHP-NEXT:	lw	a2, 0(a2)
+; CAHP-NEXT:	lui	a3, 58
+; CAHP-NEXT:	addi	a3, a3, 120
+; CAHP-NEXT:	add2	a3, fp
+; CAHP-NEXT:	lw	a3, 0(a3)
+; CAHP-NEXT:	lui	a4, 58
+; CAHP-NEXT:	addi	a4, a4, 118
+; CAHP-NEXT:	add2	a4, fp
+; CAHP-NEXT:	lw	a4, 0(a4)
+; CAHP-NEXT:	lui	a5, 58
+; CAHP-NEXT:	addi	a5, a5, 116
+; CAHP-NEXT:	add2	a5, fp
+; CAHP-NEXT:	lw	a5, 0(a5)
+; CAHP-NEXT:	lui	t0, 58
+; CAHP-NEXT:	addi	t0, t0, 114
+; CAHP-NEXT:	add2	t0, fp
+; CAHP-NEXT:	lw	t0, 0(t0)
+; CAHP-NEXT:	lui	t1, 58
+; CAHP-NEXT:	addi	t1, t1, 112
+; CAHP-NEXT:	add2	t1, fp
+; CAHP-NEXT:	lw	t1, 0(t1)
+; CAHP-NEXT:	lui	s0, 58
+; CAHP-NEXT:	addi	s0, s0, 110
+; CAHP-NEXT:	add2	s0, fp
+; CAHP-NEXT:	lw	s0, 0(s0)
+; CAHP-NEXT:	lui	s1, 58
+; CAHP-NEXT:	addi	s1, s1, 108
+; CAHP-NEXT:	add2	s1, fp
+; CAHP-NEXT:	lw	s1, 0(s1)
+; CAHP-NEXT:	lui	s2, 58
+; CAHP-NEXT:	addi	s2, s2, 106
+; CAHP-NEXT:	add2	s2, fp
+; CAHP-NEXT:	lw	s2, 0(s2)
+; CAHP-NEXT:	lui	s3, 58
+; CAHP-NEXT:	addi	s3, s3, 104
+; CAHP-NEXT:	add2	s3, fp
+; CAHP-NEXT:	lw	s3, 0(s3)
+; CAHP-NEXT:	lui	s4, 58
+; CAHP-NEXT:	addi	s4, s4, 102
+; CAHP-NEXT:	add2	s4, fp
+; CAHP-NEXT:	lw	s4, 0(s4)
+; CAHP-NEXT:	#APP
+; CAHP-NEXT:	nop
+; CAHP-NEXT:	#NO_APP
+; CAHP-NEXT:	lui	a0, 6
+; CAHP-NEXT:	addi	a0, a0, -112
+; CAHP-NEXT:	add2	a0, sp
+; CAHP-NEXT:	lw	s4, 0(a0)
+; CAHP-NEXT:	lui	a0, 6
+; CAHP-NEXT:	addi	a0, a0, -110
+; CAHP-NEXT:	add2	a0, sp
+; CAHP-NEXT:	lw	s3, 0(a0)
+; CAHP-NEXT:	lui	a0, 6
+; CAHP-NEXT:	addi	a0, a0, -108
+; CAHP-NEXT:	add2	a0, sp
+; CAHP-NEXT:	lw	s2, 0(a0)
+; CAHP-NEXT:	lui	a0, 6
+; CAHP-NEXT:	addi	a0, a0, -106
+; CAHP-NEXT:	add2	a0, sp
+; CAHP-NEXT:	lw	s1, 0(a0)
+; CAHP-NEXT:	lui	a0, 6
+; CAHP-NEXT:	addi	a0, a0, -104
+; CAHP-NEXT:	add2	a0, sp
+; CAHP-NEXT:	lw	s0, 0(a0)
+; CAHP-NEXT:	lui	a0, 6
+; CAHP-NEXT:	addi	a0, a0, -102
+; CAHP-NEXT:	add2	a0, sp
+; CAHP-NEXT:	lw	fp, 0(a0)
+; CAHP-NEXT:	lui	a0, 6
+; CAHP-NEXT:	addi	a0, a0, -100
+; CAHP-NEXT:	add2	a0, sp
+; CAHP-NEXT:	lw	ra, 0(a0)
+; CAHP-NEXT:	lui	a0, 6
+; CAHP-NEXT:	addi	a0, a0, -98
+; CAHP-NEXT:	add2	sp, a0
+; CAHP-NEXT:	jr	ra
+
+  %data = alloca [ 3000 x i16 ], align 2
+  %ptr = getelementptr inbounds [3000 x i16], [3000 x i16]* %data, i16 0, i16 1000
+  %1 = tail call { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } asm sideeffect "nop", "=r,=r,=r,=r,=r,=r,=r,=r,=r,=r,=r,=r,=r"()
+  %asmresult0 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 0
+  %asmresult1 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 1
+  %asmresult2 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 2
+  %asmresult3 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 3
+  %asmresult4 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 4
+  %asmresult5 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 5
+  %asmresult6 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 6
+  %asmresult7 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 7
+  %asmresult8 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 8
+  %asmresult9 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 9
+  %asmresult10 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 10
+  %asmresult11 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 11
+  %asmresult12 = extractvalue { i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 } %1, 12
+  store volatile i16 %a, i16* %ptr
+  tail call void asm sideeffect "nop", "r,r,r,r,r,r,r,r,r,r,r,r,r"(i16 %asmresult0, i16 %asmresult1, i16 %asmresult2, i16 %asmresult3, i16 %asmresult4, i16 %asmresult5, i16 %asmresult6, i16 %asmresult7, i16 %asmresult8, i16 %asmresult9, i16 %asmresult10, i16 %asmresult11, i16 %asmresult12)
+
   ret void
 }

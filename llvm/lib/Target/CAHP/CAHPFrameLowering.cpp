@@ -8,6 +8,7 @@
 #include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
 #include "llvm/CodeGen/MachineRegisterInfo.h"
+#include "llvm/CodeGen/RegisterScavenging.h"
 
 using namespace llvm;
 
@@ -198,5 +199,17 @@ void CAHPFrameLowering::determineCalleeSaves(MachineFunction &MF,
   if (hasFP(MF)) {
     SavedRegs.set(CAHP::X0);
     SavedRegs.set(CAHP::X2);
+  }
+}
+
+void CAHPFrameLowering::processFunctionBeforeFrameFinalized(
+    MachineFunction &MF, RegScavenger *RS) const {
+  const TargetRegisterInfo *RegInfo = MF.getSubtarget().getRegisterInfo();
+  MachineFrameInfo &MFI = MF.getFrameInfo();
+  const TargetRegisterClass *RC = &CAHP::GPRRegClass;
+  if (!isInt<9>(MFI.estimateStackSize(MF))) {
+    int RegScavFI = MFI.CreateStackObject(
+        RegInfo->getSpillSize(*RC), RegInfo->getSpillAlignment(*RC), false);
+    RS->addScavengingFrameIndex(RegScavFI);
   }
 }
