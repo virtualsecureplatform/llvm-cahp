@@ -18,6 +18,7 @@ include "CAHPInstrInfo.td"
 //===----------------------------------------------------------------------===//
 
 def : ProcessorModel<"generic", NoSchedModel, []>;
+def : ProcessorModel<"emerald", EmeraldModel, []>;
 
 //===----------------------------------------------------------------------===//
 // Define the CAHP target.

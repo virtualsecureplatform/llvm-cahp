@@ -19,6 +19,7 @@ class LLVM_LIBRARY_VISIBILITY CAHPTargetInfo : public TargetInfo {
   // The CPU profiles supported by the CAHP backend
   enum CPUKind {
     CK_NONE,
+    CK_EMERALD,
   };
 
 public:

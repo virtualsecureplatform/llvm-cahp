@@ -36,7 +36,9 @@ bool CAHPTargetInfo::isValidCPUName(StringRef Name) const {
   if (Name == "generic")
     return true;
 
-  CPUKind CPU = llvm::StringSwitch<CPUKind>(Name).Default(CK_NONE);
+  CPUKind CPU = llvm::StringSwitch<CPUKind>(Name)
+                    .Case("emerald", CK_EMERALD)
+                    .Default(CK_NONE);
   return CPU != CK_NONE;
 }
 
