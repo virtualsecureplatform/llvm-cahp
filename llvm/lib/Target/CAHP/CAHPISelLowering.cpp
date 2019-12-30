@@ -65,6 +65,10 @@ CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::UDIVREM, MVT::i16, Expand);
   setOperationAction(ISD::UDIV, MVT::i16, Expand);
 
+  setOperationAction(ISD::DYNAMIC_STACKALLOC, MVT::i16, Expand);
+  setOperationAction(ISD::STACKSAVE, MVT::Other, Expand);
+  setOperationAction(ISD::STACKRESTORE, MVT::Other, Expand);
+
   setBooleanContents(ZeroOrOneBooleanContent);
 
   // Function alignments (log2).
