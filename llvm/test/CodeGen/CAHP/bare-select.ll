@@ -5,14 +5,15 @@
 define i16 @bare_select(i1 %a, i16 %b, i16 %c) {
 ; CAHP-LABEL: bare_select:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	andi2	a0, 1
-; CAHP-NEXT:	lsi	a3, 0
-; CAHP-NEXT:	bne	a0, a3, .LBB0_2
-; CAHP-NEXT:# %bb.1:
-; CAHP-NEXT:	mov	a1, a2
-; CAHP-NEXT:.LBB0_2:
-; CAHP-NEXT:	mov	a0, a1
-; CAHP-NEXT:	jr	ra
+; CHAP-NEXT:	andi	a3, a0, 1
+; CHAP-NEXT:	lsi	a4, 0
+; CHAP-NEXT:	mov	a0, a1
+; CHAP-NEXT:	bne	a3, a4, .LBB0_2
+; CHAP-NEXT:# %bb.1:
+; CHAP-NEXT:	mov	a0, a2
+; CHAP-NEXT:.LBB0_2:
+; CHAP-NEXT:	jr	ra
+
   %1 = select i1 %a, i16 %b, i16 %c
   ret i16 %1
 }
