@@ -159,8 +159,8 @@ define i16 @caller_i32_scalars(i32 %a) nounwind {
 ; CAHP-NEXT:	swsp	a0, 6(sp)
 ; CAHP-NEXT:	swsp	a2, 4(sp)
 ; CAHP-NEXT:	swsp	a0, 2(sp)
-; CAHP-NEXT:	swsp	a2, 0(sp)
 ; CAHP-NEXT:	li	a0, 42
+; CAHP-NEXT:	swsp	a2, 0(sp)
 ; CAHP-NEXT:	mov	a3, a1
 ; CAHP-NEXT:	mov	a4, a2
 ; CAHP-NEXT:	mov	a5, a1
