@@ -16,8 +16,3 @@ extern "C" void LLVMInitializeCAHPV4TargetInfo() {
   RegisterTarget<Triple::cahpv4> X(getTheCAHPV4Target(), "cahpv4", "CAHPV4",
                                    "CAHPV4");
 }
-
-// FIXME: Temporary stub - this function must be defined for linking
-// to succeed and will be called unconditionally by llc, so must be a no-op.
-// Remove once this function is properly implemented.
-extern "C" void LLVMInitializeCAHPV4TargetMC() {}

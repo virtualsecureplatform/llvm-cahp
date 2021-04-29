@@ -5,6 +5,7 @@
 #ifndef LLVM_LIB_TARGET_CAHPV4_CAHPV4TARGETMACHINE_H
 #define LLVM_LIB_TARGET_CAHPV4_CAHPV4TARGETMACHINE_H
 
+#include "MCTargetDesc/CAHPV4MCTargetDesc.h"
 #include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/Target/TargetMachine.h"
@@ -15,9 +16,9 @@ class CAHPV4TargetMachine : public LLVMTargetMachine {
 
 public:
   CAHPV4TargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                    StringRef FS, const TargetOptions &Options,
-                    Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                    CodeGenOpt::Level OL, bool JIT);
+                      StringRef FS, const TargetOptions &Options,
+                      Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
+                      CodeGenOpt::Level OL, bool JIT);
 
   TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
 
@@ -25,7 +26,6 @@ public:
     return TLOF.get();
   }
 };
-Target &getTheCAHPV4Target();
 } // namespace llvm
 
 #endif
