@@ -15,10 +15,11 @@ add_llvm_target(CAHPV4CodeGen
   CAHPV4TargetMachine.cpp
 
   LINK_COMPONENTS
-  Core
-  CodeGen
-  CAHPV4Info
+  AsmPrinter
   CAHPV4Desc
+  CAHPV4Info
+  CodeGen
+  Core
   Support
   Target
 

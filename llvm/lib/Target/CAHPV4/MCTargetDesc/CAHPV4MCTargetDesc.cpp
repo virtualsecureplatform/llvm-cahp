@@ -3,6 +3,7 @@
 // LICENSE.TXT for details). This file is licensed under the same license.
 
 #include "CAHPV4MCTargetDesc.h"
+#include "CAHPV4InstPrinter.h"
 #include "CAHPV4MCAsmInfo.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/MC/MCAsmInfo.h"
@@ -53,6 +54,14 @@ createCAHPV4MCSubtargetInfo(const Triple &TT, StringRef CPU, StringRef FS) {
   return createCAHPV4MCSubtargetInfoImpl(TT, CPUName, CPUName, FS);
 }
 
+static MCInstPrinter *createCAHPV4MCInstPrinter(const Triple &T,
+                                                unsigned SyntaxVariant,
+                                                const MCAsmInfo &MAI,
+                                                const MCInstrInfo &MII,
+                                                const MCRegisterInfo &MRI) {
+  return new CAHPV4InstPrinter(MAI, MII, MRI);
+}
+
 extern "C" void LLVMInitializeCAHPV4TargetMC() {
   Target &T = getTheCAHPV4Target();
   TargetRegistry::RegisterMCAsmInfo(T, createCAHPV4MCAsmInfo);
@@ -61,4 +70,5 @@ extern "C" void LLVMInitializeCAHPV4TargetMC() {
   TargetRegistry::RegisterMCAsmBackend(T, createCAHPV4AsmBackend);
   TargetRegistry::RegisterMCSubtargetInfo(T, createCAHPV4MCSubtargetInfo);
   TargetRegistry::RegisterMCCodeEmitter(T, createCAHPV4MCCodeEmitter);
+  TargetRegistry::RegisterMCInstPrinter(T, createCAHPV4MCInstPrinter);
 }
