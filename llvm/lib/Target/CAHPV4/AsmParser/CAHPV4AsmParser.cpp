@@ -125,6 +125,18 @@ public:
     return static_cast<const MCConstantExpr *>(Val)->getValue();
   }
 
+  bool isUImm4() const {
+    return (isConstantImm() && isUInt<4>(getConstantImm()));
+  }
+
+  bool isSImm11() const {
+    return (isConstantImm() && isInt<11>(getConstantImm()));
+  }
+
+  bool isSImm16() const {
+    return (isConstantImm() && isInt<16>(getConstantImm()));
+  }
+
   /// getStartLoc - Gets location of the first token of this operand
   SMLoc getStartLoc() const override { return StartLoc; }
   /// getEndLoc - Gets location of the last token of this operand
@@ -274,6 +286,10 @@ bool CAHPV4AsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
     return generateImmOutOfRangeError(                                         \
         Operands, ErrorInfo, 0, (1 << nbits) - 2,                              \
         "immediate must be a multiple of 2 bytes in the range");
+
+    CASE_MATCH_INVALID_UIMM(4);
+    CASE_MATCH_INVALID_SIMM(11);
+    CASE_MATCH_INVALID_SIMM(16);
   }
 
   llvm_unreachable("Unknown match type detected!");

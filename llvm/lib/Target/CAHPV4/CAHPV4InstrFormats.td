@@ -39,3 +39,39 @@ class CAHPV4InstR<bits<11> opcode, dag outs, dag ins, string opcodestr, string a
   let Inst{15-11} = rs1;
   let Inst{10-0} = opcode;
 }
+
+// I-instruction format
+class CAHPV4InstIS11<bits<11> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPV4Inst<outs, ins, opcodestr, argstr> {
+  bits<5> rd;
+  bits<5> rs1;
+  bits<11> imm;
+
+  let Inst{31-21} = imm;
+  let Inst{20-16} = rd;
+  let Inst{15-11} = rs1;
+  let Inst{10-0} = opcode;
+}
+class CAHPV4InstIU4<bits<11> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPV4Inst<outs, ins, opcodestr, argstr> {
+  bits<5> rd;
+  bits<5> rs1;
+  bits<4> imm;
+
+  let Inst{31-25} = 0;
+  let Inst{24-21} = imm;
+  let Inst{20-16} = rd;
+  let Inst{15-11} = rs1;
+  let Inst{10-0} = opcode;
+}
+class CAHPV4InstI16<bits<11> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPV4Inst<outs, ins, opcodestr, argstr> {
+  bits<5> rd;
+  bits<16> imm;
+
+  let Inst{31} = imm{15};
+  let Inst{30-21} = imm{9-0};
+  let Inst{20-16} = rd;
+  let Inst{15-11} = imm{14-10};
+  let Inst{10-0} = opcode;
+}
