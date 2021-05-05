@@ -72,3 +72,15 @@ def SLTI : CAHPV4InstIS11<0b11100011000, (outs GPR:$rd), (ins GPR:$rs1, simm11:$
 // FIXME: SLTIU
 def LI   : CAHPV4InstI16<0b11001111000, (outs GPR:$rd), (ins simm16:$imm),
                          "li", "$rd, $imm">;
+
+// M-instructions
+def LB  : CAHPV4InstML<0b11010001001, (outs GPR:$rd), (ins GPR:$rs1, simm11:$imm),
+                       "lb", "$rd, ${imm}(${rs1})">;
+def LBU : CAHPV4InstML<0b01010001001, (outs GPR:$rd), (ins GPR:$rs1, simm11:$imm),
+                       "lbu", "$rd, ${imm}(${rs1})">;
+def LW  : CAHPV4InstML<0b01000001001, (outs GPR:$rd), (ins GPR:$rs1, simm11:$imm),
+                       "lw", "$rd, ${imm}(${rs1})">;
+def SB  : CAHPV4InstMS<0b01010000010, (outs), (ins GPR:$rs2, GPR:$rs1, simm11:$imm),
+                       "sb", "$rs2, ${imm}(${rs1})">;
+def SW  : CAHPV4InstMS<0b01000000010, (outs), (ins GPR:$rs2, GPR:$rs1, simm11:$imm),
+                       "sw", "$rs2, ${imm}(${rs1})">;

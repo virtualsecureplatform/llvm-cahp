@@ -75,3 +75,28 @@ class CAHPV4InstI16<bits<11> opcode, dag outs, dag ins, string opcodestr, string
   let Inst{15-11} = imm{14-10};
   let Inst{10-0} = opcode;
 }
+
+// M-Instruction
+class CAHPV4InstML<bits<11> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPV4Inst<outs, ins, opcodestr, argstr> {
+  bits<5> rd;
+  bits<5> rs1;
+  bits<11> imm;
+
+  let Inst{31-21} = imm;
+  let Inst{20-16} = rd;
+  let Inst{15-11} = rs1;
+  let Inst{10-0} = opcode;
+}
+class CAHPV4InstMS<bits<11> opcode, dag outs, dag ins, string opcodestr, string argstr>
+: CAHPV4Inst<outs, ins, opcodestr, argstr> {
+  bits<5> rs1;
+  bits<5> rs2;
+  bits<11> imm;
+
+  let Inst{31-26} = imm{10-5};
+  let Inst{25-21} = rs2;
+  let Inst{20-16} = imm{4-0};
+  let Inst{15-11} = rs1;
+  let Inst{10-0} = opcode;
+}

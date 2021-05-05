@@ -61,3 +61,18 @@ slti x1, x2, -2
 # CHECK-INST: li x1, -500
 # CHECK: [0x78,0xfe,0x81,0xc1]
 li x1, -500
+# CHECK-INST: lb x2, -500(x1)
+# CHECK: [0x89,0x0e,0x82,0xc1]
+lb x2, -500(x1)
+# CHECK-INST: lbu x2, -500(x1)
+# CHECK: [0x89,0x0a,0x82,0xc1]
+lbu x2, -500(x1)
+# CHECK-INST: lw x2, -500(x1)
+# CHECK: [0x09,0x0a,0x82,0xc1]
+lw x2, -500(x1)
+# CHECK-INST: sb x3, -500(x1)
+# CHECK: [0x82,0x0a,0x6c,0xc0]
+sb x3, -500(x1)
+# CHECK-INST: sw x3, -500(x1)
+# CHECK: [0x02,0x0a,0x6c,0xc0]
+sw x3, -500(x1)
