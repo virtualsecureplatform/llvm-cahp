@@ -51,5 +51,5 @@ unsigned CAHPELFObjectWriter::getRelocType(MCContext &Ctx,
 
 std::unique_ptr<MCObjectTargetWriter>
 llvm::createCAHPELFObjectWriter(uint8_t OSABI) {
-  return llvm::make_unique<CAHPELFObjectWriter>(OSABI);
+  return std::make_unique<CAHPELFObjectWriter>(OSABI);
 }
