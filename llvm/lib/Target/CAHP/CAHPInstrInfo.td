@@ -458,12 +458,6 @@ def : Pat<(Call texternalsym:$dst), (JSAL texternalsym:$dst)>;
 
 // Compress patterns
 
-class CompressPat<dag input, dag output> {
-  dag Input  = input;
-  dag Output    = output;
-  list<Predicate> Predicates = [];
-}
-
 multiclass CompPatRRRComm<CAHPInst24 Inst24, CAHPInst16 Inst16> {
   def : CompressPat<(Inst24 GPR:$rs1, GPR:$rs1, GPR:$rs2),
                     (Inst16 GPR:$rs1, GPR:$rs2)>;
