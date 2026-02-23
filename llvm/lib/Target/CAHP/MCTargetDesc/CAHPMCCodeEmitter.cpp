@@ -68,7 +68,6 @@ private:
 } // end anonymous namespace
 
 MCCodeEmitter *llvm::createCAHPMCCodeEmitter(const MCInstrInfo &MCII,
-                                             const MCRegisterInfo &MRI,
                                              MCContext &Ctx) {
   return new CAHPMCCodeEmitter(Ctx, MCII);
 }
