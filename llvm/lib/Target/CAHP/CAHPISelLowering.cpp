@@ -425,14 +425,14 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
 
     SDValue Arg = OutVals[i];
     unsigned Size = Flags.getByValSize();
-    unsigned Align = Flags.getByValAlign();
+    Align ArgAlign = Flags.getNonZeroByValAlign();
 
-    int FI = MF.getFrameInfo().CreateStackObject(Size, Align,
+    int FI = MF.getFrameInfo().CreateStackObject(Size, ArgAlign,
                                                  /*isSillSlot=*/false);
     SDValue FIPtr = DAG.getFrameIndex(FI, MVT::i16);
     SDValue SizeNode = DAG.getConstant(Size, DL, MVT::i16);
 
-    Chain = DAG.getMemcpy(Chain, DL, FIPtr, Arg, SizeNode, Align,
+    Chain = DAG.getMemcpy(Chain, DL, FIPtr, Arg, SizeNode, ArgAlign,
                           /*IsVolatile=*/false,
                           /*AlwaysInline=*/false, CLI.IsTailCall,
                           MachinePointerInfo(), MachinePointerInfo());
