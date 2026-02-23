@@ -29,7 +29,7 @@ public:
 
   StringRef getPassName() const override { return "CAHP Assembly Printer"; }
 
-  void EmitInstruction(const MachineInstr *MI) override;
+  void emitInstruction(const MachineInstr *MI) override;
 
   bool PrintAsmOperand(const MachineInstr *MI, unsigned OpNo,
                        const char *ExtraCode, raw_ostream &OS) override;
@@ -49,7 +49,7 @@ public:
 #define GEN_COMPRESS_INSTR
 #include "CAHPGenCompressInstEmitter.inc"
 
-void CAHPAsmPrinter::EmitInstruction(const MachineInstr *MI) {
+void CAHPAsmPrinter::emitInstruction(const MachineInstr *MI) {
   // Do any auto-generated pseudo lowerings.
   if (emitPseudoExpansionLowering(*OutStreamer, MI))
     return;
