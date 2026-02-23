@@ -1,7 +1,7 @@
 # RUN: llvm-mc -triple cahp < %s -show-encoding \
 # RUN:     | FileCheck -check-prefix=INSTR -check-prefix=FIXUP %s
 # RUN: llvm-mc -filetype=obj -triple cahp < %s \
-# RUN:     | llvm-readobj -r | FileCheck -check-prefix=RELOC %s
+# RUN:     | llvm-readobj -r - | FileCheck -check-prefix=RELOC %s
 
 # Check prefixes:
 # RELOC - Check the relocation in the object.

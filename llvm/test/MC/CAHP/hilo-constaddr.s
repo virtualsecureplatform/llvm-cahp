@@ -2,7 +2,7 @@
 # RUN:  | llvm-objdump -d - | FileCheck %s -check-prefix=CHECK-INSTR
 
 # RUN: llvm-mc -filetype=obj -triple=cahp %s \
-# RUN:  | llvm-readobj -r | FileCheck %s -check-prefix=CHECK-REL
+# RUN:  | llvm-readobj -r - | FileCheck %s -check-prefix=CHECK-REL
 
 # Check the assembler can handle hi and lo expressions with a constant
 # address, and constant expressions involving labels. Test case derived from
