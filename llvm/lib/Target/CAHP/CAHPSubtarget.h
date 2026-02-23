@@ -33,7 +33,7 @@ class CAHPSubtarget : public CAHPGenSubtargetInfo {
 
 public:
   // Initializes the data members to match that of the specified triple.
-  CAHPSubtarget(const Triple &TT, const std::string &CPU, const std::string &FS,
+  CAHPSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
                 const TargetMachine &TM);
 
   // Parses features string setting specified subtarget options. The
