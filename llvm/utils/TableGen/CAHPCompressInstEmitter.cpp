@@ -706,14 +706,11 @@ void CAHPCompressInstEmitter::emitCompressInstEmitter(raw_ostream &o,
       << "    break;\n";
 
     for (unsigned i = 0; i < MCOpPredicates.size(); ++i) {
-      Init *MCOpPred = MCOpPredicates[i]->getValueInit("MCOperandPredicate");
-      if (CodeInit *SI = dyn_cast<CodeInit>(MCOpPred))
-        o << "  case " << i + 1 << ": {\n"
-          << "   // " << MCOpPredicates[i]->getName().str() << SI->getValue()
-          << "\n"
-          << "    }\n";
-      else
-        llvm_unreachable("Unexpected MCOperandPredicate field!");
+      StringRef Pred = MCOpPredicates[i]->getValueAsString("MCOperandPredicate");
+      o << "  case " << i + 1 << ": {\n"
+        << "   // " << MCOpPredicates[i]->getName().str() << "\n"
+        << "   " << Pred << "\n"
+        << "    }\n";
     }
     o << "  }\n"
       << "}\n\n";
