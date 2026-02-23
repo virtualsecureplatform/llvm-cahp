@@ -24,11 +24,13 @@ public:
   void storeRegToStackSlot(MachineBasicBlock &MBB,
                            MachineBasicBlock::iterator I, Register SrcReg,
                            bool IsKill, int FI, const TargetRegisterClass *RC,
-                           const TargetRegisterInfo *TRI) const override;
+                           const TargetRegisterInfo *TRI,
+                           Register VReg) const override;
   void loadRegFromStackSlot(MachineBasicBlock &MBB,
                             MachineBasicBlock::iterator I, Register DstReg,
                             int FI, const TargetRegisterClass *RC,
-                            const TargetRegisterInfo *TRI) const override;
+                            const TargetRegisterInfo *TRI,
+                            Register VReg) const override;
 
   // Materializes the given int16 Val into DstReg.
   void movImm16(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
