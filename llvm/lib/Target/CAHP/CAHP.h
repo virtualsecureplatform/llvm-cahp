@@ -23,7 +23,7 @@ bool LowerCAHPMachineOperandToMCOperand(const MachineOperand &MO,
                                         MCOperand &MCOp, const AsmPrinter &AP);
 
 FunctionPass *createCAHPISelDag(CAHPTargetMachine &TM,
-                                CodeGenOpt::Level OptLevel);
+                                CodeGenOptLevel OptLevel);
 } // namespace llvm
 
 #endif

@@ -24,7 +24,7 @@ class CAHPAsmBackend : public MCAsmBackend {
   uint8_t OSABI;
 
 public:
-  CAHPAsmBackend(uint8_t OSABI) : MCAsmBackend(support::little), OSABI(OSABI) {}
+  CAHPAsmBackend(uint8_t OSABI) : MCAsmBackend(llvm::endianness::little), OSABI(OSABI) {}
   ~CAHPAsmBackend() override {}
 
   void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
