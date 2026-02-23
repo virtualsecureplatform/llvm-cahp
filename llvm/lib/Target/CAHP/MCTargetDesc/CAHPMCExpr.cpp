@@ -3,6 +3,7 @@
 // LICENSE.TXT for details). This file is licensed under the same license.
 
 #include "CAHPMCExpr.h"
+#include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCAssembler.h"
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCStreamer.h"
@@ -24,15 +25,14 @@ void CAHPMCExpr::printImpl(raw_ostream &OS, const MCAsmInfo *MAI) const {
   bool HasVariant = getKind() != VK_CAHP_None;
   if (HasVariant)
     OS << '%' << getVariantKindName(getKind()) << '(';
-  Expr->print(OS, MAI);
+  MAI->printExpr(OS, *Expr);
   if (HasVariant)
     OS << ')';
 }
 
 bool CAHPMCExpr::evaluateAsRelocatableImpl(MCValue &Res,
-                                           const MCAssembler *Asm,
-                                           const MCFixup *Fixup) const {
-  return getSubExpr()->evaluateAsRelocatable(Res, Asm, Fixup);
+                                           const MCAssembler *Asm) const {
+  return getSubExpr()->evaluateAsRelocatable(Res, Asm);
 }
 
 void CAHPMCExpr::visitUsedExpr(MCStreamer &Streamer) const {
@@ -60,7 +60,7 @@ StringRef CAHPMCExpr::getVariantKindName(VariantKind Kind) {
 bool CAHPMCExpr::evaluateAsConstant(int64_t &Res) const {
   MCValue Value;
 
-  if (!getSubExpr()->evaluateAsRelocatable(Value, nullptr, nullptr))
+  if (!getSubExpr()->evaluateAsRelocatable(Value, nullptr))
     return false;
 
   if (!Value.isAbsolute())

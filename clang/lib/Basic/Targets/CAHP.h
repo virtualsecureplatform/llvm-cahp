@@ -69,7 +69,9 @@ public:
   bool isValidCPUName(StringRef Name) const override;
   bool setCPU(const std::string &Name) override;
 
-  ArrayRef<Builtin::Info> getTargetBuiltins() const override { return {}; }
+  llvm::SmallVector<Builtin::InfosShard> getTargetBuiltins() const override {
+    return {};
+  }
 
   BuiltinVaListKind getBuiltinVaListKind() const override {
     return TargetInfo::VoidPtrBuiltinVaList;

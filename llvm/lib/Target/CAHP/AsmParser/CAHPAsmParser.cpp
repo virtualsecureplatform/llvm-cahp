@@ -6,10 +6,11 @@
 #include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/StringSwitch.h"
+#include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCInst.h"
-#include "llvm/MC/MCParser/MCAsmLexer.h"
+#include "llvm/MC/MCAsmMacro.h"
 #include "llvm/MC/MCParser/MCParsedAsmOperand.h"
 #include "llvm/MC/MCParser/MCTargetAsmParser.h"
 #include "llvm/MC/MCRegisterInfo.h"
@@ -48,10 +49,10 @@ class CAHPAsmParser : public MCTargetAsmParser {
 #define GET_ASSEMBLER_HEADER
 #include "CAHPGenAsmMatcher.inc"
 
-  OperandMatchResultTy parseImmediate(OperandVector &Operands);
-  OperandMatchResultTy parseRegister(OperandVector &Operands);
-  OperandMatchResultTy parseMemOpBaseReg(OperandVector &Operands);
-  OperandMatchResultTy parseOperandWithModifier(OperandVector &Operands);
+  ParseStatus parseImmediate(OperandVector &Operands);
+  ParseStatus parseRegister(OperandVector &Operands);
+  ParseStatus parseMemOpBaseReg(OperandVector &Operands);
+  ParseStatus parseOperandWithModifier(OperandVector &Operands);
 
   bool parseOperand(OperandVector &Operands);
 
@@ -227,10 +228,10 @@ public:
     return Tok;
   }
 
-  void print(raw_ostream &OS) const override {
+  void print(raw_ostream &OS, const MCAsmInfo &MAI) const override {
     switch (Kind) {
     case Immediate:
-      OS << *getImm();
+      MAI.printExpr(OS, *getImm());
       break;
     case Register:
       OS << "<register x";
@@ -414,35 +415,35 @@ ParseStatus CAHPAsmParser::tryParseRegister(MCRegister &RegNo,
   return ParseStatus::Success;
 }
 
-OperandMatchResultTy CAHPAsmParser::parseRegister(OperandVector &Operands) {
+ParseStatus CAHPAsmParser::parseRegister(OperandVector &Operands) {
   SMLoc S = getLoc();
   SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
 
   switch (getLexer().getKind()) {
   default:
-    return MatchOperand_NoMatch;
+    return ParseStatus::NoMatch;
   case AsmToken::Identifier:
     StringRef Name = getLexer().getTok().getIdentifier();
     unsigned RegNo = MatchRegisterName(Name);
     if (RegNo == 0) {
       RegNo = MatchRegisterAltName(Name);
       if (RegNo == 0)
-        return MatchOperand_NoMatch;
+        return ParseStatus::NoMatch;
     }
     getLexer().Lex();
     Operands.push_back(CAHPOperand::createReg(RegNo, S, E));
   }
-  return MatchOperand_Success;
+  return ParseStatus::Success;
 }
 
-OperandMatchResultTy CAHPAsmParser::parseImmediate(OperandVector &Operands) {
+ParseStatus CAHPAsmParser::parseImmediate(OperandVector &Operands) {
   SMLoc S = getLoc();
   SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
   const MCExpr *Res;
 
   switch (getLexer().getKind()) {
   default:
-    return MatchOperand_NoMatch;
+    return ParseStatus::NoMatch;
 
   case AsmToken::LParen:
   case AsmToken::Minus:
@@ -450,15 +451,15 @@ OperandMatchResultTy CAHPAsmParser::parseImmediate(OperandVector &Operands) {
   case AsmToken::Integer:
   case AsmToken::String:
     if (getParser().parseExpression(Res))
-      return MatchOperand_ParseFail;
+      return ParseStatus::Failure;
     break;
 
   case AsmToken::Identifier: {
     StringRef Identifier;
     if (getParser().parseIdentifier(Identifier))
-      return MatchOperand_ParseFail;
+      return ParseStatus::Failure;
     MCSymbol *Sym = getContext().getOrCreateSymbol(Identifier);
-    Res = MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None, getContext());
+    Res = MCSymbolRefExpr::create(Sym, getContext());
     break;
   }
 
@@ -468,72 +469,72 @@ OperandMatchResultTy CAHPAsmParser::parseImmediate(OperandVector &Operands) {
   }
 
   Operands.push_back(CAHPOperand::createImm(Res, S, E));
-  return MatchOperand_Success;
+  return ParseStatus::Success;
 }
 
-OperandMatchResultTy
+ParseStatus
 CAHPAsmParser::parseOperandWithModifier(OperandVector &Operands) {
   SMLoc S = getLoc();
   SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
 
   if (getLexer().getKind() != AsmToken::Percent) {
     Error(getLoc(), "expected '%' for operand modifier");
-    return MatchOperand_ParseFail;
+    return ParseStatus::Failure;
   }
 
   getParser().Lex(); // Eat '%'
 
   if (getLexer().getKind() != AsmToken::Identifier) {
     Error(getLoc(), "expected valid identifier for operand modifier");
-    return MatchOperand_ParseFail;
+    return ParseStatus::Failure;
   }
   StringRef Identifier = getParser().getTok().getIdentifier();
   CAHPMCExpr::VariantKind VK = CAHPMCExpr::getVariantKindForName(Identifier);
   if (VK == CAHPMCExpr::VK_CAHP_Invalid) {
     Error(getLoc(), "unrecognized operand modifier");
-    return MatchOperand_ParseFail;
+    return ParseStatus::Failure;
   }
 
   getParser().Lex(); // Eat the identifier
   if (getLexer().getKind() != AsmToken::LParen) {
     Error(getLoc(), "expected '('");
-    return MatchOperand_ParseFail;
+    return ParseStatus::Failure;
   }
   getParser().Lex(); // Eat '('
 
   const MCExpr *SubExpr;
   if (getParser().parseParenExpression(SubExpr, E)) {
-    return MatchOperand_ParseFail;
+    return ParseStatus::Failure;
   }
 
   const MCExpr *ModExpr = CAHPMCExpr::create(SubExpr, VK, getContext());
   Operands.push_back(CAHPOperand::createImm(ModExpr, S, E));
-  return MatchOperand_Success;
+  return ParseStatus::Success;
 }
 
-OperandMatchResultTy CAHPAsmParser::parseMemOpBaseReg(OperandVector &Operands) {
+ParseStatus CAHPAsmParser::parseMemOpBaseReg(OperandVector &Operands) {
   if (getLexer().isNot(AsmToken::LParen)) {
     Error(getLoc(), "expected '('");
-    return MatchOperand_ParseFail;
+    return ParseStatus::Failure;
   }
 
   getParser().Lex(); // Eat '('
   Operands.push_back(CAHPOperand::createToken("(", getLoc()));
 
-  if (parseRegister(Operands) != MatchOperand_Success) {
+  if (!parseRegister(Operands).isSuccess()) {
     Error(getLoc(), "expected register");
-    return MatchOperand_ParseFail;
+    return ParseStatus::Failure;
   }
 
   if (getLexer().isNot(AsmToken::RParen)) {
     Error(getLoc(), "expected ')'");
-    return MatchOperand_ParseFail;
+    return ParseStatus::Failure;
   }
 
   getParser().Lex(); // Eat ')'
   Operands.push_back(CAHPOperand::createToken(")", getLoc()));
 
-  return MatchOperand_Success;
+  return ParseStatus::Success;
 }
 
 /// Looks at a token type and creates the relevant operand
@@ -541,14 +542,14 @@ OperandMatchResultTy CAHPAsmParser::parseMemOpBaseReg(OperandVector &Operands) {
 /// If operand was parsed, returns false, else true.
 bool CAHPAsmParser::parseOperand(OperandVector &Operands) {
   // Attempt to parse token as register
-  if (parseRegister(Operands) == MatchOperand_Success)
+  if (parseRegister(Operands).isSuccess())
     return false;
 
   // Attempt to parse token as an immediate
-  if (parseImmediate(Operands) == MatchOperand_Success) {
+  if (parseImmediate(Operands).isSuccess()) {
     // Parse memory base register if present
     if (getLexer().is(AsmToken::LParen))
-      return parseMemOpBaseReg(Operands) != MatchOperand_Success;
+      return !parseMemOpBaseReg(Operands).isSuccess();
     return false;
   }
 

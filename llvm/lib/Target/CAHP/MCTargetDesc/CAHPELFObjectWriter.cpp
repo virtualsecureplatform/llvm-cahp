@@ -19,8 +19,8 @@ public:
   ~CAHPELFObjectWriter() override;
 
 protected:
-  unsigned getRelocType(MCContext &Ctx, const MCValue &Target,
-                        const MCFixup &Fixup, bool IsPCRel) const override;
+  unsigned getRelocType(const MCFixup &Fixup, const MCValue &Target,
+                        bool IsPCRel) const override;
 };
 } // namespace
 
@@ -30,9 +30,8 @@ CAHPELFObjectWriter::CAHPELFObjectWriter(uint8_t OSABI)
 
 CAHPELFObjectWriter::~CAHPELFObjectWriter() {}
 
-unsigned CAHPELFObjectWriter::getRelocType(MCContext &Ctx,
+unsigned CAHPELFObjectWriter::getRelocType(const MCFixup &Fixup,
                                            const MCValue &Target,
-                                           const MCFixup &Fixup,
                                            bool IsPCRel) const {
   // Determine the type of the relocation
   switch ((unsigned)Fixup.getKind()) {

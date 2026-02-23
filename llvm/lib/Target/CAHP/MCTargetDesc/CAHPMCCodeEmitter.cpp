@@ -162,8 +162,7 @@ unsigned CAHPMCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
       break;
     }
   } else if (Kind == MCExpr::SymbolRef &&
-             cast<MCSymbolRefExpr>(Expr)->getKind() ==
-                 MCSymbolRefExpr::VK_None) {
+             cast<MCSymbolRefExpr>(Expr)->getSpecifier() == 0) {
     switch (MI.getOpcode()) {
     case CAHP::JS:
     case CAHP::JSAL:
@@ -184,7 +183,7 @@ unsigned CAHPMCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
   assert(FixupKind != CAHP::fixup_cahp_invalid && "Unhandled expression!");
 
   Fixups.push_back(MCFixup::create(
-      Offset, Expr, static_cast<MCFixupKind>(FixupKind), MI.getLoc()));
+      Offset, Expr, static_cast<MCFixupKind>(FixupKind)));
   ++MCNumFixups;
 
   return 0;

@@ -37,7 +37,7 @@ static MCOperand LowerSymbolOperand(const MachineOperand &MO, MCSymbol *Sym,
   }
 
   const MCExpr *ME =
-      MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None, Ctx);
+      MCSymbolRefExpr::create(Sym, Ctx);
 
   if (!MO.isJTI() && MO.getOffset())
     ME = MCBinaryExpr::createAdd(

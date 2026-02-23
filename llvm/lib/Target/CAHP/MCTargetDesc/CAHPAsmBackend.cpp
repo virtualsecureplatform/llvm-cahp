@@ -10,7 +10,6 @@
 #include "llvm/MC/MCDirectives.h"
 #include "llvm/MC/MCELFObjectWriter.h"
 #include "llvm/MC/MCExpr.h"
-#include "llvm/MC/MCFixupKindInfo.h"
 #include "llvm/MC/MCObjectWriter.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/MCSymbol.h"
@@ -27,10 +26,9 @@ public:
   CAHPAsmBackend(uint8_t OSABI) : MCAsmBackend(llvm::endianness::little), OSABI(OSABI) {}
   ~CAHPAsmBackend() override {}
 
-  void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
+  void applyFixup(const MCFragment &, const MCFixup &Fixup,
                   const MCValue &Target, MutableArrayRef<char> Data,
-                  uint64_t Value, bool IsResolved,
-                  const MCSubtargetInfo *STI) const override;
+                  uint64_t Value, bool IsResolved) override;
 
   std::unique_ptr<MCObjectTargetWriter>
   createObjectTargetWriter() const override;
@@ -40,52 +38,23 @@ public:
     return false;
   }
 
-  unsigned getNumFixupKinds() const override {
-    return CAHP::NumTargetFixupKinds;
-  }
-
-  const MCFixupKindInfo &getFixupKindInfo(MCFixupKind Kind) const override {
+  MCFixupKindInfo getFixupKindInfo(MCFixupKind Kind) const override {
     if (Kind < FirstTargetFixupKind)
       return MCAsmBackend::getFixupKindInfo(Kind);
 
     // MCFixupKindInfo{name, offset, bits, flag}
     switch ((unsigned)Kind) {
-    case CAHP::fixup_cahp_hi6: {
-      const static MCFixupKindInfo info{"fixup_cahp_hi6", 0, 16, 0};
-      return info;
-    }
-
-    case CAHP::fixup_cahp_lo10: {
-      const static MCFixupKindInfo info{"fixup_cahp_lo10", 0, 24, 0};
-      return info;
-    }
-
-    case CAHP::fixup_cahp_pcrel_10: {
-      const static MCFixupKindInfo info{"fixup_cahp_pcrel_10", 0, 24,
-                                        MCFixupKindInfo::FKF_IsPCRel};
-      return info;
-    }
-
-    case CAHP::fixup_cahp_pcrel_11: {
-      const static MCFixupKindInfo info{"fixup_cahp_pcrel_11", 5, 11,
-                                        MCFixupKindInfo::FKF_IsPCRel};
-      return info;
-    }
-
+    case CAHP::fixup_cahp_hi6:
+      return {"fixup_cahp_hi6", 0, 16, 0};
+    case CAHP::fixup_cahp_lo10:
+      return {"fixup_cahp_lo10", 0, 24, 0};
+    case CAHP::fixup_cahp_pcrel_10:
+      return {"fixup_cahp_pcrel_10", 0, 24, 0};
+    case CAHP::fixup_cahp_pcrel_11:
+      return {"fixup_cahp_pcrel_11", 5, 11, 0};
     default:
       llvm_unreachable("Invalid kind!");
     }
-  }
-
-  bool mayNeedRelaxation(const MCInst &Inst,
-                         const MCSubtargetInfo &STI) const override {
-    return false;
-  }
-
-  void relaxInstruction(MCInst &Inst,
-                        const MCSubtargetInfo &STI) const override {
-
-    report_fatal_error("CAHPAsmBackend::relaxInstruction() unimplemented");
   }
 
   bool writeNopData(raw_ostream &OS, uint64_t Count,
@@ -143,15 +112,14 @@ static uint64_t adjustFixupValue(const MCFixup &Fixup, uint64_t Value,
   }
 }
 
-void CAHPAsmBackend::applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
+void CAHPAsmBackend::applyFixup(const MCFragment &, const MCFixup &Fixup,
                                 const MCValue &Target,
                                 MutableArrayRef<char> Data, uint64_t Value,
-                                bool IsResolved,
-                                const MCSubtargetInfo *STI) const {
+                                bool IsResolved) {
   if (!Value)
     return; // Doesn't change encoding.
 
-  MCContext &Ctx = Asm.getContext();
+  MCContext &Ctx = getContext();
   MCFixupKindInfo Info = getFixupKindInfo(Fixup.getKind());
   // Apply any target-specific value adjustments.
   Value = adjustFixupValue(Fixup, Value, Ctx);
