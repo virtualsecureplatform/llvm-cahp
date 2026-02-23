@@ -2,7 +2,7 @@
 // is distributed under the Apache License v2.0 with LLVM Exceptions (see
 // LICENSE.TXT for details). This file is licensed under the same license.
 
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 using namespace llvm;
 
 namespace llvm {

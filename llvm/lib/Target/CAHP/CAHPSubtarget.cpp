@@ -5,7 +5,7 @@
 #include "CAHPSubtarget.h"
 #include "CAHP.h"
 #include "CAHPFrameLowering.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 
 using namespace llvm;
 
