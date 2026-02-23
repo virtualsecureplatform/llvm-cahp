@@ -71,9 +71,9 @@ CAHPTargetLowering::CAHPTargetLowering(const TargetMachine &TM,
 
   setBooleanContents(ZeroOrOneBooleanContent);
 
-  // Function alignments (log2).
-  setMinFunctionAlignment(0);
-  setPrefFunctionAlignment(0);
+  // Keep function alignment at one byte (equivalent to log2 value 0).
+  setMinFunctionAlignment(Align(1));
+  setPrefFunctionAlignment(Align(1));
 
   // Effectively disable jump table generation.
   setMinimumJumpTableEntries(INT_MAX);

@@ -28,8 +28,7 @@ public:
 
   DecodeStatus getInstruction(MCInst &Instr, uint64_t &Size,
                               ArrayRef<uint8_t> Bytes, uint64_t Address,
-                              raw_ostream &VStream,
-                              raw_ostream &CStream) const override;
+                              raw_ostream &VStream) const override;
 };
 } // end anonymous namespace
 
@@ -52,7 +51,7 @@ static const unsigned GPRDecoderTable[] = {
 static DecodeStatus DecodeGPRRegisterClass(MCInst &Inst, uint64_t RegNo,
                                            uint64_t Address,
                                            const void *Decoder) {
-  if (RegNo > sizeof(GPRDecoderTable))
+  if (RegNo >= array_lengthof(GPRDecoderTable))
     return MCDisassembler::Fail;
 
   unsigned Reg = GPRDecoderTable[RegNo];
@@ -89,8 +88,8 @@ static DecodeStatus decodeSImmOperand(MCInst &Inst, uint64_t Imm,
 
 DecodeStatus CAHPDisassembler::getInstruction(MCInst &MI, uint64_t &Size,
                                               ArrayRef<uint8_t> Bytes,
-                                              uint64_t Address, raw_ostream &OS,
-                                              raw_ostream &CS) const {
+                                              uint64_t Address,
+                                              raw_ostream &OS) const {
   if (Bytes.size() < 2) {
     Size = 0;
     return MCDisassembler::Fail;
