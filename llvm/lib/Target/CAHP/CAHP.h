@@ -7,6 +7,7 @@
 
 #include "MCTargetDesc/CAHPBaseInfo.h"
 #include "llvm/Support/CodeGen.h"
+#include "llvm/PassRegistry.h"
 
 namespace llvm {
 class AsmPrinter;
@@ -24,6 +25,7 @@ bool LowerCAHPMachineOperandToMCOperand(const MachineOperand &MO,
 
 FunctionPass *createCAHPISelDag(CAHPTargetMachine &TM,
                                 CodeGenOptLevel OptLevel);
+void initializeCAHPDAGToDAGISelLegacyPass(PassRegistry &);
 } // namespace llvm
 
 #endif

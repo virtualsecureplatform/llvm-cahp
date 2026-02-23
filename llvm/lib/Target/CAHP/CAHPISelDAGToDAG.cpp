@@ -7,6 +7,7 @@
 #include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/CodeGen/SelectionDAGISel.h"
 #include "llvm/IR/InlineAsm.h"
+#include "llvm/PassRegistry.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
@@ -19,15 +20,9 @@ using namespace llvm;
 namespace {
 class CAHPDAGToDAGISel final : public SelectionDAGISel {
 public:
-  static char ID;
-
   explicit CAHPDAGToDAGISel(CAHPTargetMachine &TargetMachine,
                             CodeGenOptLevel OptLevel)
-      : SelectionDAGISel(ID, TargetMachine, OptLevel) {}
-
-  StringRef getPassName() const override {
-    return "CAHP DAG->DAG Pattern Instruction Selection";
-  }
+      : SelectionDAGISel(TargetMachine, OptLevel) {}
 
   void Select(SDNode *Node) override;
 
@@ -42,7 +37,18 @@ public:
 };
 } // namespace
 
-char CAHPDAGToDAGISel::ID;
+class CAHPDAGToDAGISelLegacy : public SelectionDAGISelLegacy {
+public:
+  static char ID;
+  explicit CAHPDAGToDAGISelLegacy(CAHPTargetMachine &TM,
+                                  CodeGenOptLevel OptLevel)
+      : SelectionDAGISelLegacy(
+            ID, std::make_unique<CAHPDAGToDAGISel>(TM, OptLevel)) {}
+};
+
+char CAHPDAGToDAGISelLegacy::ID = 0;
+INITIALIZE_PASS(CAHPDAGToDAGISelLegacy, "cahp-isel",
+                "CAHP DAG->DAG Pattern Instruction Selection", false, false)
 
 void CAHPDAGToDAGISel::Select(SDNode *Node) {
   // If we have a custom node, we have already selected
@@ -95,5 +101,5 @@ bool CAHPDAGToDAGISel::SelectAddrFI(SDValue Addr, SDValue &Base) {
 // for instruction scheduling.
 FunctionPass *llvm::createCAHPISelDag(CAHPTargetMachine &TM,
                                       CodeGenOptLevel OptLevel) {
-  return new CAHPDAGToDAGISel(TM, OptLevel);
+  return new CAHPDAGToDAGISelLegacy(TM, OptLevel);
 }
