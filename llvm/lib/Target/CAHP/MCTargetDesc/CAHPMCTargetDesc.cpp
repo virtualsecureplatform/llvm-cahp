@@ -11,6 +11,7 @@
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/MCSubtargetInfo.h"
+#include "llvm/MC/MCTargetOptions.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/TargetRegistry.h"
 
@@ -41,7 +42,8 @@ static MCRegisterInfo *createCAHPMCRegisterInfo(const Triple &TT) {
 }
 
 static MCAsmInfo *createCAHPMCAsmInfo(const MCRegisterInfo &MRI,
-                                      const Triple &TT) {
+                                      const Triple &TT,
+                                      const MCTargetOptions &Options) {
   return new CAHPMCAsmInfo(TT);
 }
 
