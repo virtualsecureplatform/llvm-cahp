@@ -124,10 +124,8 @@ define i16 @lw_sw_global(i16 %a) nounwind {
 ; CAHP-NEXT:	addi	a2, a1, %lo(G)
 ; CAHP-NEXT:	lw	a1, 0(a2)
 ; CAHP-NEXT:	sw	a0, 0(a2)
-; CAHP-NEXT:	lui	a2, %hi(G+18)
-; CAHP-NEXT:	addi	a2, a2, %lo(G+18)
-; CAHP-NEXT:	lw	a3, 0(a2)
-; CAHP-NEXT:	sw	a0, 0(a2)
+; CAHP-NEXT:	lw	a3, 18(a2)
+; CAHP-NEXT:	sw	a0, 18(a2)
 ; CAHP-NEXT:	mov	a0, a1
 ; CAHP-NEXT:	jr	ra
 

@@ -43,7 +43,7 @@ CAHPTargetMachine::CAHPTargetMachine(const Target &T, const Triple &TT,
                         getEffectiveRelocModel(TT, RM),
                         getEffectiveCodeModel(CM, CodeModel::Small), OL),
       TLOF(std::make_unique<TargetLoweringObjectFileELF>()),
-      Subtarget(TT, CPU, FS, *this) {
+      Subtarget(TT, CPU, CPU, FS, *this) {
   initAsmInfo();
 }
 
