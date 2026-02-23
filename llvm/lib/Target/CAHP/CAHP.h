@@ -6,6 +6,7 @@
 #define LLVM_LIB_TARGET_CAHP_CAHP_H
 
 #include "MCTargetDesc/CAHPBaseInfo.h"
+#include "llvm/Support/CodeGen.h"
 
 namespace llvm {
 class AsmPrinter;
@@ -21,7 +22,8 @@ void LowerCAHPMachineInstrToMCInst(const MachineInstr *MI, MCInst &OutMI,
 bool LowerCAHPMachineOperandToMCOperand(const MachineOperand &MO,
                                         MCOperand &MCOp, const AsmPrinter &AP);
 
-FunctionPass *createCAHPISelDag(CAHPTargetMachine &TM);
+FunctionPass *createCAHPISelDag(CAHPTargetMachine &TM,
+                                CodeGenOpt::Level OptLevel);
 } // namespace llvm
 
 #endif

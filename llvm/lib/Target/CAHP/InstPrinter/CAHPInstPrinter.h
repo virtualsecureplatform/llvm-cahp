@@ -7,6 +7,7 @@
 
 #include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/MC/MCInstPrinter.h"
+#include "llvm/MC/MCRegister.h"
 
 namespace llvm {
 class MCOperand;
@@ -19,7 +20,7 @@ public:
 
   void printInst(const MCInst *MI, uint64_t Address, StringRef Annot,
                  const MCSubtargetInfo &STI, raw_ostream &O) override;
-  void printRegName(raw_ostream &O, unsigned RegNo) const override;
+  void printRegName(raw_ostream &O, MCRegister RegNo) const override;
 
   void printOperand(const MCInst *MI, unsigned OpNo, const MCSubtargetInfo &STI,
                     raw_ostream &O, const char *Modifier = nullptr);
@@ -31,7 +32,7 @@ public:
   bool printAliasInstr(const MCInst *MI, uint64_t Address,
                        const MCSubtargetInfo &STI,
                        raw_ostream &O);
-  static const char *getRegisterName(unsigned RegNo,
+  static const char *getRegisterName(MCRegister RegNo,
                                      unsigned AltIdx = CAHP::ABIRegAltName);
 };
 } // namespace llvm
