@@ -240,7 +240,7 @@ public:
   }
 
   static std::unique_ptr<CAHPOperand> createToken(StringRef Str, SMLoc S) {
-    auto Op = make_unique<CAHPOperand>(Token);
+    auto Op = std::make_unique<CAHPOperand>(Token);
     Op->Tok = Str;
     Op->StartLoc = S;
     Op->EndLoc = S;
@@ -249,7 +249,7 @@ public:
 
   static std::unique_ptr<CAHPOperand> createReg(unsigned RegNo, SMLoc S,
                                                 SMLoc E) {
-    auto Op = make_unique<CAHPOperand>(Register);
+    auto Op = std::make_unique<CAHPOperand>(Register);
     Op->Reg.RegNum = RegNo;
     Op->StartLoc = S;
     Op->EndLoc = E;
@@ -258,7 +258,7 @@ public:
 
   static std::unique_ptr<CAHPOperand> createImm(const MCExpr *Val, SMLoc S,
                                                 SMLoc E) {
-    auto Op = make_unique<CAHPOperand>(Immediate);
+    auto Op = std::make_unique<CAHPOperand>(Immediate);
     Op->Imm.Val = Val;
     Op->StartLoc = S;
     Op->EndLoc = E;
