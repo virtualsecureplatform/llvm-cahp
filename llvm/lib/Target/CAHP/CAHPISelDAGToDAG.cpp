@@ -18,8 +18,11 @@ using namespace llvm;
 namespace {
 class CAHPDAGToDAGISel final : public SelectionDAGISel {
 public:
-  explicit CAHPDAGToDAGISel(CAHPTargetMachine &TargetMachine)
-      : SelectionDAGISel(TargetMachine) {}
+  static char ID;
+
+  explicit CAHPDAGToDAGISel(CAHPTargetMachine &TargetMachine,
+                            CodeGenOpt::Level OptLevel)
+      : SelectionDAGISel(ID, TargetMachine, OptLevel) {}
 
   StringRef getPassName() const override {
     return "CAHP DAG->DAG Pattern Instruction Selection";
@@ -36,6 +39,8 @@ public:
 #include "CAHPGenDAGISel.inc"
 };
 } // namespace
+
+char CAHPDAGToDAGISel::ID;
 
 void CAHPDAGToDAGISel::Select(SDNode *Node) {
   // If we have a custom node, we have already selected
@@ -85,6 +90,7 @@ bool CAHPDAGToDAGISel::SelectAddrFI(SDValue Addr, SDValue &Base) {
 
 // This pass converts a legalized DAG into a CAHP-specific DAG, ready
 // for instruction scheduling.
-FunctionPass *llvm::createCAHPISelDag(CAHPTargetMachine &TM) {
-  return new CAHPDAGToDAGISel(TM);
+FunctionPass *llvm::createCAHPISelDag(CAHPTargetMachine &TM,
+                                      CodeGenOpt::Level OptLevel) {
+  return new CAHPDAGToDAGISel(TM, OptLevel);
 }

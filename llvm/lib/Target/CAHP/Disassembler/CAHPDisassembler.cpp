@@ -51,7 +51,7 @@ static const unsigned GPRDecoderTable[] = {
 static DecodeStatus DecodeGPRRegisterClass(MCInst &Inst, uint64_t RegNo,
                                            uint64_t Address,
                                            const void *Decoder) {
-  if (RegNo >= array_lengthof(GPRDecoderTable))
+  if (RegNo >= (sizeof(GPRDecoderTable) / sizeof(GPRDecoderTable[0])))
     return MCDisassembler::Fail;
 
   unsigned Reg = GPRDecoderTable[RegNo];
