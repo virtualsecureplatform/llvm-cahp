@@ -3,9 +3,9 @@
 # RUN: yaml2obj %s -o %t.o
 # RUN: llvm-objdump %t.o -d | FileCheck %s
 
-# CHECK: 00000000 .text:
-# CHECK-NEXT:   0: 73 68 69 <unknown>
-# CHECK-NEXT:   3: 72 61    <unknown>
+# CHECK: 00000000 <.text>:
+# CHECK-NEXT: {{ *}}0: 73 68 69{{ *}}<unknown>
+# CHECK-NEXT: {{ *}}3: 72 61{{ *}}<unknown>
 
 --- !ELF
 FileHeader:

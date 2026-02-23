@@ -22,11 +22,11 @@ public:
                    const DebugLoc &DL, MCRegister DstReg, MCRegister SrcReg,
                    bool KillSrc) const override;
   void storeRegToStackSlot(MachineBasicBlock &MBB,
-                           MachineBasicBlock::iterator I, unsigned SrcReg,
+                           MachineBasicBlock::iterator I, Register SrcReg,
                            bool IsKill, int FI, const TargetRegisterClass *RC,
                            const TargetRegisterInfo *TRI) const override;
   void loadRegFromStackSlot(MachineBasicBlock &MBB,
-                            MachineBasicBlock::iterator I, unsigned DstReg,
+                            MachineBasicBlock::iterator I, Register DstReg,
                             int FI, const TargetRegisterClass *RC,
                             const TargetRegisterInfo *TRI) const override;
 
