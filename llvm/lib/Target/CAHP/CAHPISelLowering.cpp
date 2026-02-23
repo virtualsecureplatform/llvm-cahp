@@ -434,7 +434,8 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
 
     Chain = DAG.getMemcpy(Chain, DL, FIPtr, Arg, SizeNode, ArgAlign,
                           /*IsVolatile=*/false,
-                          /*AlwaysInline=*/false, CLI.IsTailCall,
+                          /*AlwaysInline=*/false,
+                          /*CI=*/nullptr, CLI.IsTailCall,
                           MachinePointerInfo(), MachinePointerInfo());
     ByValArgs.push_back(FIPtr);
   }
