@@ -3,7 +3,7 @@
 // LICENSE.TXT for details). This file is licensed under the same license.
 
 #include "CAHPMCAsmInfo.h"
-#include "llvm/ADT/Triple.h"
+#include "llvm/TargetParser/Triple.h"
 using namespace llvm;
 
 void CAHPMCAsmInfo::anchor() {}
