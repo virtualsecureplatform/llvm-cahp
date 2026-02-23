@@ -34,8 +34,9 @@ class CAHPAsmParser : public MCTargetAsmParser {
                                uint64_t &ErrorInfo,
                                bool MatchingInlineAsm) override;
 
-  bool ParseRegister(unsigned &RegNo, SMLoc &StartLoc, SMLoc &EndLoc) override;
-  OperandMatchResultTy tryParseRegister(unsigned &RegNo, SMLoc &StartLoc,
+  bool parseRegister(MCRegister &RegNo, SMLoc &StartLoc,
+                     SMLoc &EndLoc) override;
+  OperandMatchResultTy tryParseRegister(MCRegister &RegNo, SMLoc &StartLoc,
                                         SMLoc &EndLoc) override;
 
   bool ParseInstruction(ParseInstructionInfo &Info, StringRef Name,
@@ -386,27 +387,28 @@ bool CAHPAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
   llvm_unreachable("Unknown match type detected!");
 }
 
-bool CAHPAsmParser::ParseRegister(unsigned &RegNo, SMLoc &StartLoc,
+bool CAHPAsmParser::parseRegister(MCRegister &RegNo, SMLoc &StartLoc,
                                   SMLoc &EndLoc) {
   if (tryParseRegister(RegNo, StartLoc, EndLoc) != MatchOperand_Success)
     return Error(StartLoc, "invalid register name");
   return false;
 }
 
-OperandMatchResultTy CAHPAsmParser::tryParseRegister(unsigned &RegNo,
+OperandMatchResultTy CAHPAsmParser::tryParseRegister(MCRegister &RegNo,
                                                      SMLoc &StartLoc,
                                                      SMLoc &EndLoc) {
   const AsmToken &Tok = getParser().getTok();
   StartLoc = Tok.getLoc();
   EndLoc = Tok.getEndLoc();
-  RegNo = CAHP::NoRegister;
+  RegNo = MCRegister();
   StringRef Name = getLexer().getTok().getIdentifier();
 
-  RegNo = MatchRegisterName(Name);
-  if (RegNo == CAHP::NoRegister)
-    RegNo = MatchRegisterAltName(Name);
-  if (RegNo == CAHP::NoRegister)
+  unsigned Reg = MatchRegisterName(Name);
+  if (Reg == CAHP::NoRegister)
+    Reg = MatchRegisterAltName(Name);
+  if (Reg == CAHP::NoRegister)
     return MatchOperand_NoMatch;
+  RegNo = MCRegister(Reg);
 
   getParser().Lex(); // Eat identifier token.
   return MatchOperand_Success;

@@ -24,7 +24,7 @@ void CAHPInstPrinter::printInst(const MCInst *MI, uint64_t Address,
   printAnnotation(O, Annot);
 }
 
-void CAHPInstPrinter::printRegName(raw_ostream &O, unsigned RegNo) const {
+void CAHPInstPrinter::printRegName(raw_ostream &O, MCRegister RegNo) const {
   O << getRegisterName(RegNo);
 }
 
