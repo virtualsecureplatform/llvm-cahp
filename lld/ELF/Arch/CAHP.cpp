@@ -26,7 +26,7 @@ public:
 
 } // end anonymous namespace
 
-CAHP::CAHP(Ctx &ctx) : TargetInfo(ctx) { noneRel = R_CAHP_NONE; }
+CAHP::CAHP(Ctx &ctx) : TargetInfo(ctx) {}
 
 RelExpr CAHP::getRelExpr(const RelType type, const Symbol &s,
                          const uint8_t *loc) const {
