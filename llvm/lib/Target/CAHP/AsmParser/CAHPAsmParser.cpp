@@ -36,8 +36,8 @@ class CAHPAsmParser : public MCTargetAsmParser {
 
   bool parseRegister(MCRegister &RegNo, SMLoc &StartLoc,
                      SMLoc &EndLoc) override;
-  OperandMatchResultTy tryParseRegister(MCRegister &RegNo, SMLoc &StartLoc,
-                                        SMLoc &EndLoc) override;
+  ParseStatus tryParseRegister(MCRegister &RegNo, SMLoc &StartLoc,
+                               SMLoc &EndLoc) override;
 
   bool ParseInstruction(ParseInstructionInfo &Info, StringRef Name,
                         SMLoc NameLoc, OperandVector &Operands) override;
@@ -389,14 +389,14 @@ bool CAHPAsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
 
 bool CAHPAsmParser::parseRegister(MCRegister &RegNo, SMLoc &StartLoc,
                                   SMLoc &EndLoc) {
-  if (tryParseRegister(RegNo, StartLoc, EndLoc) != MatchOperand_Success)
+  if (!tryParseRegister(RegNo, StartLoc, EndLoc).isSuccess())
     return Error(StartLoc, "invalid register name");
   return false;
 }
 
-OperandMatchResultTy CAHPAsmParser::tryParseRegister(MCRegister &RegNo,
-                                                     SMLoc &StartLoc,
-                                                     SMLoc &EndLoc) {
+ParseStatus CAHPAsmParser::tryParseRegister(MCRegister &RegNo,
+                                            SMLoc &StartLoc,
+                                            SMLoc &EndLoc) {
   const AsmToken &Tok = getParser().getTok();
   StartLoc = Tok.getLoc();
   EndLoc = Tok.getEndLoc();
@@ -407,11 +407,11 @@ OperandMatchResultTy CAHPAsmParser::tryParseRegister(MCRegister &RegNo,
   if (Reg == CAHP::NoRegister)
     Reg = MatchRegisterAltName(Name);
   if (Reg == CAHP::NoRegister)
-    return MatchOperand_NoMatch;
+    return ParseStatus::NoMatch;
   RegNo = MCRegister(Reg);
 
   getParser().Lex(); // Eat identifier token.
-  return MatchOperand_Success;
+  return ParseStatus::Success;
 }
 
 OperandMatchResultTy CAHPAsmParser::parseRegister(OperandVector &Operands) {
