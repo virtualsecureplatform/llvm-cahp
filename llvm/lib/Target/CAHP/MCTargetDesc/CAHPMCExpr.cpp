@@ -30,9 +30,9 @@ void CAHPMCExpr::printImpl(raw_ostream &OS, const MCAsmInfo *MAI) const {
 }
 
 bool CAHPMCExpr::evaluateAsRelocatableImpl(MCValue &Res,
-                                           const MCAsmLayout *Layout,
+                                           const MCAssembler *Asm,
                                            const MCFixup *Fixup) const {
-  return getSubExpr()->evaluateAsRelocatable(Res, Layout, Fixup);
+  return getSubExpr()->evaluateAsRelocatable(Res, Asm, Fixup);
 }
 
 void CAHPMCExpr::visitUsedExpr(MCStreamer &Streamer) const {
