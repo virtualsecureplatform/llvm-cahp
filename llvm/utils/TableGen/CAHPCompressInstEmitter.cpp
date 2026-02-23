@@ -3,6 +3,7 @@
 // LICENSE.TXT for details). This file is licensed under the same license.
 
 #include "CodeGenInstruction.h"
+#include "CodeGenRegisters.h"
 #include "CodeGenTarget.h"
 #include "llvm/ADT/IndexedMap.h"
 #include "llvm/ADT/SmallVector.h"

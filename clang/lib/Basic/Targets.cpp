@@ -431,7 +431,7 @@ std::unique_ptr<TargetInfo> AllocateTarget(const llvm::Triple &Triple,
     return std::make_unique<AMDGPUTargetInfo>(Triple, Opts);
 
   case llvm::Triple::cahp:
-    return new CAHPTargetInfo(Triple, Opts);
+    return std::make_unique<CAHPTargetInfo>(Triple, Opts);
 
   case llvm::Triple::riscv32:
     switch (os) {
