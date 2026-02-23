@@ -158,8 +158,8 @@ void CAHPFrameLowering::emitEpilogue(MachineFunction &MF,
   adjustReg(MBB, MBBI, DL, SPReg, SPReg, StackSize, MachineInstr::FrameDestroy);
 }
 
-int CAHPFrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
-                                              Register &FrameReg) const {
+StackOffset CAHPFrameLowering::getFrameIndexReference(
+    const MachineFunction &MF, int FI, Register &FrameReg) const {
   const MachineFrameInfo &MFI = MF.getFrameInfo();
   const TargetRegisterInfo *RI = MF.getSubtarget().getRegisterInfo();
 
@@ -187,7 +187,7 @@ int CAHPFrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
     FrameReg = CAHP::X1; // X1 is SP.
     Offset += MF.getFrameInfo().getStackSize();
   }
-  return Offset;
+  return StackOffset::getFixed(Offset);
 }
 
 void CAHPFrameLowering::determineCalleeSaves(MachineFunction &MF,

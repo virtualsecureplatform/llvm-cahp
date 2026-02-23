@@ -17,18 +17,21 @@ using namespace llvm;
 
 void CAHPSubtarget::anchor() {}
 
-CAHPSubtarget &CAHPSubtarget::initializeSubtargetDependencies(StringRef CPU,
-                                                              StringRef FS) {
+CAHPSubtarget &CAHPSubtarget::initializeSubtargetDependencies(
+    StringRef CPU, StringRef TuneCPU, StringRef FS) {
   // Determine default and user-specified characteristics
   std::string CPUName = CPU.str();
+  std::string TuneCPUName = TuneCPU.str();
   if (CPUName.empty())
     CPUName = "generic";
-  ParseSubtargetFeatures(CPUName, FS);
+  if (TuneCPUName.empty())
+    TuneCPUName = CPUName;
+  ParseSubtargetFeatures(CPUName, TuneCPUName, FS);
   return *this;
 }
 
-CAHPSubtarget::CAHPSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
-                             const TargetMachine &TM)
-    : CAHPGenSubtargetInfo(TT, CPU, FS),
-      FrameLowering(initializeSubtargetDependencies(CPU, FS)), InstrInfo(),
-      RegInfo(getHwMode()), TLInfo(TM, *this) {}
+CAHPSubtarget::CAHPSubtarget(const Triple &TT, StringRef CPU, StringRef TuneCPU,
+                             StringRef FS, const TargetMachine &TM)
+    : CAHPGenSubtargetInfo(TT, CPU, TuneCPU, FS),
+      FrameLowering(initializeSubtargetDependencies(CPU, TuneCPU, FS)),
+      InstrInfo(), RegInfo(getHwMode()), TLInfo(TM, *this) {}
