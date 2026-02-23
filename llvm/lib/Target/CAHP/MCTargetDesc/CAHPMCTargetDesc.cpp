@@ -49,7 +49,7 @@ static MCAsmInfo *createCAHPMCAsmInfo(const MCRegisterInfo &MRI,
 
 static MCSubtargetInfo *createCAHPMCSubtargetInfo(const Triple &TT,
                                                   StringRef CPU, StringRef FS) {
-  std::string CPUName = CPU;
+  std::string CPUName = CPU.str();
   if (CPUName.empty())
     CPUName = "generic";
   return createCAHPMCSubtargetInfoImpl(TT, CPUName, FS);
