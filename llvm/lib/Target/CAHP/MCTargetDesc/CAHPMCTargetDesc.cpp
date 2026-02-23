@@ -52,7 +52,7 @@ static MCSubtargetInfo *createCAHPMCSubtargetInfo(const Triple &TT,
   std::string CPUName = CPU.str();
   if (CPUName.empty())
     CPUName = "generic";
-  return createCAHPMCSubtargetInfoImpl(TT, CPUName, FS);
+  return createCAHPMCSubtargetInfoImpl(TT, CPUName, CPUName, FS);
 }
 
 static MCInstPrinter *createCAHPMCInstPrinter(const Triple &T,
