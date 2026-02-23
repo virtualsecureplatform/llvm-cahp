@@ -20,7 +20,8 @@ public:
   CAHP();
   RelExpr getRelExpr(RelType type, const Symbol &s,
                      const uint8_t *loc) const override;
-  void relocateOne(uint8_t *loc, RelType type, uint64_t val) const override;
+  void relocate(uint8_t *loc, const Relocation &rel,
+                uint64_t val) const override;
 };
 
 } // end anonymous namespace
@@ -38,9 +39,9 @@ RelExpr CAHP::getRelExpr(const RelType type, const Symbol &s,
   }
 }
 
-void CAHP::relocateOne(uint8_t *loc, const RelType type,
-                       const uint64_t val) const {
-  switch (type) {
+void CAHP::relocate(uint8_t *loc, const Relocation &rel,
+                    const uint64_t val) const {
+  switch (rel.type) {
   case R_CAHP_NONE:
     break;
 
@@ -49,7 +50,7 @@ void CAHP::relocateOne(uint8_t *loc, const RelType type,
     break;
 
   case R_CAHP_PCREL_11: {
-    checkInt(loc, static_cast<int64_t>(val), 11, type);
+    checkInt(loc, static_cast<int64_t>(val), 11, rel);
     uint32_t insn = read16le(loc) & 0x001F;
     insn |= (val << 5);
     write16le(loc, insn);
@@ -81,7 +82,7 @@ void CAHP::relocateOne(uint8_t *loc, const RelType type,
 
   default:
     error(getErrorLocation(loc) +
-          "unimplemented relocation: " + toString(type));
+          "unimplemented relocation: " + toString(rel.type));
     return;
   }
 }

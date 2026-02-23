@@ -34,7 +34,7 @@ void CAHPInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
 
 void CAHPInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
                                         MachineBasicBlock::iterator I,
-                                        unsigned SrcReg, bool IsKill, int FI,
+                                        Register SrcReg, bool IsKill, int FI,
                                         const TargetRegisterClass *RC,
                                         const TargetRegisterInfo *TRI) const {
   DebugLoc DL;
@@ -49,7 +49,7 @@ void CAHPInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
 
 void CAHPInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
                                          MachineBasicBlock::iterator I,
-                                         unsigned DstReg, int FI,
+                                         Register DstReg, int FI,
                                          const TargetRegisterClass *RC,
                                          const TargetRegisterInfo *TRI) const {
   DebugLoc DL;
