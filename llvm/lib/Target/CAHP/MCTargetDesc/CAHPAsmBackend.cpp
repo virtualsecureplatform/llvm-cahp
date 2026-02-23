@@ -89,10 +89,12 @@ public:
     report_fatal_error("CAHPAsmBackend::relaxInstruction() unimplemented");
   }
 
-  bool writeNopData(raw_ostream &OS, uint64_t Count) const override;
+  bool writeNopData(raw_ostream &OS, uint64_t Count,
+                    const MCSubtargetInfo *STI) const override;
 };
 
-bool CAHPAsmBackend::writeNopData(raw_ostream &OS, uint64_t Count) const {
+bool CAHPAsmBackend::writeNopData(raw_ostream &OS, uint64_t Count,
+                                  const MCSubtargetInfo *STI) const {
   if ((Count % 2) != 0)
     return false;
 
