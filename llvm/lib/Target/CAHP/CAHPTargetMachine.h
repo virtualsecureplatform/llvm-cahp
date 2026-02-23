@@ -9,11 +9,11 @@
 #include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/CodeGen/SelectionDAGTargetInfo.h"
 #include "llvm/IR/DataLayout.h"
-#include "llvm/Target/TargetMachine.h"
+#include "llvm/CodeGen/CodeGenTargetMachineImpl.h"
 #include <optional>
 
 namespace llvm {
-class CAHPTargetMachine : public LLVMTargetMachine {
+class CAHPTargetMachine : public CodeGenTargetMachineImpl {
   std::unique_ptr<TargetLoweringObjectFile> TLOF;
   CAHPSubtarget Subtarget;
 
