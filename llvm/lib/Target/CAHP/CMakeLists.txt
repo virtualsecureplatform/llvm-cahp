@@ -1,3 +1,5 @@
+add_llvm_component_group(CAHP)
+
 set(LLVM_TARGET_DEFINITIONS CAHP.td)
 
 tablegen(LLVM CAHPGenAsmMatcher.inc -gen-asm-matcher)
@@ -24,6 +26,9 @@ add_llvm_target(CAHPCodeGen
   CAHPRegisterInfo.cpp
   CAHPSubtarget.cpp
   CAHPTargetMachine.cpp
+
+  ADD_TO_COMPONENT
+  CAHP
   )
 add_subdirectory(AsmParser)
 add_subdirectory(Disassembler)
