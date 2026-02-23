@@ -20,7 +20,7 @@ bool CAHPFrameLowering::hasFP(const MachineFunction &MF) const {
   const MachineFrameInfo &MFI = MF.getFrameInfo();
 
   return MF.getTarget().Options.DisableFramePointerElim(MF) ||
-         RegInfo->needsStackRealignment(MF) || MFI.hasVarSizedObjects() ||
+         RegInfo->hasStackRealignment(MF) || MFI.hasVarSizedObjects() ||
          MFI.isFrameAddressTaken();
 }
 
@@ -33,8 +33,8 @@ void CAHPFrameLowering::determineFrameLayout(MachineFunction &MF) const {
   uint64_t FrameSize = MFI.getStackSize();
 
   // Get the alignment.
-  uint64_t StackAlign = RI->needsStackRealignment(MF) ? MFI.getMaxAlignment()
-                                                      : getStackAlignment();
+  Align StackAlign = RI->hasStackRealignment(MF) ? MFI.getMaxAlign()
+                                                 : getStackAlign();
 
   // Make sure the frame is aligned.
   FrameSize = alignTo(FrameSize, StackAlign);
@@ -148,7 +148,7 @@ void CAHPFrameLowering::emitEpilogue(MachineFunction &MF,
   // Restore the stack pointer using the value of the frame pointer. Only
   // necessary if the stack pointer was modified, meaning the stack size is
   // unknown.
-  if (RI->needsStackRealignment(MF) || MFI.hasVarSizedObjects()) {
+  if (RI->hasStackRealignment(MF) || MFI.hasVarSizedObjects()) {
     assert(hasFP(MF) && "frame pointer should not have been eliminated");
     adjustReg(MBB, LastFrameDestroy, DL, SPReg, FPReg, -StackSize,
               MachineInstr::FrameDestroy);
@@ -209,7 +209,7 @@ void CAHPFrameLowering::processFunctionBeforeFrameFinalized(
   const TargetRegisterClass *RC = &CAHP::GPRRegClass;
   if (!isInt<9>(MFI.estimateStackSize(MF))) {
     int RegScavFI = MFI.CreateStackObject(
-        RegInfo->getSpillSize(*RC), RegInfo->getSpillAlignment(*RC), false);
+        RegInfo->getSpillSize(*RC), RegInfo->getSpillAlign(*RC), false);
     RS->addScavengingFrameIndex(RegScavFI);
   }
 }
