@@ -22,8 +22,9 @@ private:
 public:
   explicit CAHPFrameLowering(const CAHPSubtarget &STI)
       : TargetFrameLowering(StackGrowsDown,
-                            /*StackAlignment=*/2,
-                            /*LocalAreaOffset=*/0),
+                            /*StackAlignment=*/Align(2),
+                            /*LocalAreaOffset=*/0,
+                            /*TransientStackAlignment=*/Align(2)),
         STI(STI) {}
 
   void emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const override;
