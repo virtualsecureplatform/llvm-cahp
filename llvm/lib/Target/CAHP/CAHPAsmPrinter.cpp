@@ -37,8 +37,7 @@ public:
                              const char *ExtraCode, raw_ostream &OS) override;
 
   // TableGen'erated function.
-  bool emitPseudoExpansionLowering(MCStreamer &OutStreamer,
-                                   const MachineInstr *MI);
+  bool lowerPseudoInstExpansion(const MachineInstr *MI, MCInst &Inst);
 };
 } // namespace
 
@@ -51,10 +50,12 @@ public:
 
 void CAHPAsmPrinter::emitInstruction(const MachineInstr *MI) {
   // Do any auto-generated pseudo lowerings.
-  if (emitPseudoExpansionLowering(*OutStreamer, MI))
-    return;
-
   MCInst TmpInst, CInst;
+  if (lowerPseudoInstExpansion(MI, TmpInst)) {
+    EmitToStreamer(*OutStreamer, TmpInst);
+    return;
+  }
+
   LowerCAHPMachineInstrToMCInst(MI, TmpInst, *this);
   bool Res = compressInst(CInst, TmpInst, *TM.getMCSubtargetInfo(),
                           OutStreamer->getContext());

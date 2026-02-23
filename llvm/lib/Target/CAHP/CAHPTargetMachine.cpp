@@ -3,6 +3,7 @@
 // LICENSE.TXT for details). This file is licensed under the same license.
 
 #include "CAHPTargetMachine.h"
+#include "llvm/CodeGen/CodeGenTargetMachineImpl.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/CodeGen/Passes.h"
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
@@ -38,7 +39,7 @@ CAHPTargetMachine::CAHPTargetMachine(const Target &T, const Triple &TT,
                                      std::optional<Reloc::Model> RM,
                                      std::optional<CodeModel::Model> CM,
                                      CodeGenOptLevel OL, bool JIT)
-      : LLVMTargetMachine(T, computeDataLayout(TT), TT, CPU, FS, Options,
+      : CodeGenTargetMachineImpl(T, computeDataLayout(TT), TT, CPU, FS, Options,
                         getEffectiveRelocModel(TT, RM),
                         getEffectiveCodeModel(CM, CodeModel::Small), OL),
       TLOF(std::make_unique<TargetLoweringObjectFileELF>()),

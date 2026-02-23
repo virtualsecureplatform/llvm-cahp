@@ -28,14 +28,14 @@ class CAHPCompressInstEmitter {
     union {
       unsigned Operand; // Operand number mapped to.
       uint64_t Imm;     // Integer immediate value.
-      Record *Reg;      // Physical register.
+      const Record *Reg;      // Physical register.
     } Data;
     int TiedOpIdx = -1; // Tied operand index within the instruction.
   };
   struct CompressPat {
     CodeGenInstruction Source; // The source instruction definition.
     CodeGenInstruction Dest;   // The destination instruction to transform to.
-    std::vector<Record *>
+    std::vector<const Record *>
         PatReqFeatures; // Required target features to enable pattern.
     IndexedMap<OpData>
         SourceOperandMap; // Maps operands in the Source Instruction to
@@ -44,42 +44,46 @@ class CAHPCompressInstEmitter {
         DestOperandMap; // Maps operands in the Dest Instruction
                         // to the corresponding Source instruction operand.
     CompressPat(CodeGenInstruction &S, CodeGenInstruction &D,
-                std::vector<Record *> RF, IndexedMap<OpData> &SourceMap,
+                std::vector<const Record *> RF, IndexedMap<OpData> &SourceMap,
                 IndexedMap<OpData> &DestMap)
         : Source(S), Dest(D), PatReqFeatures(RF), SourceOperandMap(SourceMap),
           DestOperandMap(DestMap) {}
   };
 
-  RecordKeeper &Records;
+  const RecordKeeper &Records;
   CodeGenTarget Target;
   SmallVector<CompressPat, 4> CompressPatterns;
 
-  void addDagOperandMapping(Record *Rec, DagInit *Dag, CodeGenInstruction &Inst,
+  void addDagOperandMapping(const Record *Rec, const DagInit *Dag,
+                            CodeGenInstruction &Inst,
                             IndexedMap<OpData> &OperandMap, bool IsSourceInst);
-  void evaluateCompressPat(Record *Compress);
+  void evaluateCompressPat(const Record *Compress);
   void emitCompressInstEmitter(raw_ostream &o, bool Compress);
-  bool validateTypes(Record *SubType, Record *Type, bool IsSourceInst);
-  bool validateRegister(Record *Reg, Record *RegClass);
-  void createDagOperandMapping(Record *Rec, StringMap<unsigned> &SourceOperands,
+  bool validateTypes(const Record *SubType, const Record *Type,
+                     bool IsSourceInst);
+  bool validateRegister(const Record *Reg, const Record *RegClass);
+  void createDagOperandMapping(const Record *Rec,
+                               StringMap<unsigned> &SourceOperands,
                                StringMap<unsigned> &DestOperands,
-                               DagInit *SourceDag, DagInit *DestDag,
+                               const DagInit *SourceDag,
+                               const DagInit *DestDag,
                                IndexedMap<OpData> &SourceOperandMap);
 
-  void createInstOperandMapping(Record *Rec, DagInit *SourceDag,
-                                DagInit *DestDag,
+  void createInstOperandMapping(const Record *Rec, const DagInit *SourceDag,
+                                const DagInit *DestDag,
                                 IndexedMap<OpData> &SourceOperandMap,
                                 IndexedMap<OpData> &DestOperandMap,
                                 StringMap<unsigned> &SourceOperands,
                                 CodeGenInstruction &DestInst);
 
 public:
-  CAHPCompressInstEmitter(RecordKeeper &R) : Records(R), Target(R) {}
+  CAHPCompressInstEmitter(const RecordKeeper &R) : Records(R), Target(R) {}
 
   void run(raw_ostream &o);
 };
 } // End anonymous namespace.
 
-bool CAHPCompressInstEmitter::validateRegister(Record *Reg, Record *RegClass) {
+bool CAHPCompressInstEmitter::validateRegister(const Record *Reg, const Record *RegClass) {
   assert(Reg->isSubClassOf("Register") && "Reg record should be a Register\n");
   assert(RegClass->isSubClassOf("RegisterClass") && "RegClass record should be"
                                                     " a RegisterClass\n");
@@ -90,8 +94,8 @@ bool CAHPCompressInstEmitter::validateRegister(Record *Reg, Record *RegClass) {
   return RC.contains(R);
 }
 
-bool CAHPCompressInstEmitter::validateTypes(Record *DagOpType,
-                                            Record *InstOpType,
+bool CAHPCompressInstEmitter::validateTypes(const Record *DagOpType,
+                                            const Record *InstOpType,
                                             bool IsSourceInst) {
   if (DagOpType == InstOpType)
     return true;
@@ -130,7 +134,7 @@ bool CAHPCompressInstEmitter::validateTypes(Record *DagOpType,
 /// in the instantiated instruction operand type. For immediate operands and
 /// immediates no validation checks are enforced at pattern validation time.
 void CAHPCompressInstEmitter::addDagOperandMapping(
-    Record *Rec, DagInit *Dag, CodeGenInstruction &Inst,
+    const Record *Rec, const DagInit *Dag, CodeGenInstruction &Inst,
     IndexedMap<OpData> &OperandMap, bool IsSourceInst) {
   // TiedCount keeps track of the number of operands skipped in Inst
   // operands list to get to the corresponding Dag operand. This is
@@ -147,7 +151,7 @@ void CAHPCompressInstEmitter::addDagOperandMapping(
       TiedCount++;
       continue;
     }
-    if (DefInit *DI = dyn_cast<DefInit>(Dag->getArg(i - TiedCount))) {
+    if (const DefInit *DI = dyn_cast<DefInit>(Dag->getArg(i - TiedCount))) {
       if (DI->getDef()->isSubClassOf("Register")) {
         // Check if the fixed register belongs to the Register class.
         if (!validateRegister(DI->getDef(), Inst.Operands[i].Rec))
@@ -174,7 +178,7 @@ void CAHPCompressInstEmitter::addDagOperandMapping(
                             "' in the corresponding instruction operand!");
 
       OperandMap[i].Kind = OpData::Operand;
-    } else if (IntInit *II = dyn_cast<IntInit>(Dag->getArg(i - TiedCount))) {
+    } else if (const IntInit *II = dyn_cast<IntInit>(Dag->getArg(i - TiedCount))) {
       // Validate that corresponding instruction operand expects an immediate.
       if (Inst.Operands[i].Rec->isSubClassOf("RegisterClass"))
         PrintFatalError(
@@ -196,7 +200,7 @@ void CAHPCompressInstEmitter::addDagOperandMapping(
 }
 
 // Verify the Dag operand count is enough to build an instruction.
-static bool verifyDagOpCount(CodeGenInstruction &Inst, DagInit *Dag,
+static bool verifyDagOpCount(CodeGenInstruction &Inst, const DagInit *Dag,
                              bool IsSource) {
   if (Dag->getNumArgs() == Inst.Operands.size())
     return true;
@@ -226,9 +230,9 @@ static bool verifyDagOpCount(CodeGenInstruction &Inst, DagInit *Dag,
   return true;
 }
 
-static bool validateArgsTypes(Init *Arg1, Init *Arg2) {
-  DefInit *Type1 = dyn_cast<DefInit>(Arg1);
-  DefInit *Type2 = dyn_cast<DefInit>(Arg2);
+static bool validateArgsTypes(const Init *Arg1, const Init *Arg2) {
+  const DefInit *Type1 = dyn_cast<DefInit>(Arg1);
+  const DefInit *Type2 = dyn_cast<DefInit>(Arg2);
   assert(Type1 && ("Arg1 type not found\n"));
   assert(Type2 && ("Arg2 type not found\n"));
   return Type1->getDef() == Type2->getDef();
@@ -240,9 +244,9 @@ static bool validateArgsTypes(Init *Arg1, Init *Arg2) {
 // mapping $rs1 --> 0, $rs2 ---> 1. If the operand appears twice in the (tied)
 // same Dag we use the last occurrence for indexing.
 void CAHPCompressInstEmitter::createDagOperandMapping(
-    Record *Rec, StringMap<unsigned> &SourceOperands,
-    StringMap<unsigned> &DestOperands, DagInit *SourceDag, DagInit *DestDag,
-    IndexedMap<OpData> &SourceOperandMap) {
+    const Record *Rec, StringMap<unsigned> &SourceOperands,
+    StringMap<unsigned> &DestOperands, const DagInit *SourceDag,
+    const DagInit *DestDag, IndexedMap<OpData> &SourceOperandMap) {
   for (unsigned i = 0; i < DestDag->getNumArgs(); ++i) {
     // Skip fixed immediates and registers, they were handled in
     // addDagOperandMapping.
@@ -287,7 +291,7 @@ void CAHPCompressInstEmitter::createDagOperandMapping(
 /// output instructions. Validate that operands defined in the input are
 /// used in the output pattern while populating the maps.
 void CAHPCompressInstEmitter::createInstOperandMapping(
-    Record *Rec, DagInit *SourceDag, DagInit *DestDag,
+    const Record *Rec, const DagInit *SourceDag, const DagInit *DestDag,
     IndexedMap<OpData> &SourceOperandMap, IndexedMap<OpData> &DestOperandMap,
     StringMap<unsigned> &SourceOperands, CodeGenInstruction &DestInst) {
   // TiedCount keeps track of the number of operands skipped in Inst
@@ -355,18 +359,18 @@ void CAHPCompressInstEmitter::createInstOperandMapping(
 ///   and generate warning.
 /// - Immediate operand type in Dag Input differs from the corresponding Source
 ///   Instruction type  and generate a warning.
-void CAHPCompressInstEmitter::evaluateCompressPat(Record *Rec) {
+void CAHPCompressInstEmitter::evaluateCompressPat(const Record *Rec) {
   // Validate input Dag operands.
-  DagInit *SourceDag = Rec->getValueAsDag("Input");
+  const DagInit *SourceDag = Rec->getValueAsDag("Input");
   assert(SourceDag && "Missing 'Input' in compress pattern!");
   LLVM_DEBUG(dbgs() << "Input: " << *SourceDag << "\n");
 
-  DefInit *OpDef = dyn_cast<DefInit>(SourceDag->getOperator());
+  const DefInit *OpDef = dyn_cast<DefInit>(SourceDag->getOperator());
   if (!OpDef)
     PrintFatalError(Rec->getLoc(),
                     Rec->getName() + " has unexpected operator type!");
   // Checking we are transforming from compressed to uncompressed instructions.
-  Record *Operator = OpDef->getDef();
+  const Record *Operator = OpDef->getDef();
   if (!Operator->isSubClassOf("CAHPInst24"))
     PrintFatalError(Rec->getLoc(), "Input instruction '" + Operator->getName() +
                                        "' is not a 24 bit wide instruction!");
@@ -374,16 +378,16 @@ void CAHPCompressInstEmitter::evaluateCompressPat(Record *Rec) {
   verifyDagOpCount(SourceInst, SourceDag, true);
 
   // Validate output Dag operands.
-  DagInit *DestDag = Rec->getValueAsDag("Output");
+  const DagInit *DestDag = Rec->getValueAsDag("Output");
   assert(DestDag && "Missing 'Output' in compress pattern!");
   LLVM_DEBUG(dbgs() << "Output: " << *DestDag << "\n");
 
-  DefInit *DestOpDef = dyn_cast<DefInit>(DestDag->getOperator());
+  const DefInit *DestOpDef = dyn_cast<DefInit>(DestDag->getOperator());
   if (!DestOpDef)
     PrintFatalError(Rec->getLoc(),
                     Rec->getName() + " has unexpected operator type!");
 
-  Record *DestOperator = DestOpDef->getDef();
+  const Record *DestOperator = DestOpDef->getDef();
   if (!DestOperator->isSubClassOf("CAHPInst16"))
     PrintFatalError(Rec->getLoc(), "Output instruction  '" +
                                        DestOperator->getName() +
@@ -415,9 +419,9 @@ void CAHPCompressInstEmitter::evaluateCompressPat(Record *Rec) {
                            DestOperandMap, SourceOperands, DestInst);
 
   // Get the target features for the CompressPat.
-  std::vector<Record *> PatReqFeatures;
-  std::vector<Record *> RF = Rec->getValueAsListOfDefs("Predicates");
-  copy_if(RF, std::back_inserter(PatReqFeatures), [](Record *R) {
+  std::vector<const Record *> PatReqFeatures;
+  std::vector<const Record *> RF = Rec->getValueAsListOfDefs("Predicates");
+  copy_if(RF, std::back_inserter(PatReqFeatures), [](const Record *R) {
     return R->getValueAsBit("AssemblerMatcherPredicate");
   });
 
@@ -426,7 +430,7 @@ void CAHPCompressInstEmitter::evaluateCompressPat(Record *Rec) {
 }
 
 static void getReqFeatures(std::set<StringRef> &FeaturesSet,
-                           const std::vector<Record *> &ReqFeatures) {
+                           const std::vector<const Record *> &ReqFeatures) {
   for (auto &R : ReqFeatures) {
     StringRef AsmCondString = R->getValueAsString("AssemblerCondString");
 
@@ -443,7 +447,8 @@ static void getReqFeatures(std::set<StringRef> &FeaturesSet,
 
 static unsigned
 getMCOpPredicate(DenseMap<const Record *, unsigned> &MCOpPredicateMap,
-                 std::vector<const Record *> &MCOpPredicates, Record *Rec) {
+                 std::vector<const Record *> &MCOpPredicates,
+                 const Record *Rec) {
   unsigned Entry = MCOpPredicateMap[Rec];
   if (Entry)
     return Entry;
@@ -479,7 +484,7 @@ static std::string mergeCondAndCode(raw_string_ostream &CondStream,
 
 void CAHPCompressInstEmitter::emitCompressInstEmitter(raw_ostream &o,
                                                       bool Compress) {
-  Record *AsmWriter = Target.getAsmWriter();
+  const Record *AsmWriter = Target.getAsmWriter();
   if (!AsmWriter->getValueAsInt("PassSubtarget"))
     PrintFatalError(AsmWriter->getLoc(),
                     "'PassSubtarget' is false. SubTargetInfo object is needed "
@@ -574,9 +579,10 @@ void CAHPCompressInstEmitter::emitCompressInstEmitter(raw_ostream &o,
     getReqFeatures(FeaturesSet, CompressPat.PatReqFeatures);
 
     // Add Dest instruction required features.
-    std::vector<Record *> ReqFeatures;
-    std::vector<Record *> RF = Dest.TheDef->getValueAsListOfDefs("Predicates");
-    copy_if(RF, std::back_inserter(ReqFeatures), [](Record *R) {
+    std::vector<const Record *> ReqFeatures;
+    std::vector<const Record *> RF =
+        Dest.TheDef->getValueAsListOfDefs("Predicates");
+    copy_if(RF, std::back_inserter(ReqFeatures), [](const Record *R) {
       return R->getValueAsBit("AssemblerMatcherPredicate");
     });
     getReqFeatures(FeaturesSet, ReqFeatures);
@@ -620,7 +626,7 @@ void CAHPCompressInstEmitter::emitCompressInstEmitter(raw_ostream &o,
                    std::to_string(SourceOperandMap[OpNo].Data.Imm) + ") &&\n";
         break;
       case OpData::Reg: {
-        Record *Reg = SourceOperandMap[OpNo].Data.Reg;
+        const Record *Reg = SourceOperandMap[OpNo].Data.Reg;
         CondStream.indent(6) << "(MI.getOperand(" + std::to_string(OpNo) +
                                     ").getReg() == " + Namespace +
                                     "::" + Reg->getName().str() + ") &&\n";
@@ -679,7 +685,7 @@ void CAHPCompressInstEmitter::emitCompressInstEmitter(raw_ostream &o,
       } break;
       case OpData::Reg: {
         // Fixed register has been validated at pattern validation time.
-        Record *Reg = DestOperandMap[OpNo].Data.Reg;
+        const Record *Reg = DestOperandMap[OpNo].Data.Reg;
         CodeStream.indent(6) << "OutInst.addOperand(MCOperand::createReg(" +
                                     Namespace + "::" + Reg->getName().str() +
                                     "));\n";
@@ -729,17 +735,9 @@ void CAHPCompressInstEmitter::emitCompressInstEmitter(raw_ostream &o,
 }
 
 void CAHPCompressInstEmitter::run(raw_ostream &o) {
-  Record *CompressClass = Records.getClass("CompressPat");
-  assert(CompressClass && "Compress class definition missing!");
-  std::vector<Record *> Insts;
-  for (const auto &D : Records.getDefs()) {
-    if (D.second->isSubClassOf(CompressClass))
-      Insts.push_back(D.second.get());
-  }
-
   // Process the CompressPat definitions, validating them as we do so.
-  for (unsigned i = 0, e = Insts.size(); i != e; ++i)
-    evaluateCompressPat(Insts[i]);
+  for (const Record *Pat : Records.getAllDerivedDefinitions("CompressPat"))
+    evaluateCompressPat(Pat);
 
   // Emit file header.
   emitSourceFileHeader("Compress instruction Source Fragment", o);
