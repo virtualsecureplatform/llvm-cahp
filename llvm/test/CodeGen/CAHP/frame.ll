@@ -10,25 +10,21 @@
 define i16 @test() nounwind {
 ; CAHP-LABEL: test:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -24
-; CAHP-NEXT:	swsp	ra, 22(sp)
-; CAHP-NEXT:	swsp	fp, 20(sp)
+; CAHP-NEXT:	addi2	sp, -22
+; CAHP-NEXT:	swsp	ra, 20(sp)
 ; CAHP-NEXT:	swsp	s0, 18(sp)
-; CAHP-NEXT:	addi	fp, sp, 24
 ; CAHP-NEXT:	lsi	s0, 0
-; CAHP-NEXT:	sw	s0, -16(fp)
-; CAHP-NEXT:	sw	s0, -18(fp)
-; CAHP-NEXT:	sw	s0, -20(fp)
-; CAHP-NEXT:	sw	s0, -22(fp)
-; CAHP-NEXT:	sw	s0, -24(fp)
-; CAHP-NEXT:	addi	a0, fp, -22
+; CAHP-NEXT:	swsp	s0, 8(sp)
+; CAHP-NEXT:	swsp	s0, 6(sp)
+; CAHP-NEXT:	swsp	s0, 4(sp)
+; CAHP-NEXT:	swsp	s0, 2(sp)
+; CAHP-NEXT:	swsp	s0, 0(sp)
+; CAHP-NEXT:	addi	a0, sp, 2
 ; CAHP-NEXT:	jsal	test1
 ; CAHP-NEXT:	mov	a0, s0
-; CAHP-NEXT:	addi	sp, fp, -24
 ; CAHP-NEXT:	lwsp	s0, 18(sp)
-; CAHP-NEXT:	lwsp	fp, 20(sp)
-; CAHP-NEXT:	lwsp	ra, 22(sp)
-; CAHP-NEXT:	addi2	sp, 24
+; CAHP-NEXT:	lwsp	ra, 20(sp)
+; CAHP-NEXT:	addi2	sp, 22
 ; CAHP-NEXT:	jr	ra
 
   %key = alloca %struct.key_t, align 2
