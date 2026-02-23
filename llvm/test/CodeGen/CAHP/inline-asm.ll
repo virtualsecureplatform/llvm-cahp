@@ -37,7 +37,7 @@ define void @constraint_m(i16* %a) {
 ; CAHP-NEXT:	#APP
 ; CAHP-NEXT:	#NO_APP
 ; CAHP-NEXT:	jr	ra
-  call void asm sideeffect "", "=*m"(i16* %a)
+  call void asm sideeffect "", "=*m"(i16* elementtype(i16) %a)
   ret void
 }
 
@@ -48,6 +48,6 @@ define i16 @constraint_m2(i16* %a) {
 ; CAHP-NEXT:	lw a0, 0(a0)
 ; CAHP-NEXT:	#NO_APP
 ; CAHP-NEXT:	jr	ra
-  %1 = tail call i16 asm "lw $0, $1", "=r,*m"(i16* %a) nounwind
+  %1 = tail call i16 asm "lw $0, $1", "=r,*m"(i16* elementtype(i16) %a) nounwind
   ret i16 %1
 }
