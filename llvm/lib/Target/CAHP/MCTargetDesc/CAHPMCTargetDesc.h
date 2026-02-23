@@ -27,7 +27,6 @@ class raw_pwrite_stream;
 Target &getTheCAHPTarget();
 
 MCCodeEmitter *createCAHPMCCodeEmitter(const MCInstrInfo &MCII,
-                                       const MCRegisterInfo &MRI,
                                        MCContext &Ctx);
 
 MCAsmBackend *createCAHPAsmBackend(const Target &T, const MCSubtargetInfo &STI,
