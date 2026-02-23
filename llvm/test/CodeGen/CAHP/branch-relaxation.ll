@@ -12,7 +12,7 @@ define void @relax_bcc(i1 %a) {
 ; CHECK-NEXT:	js	.LBB0_2
 ; CHECK-NEXT:.LBB0_1:                                # %iftrue
 ; CHECK-NEXT:	#APP
-; CHECK-NEXT:	.space 512
+; CHECK-NEXT:	.zero 512
 ; CHECK-NEXT:	#NO_APP
 ; CHECK-NEXT:.LBB0_2:                                # %tail
 ; CHECK-NEXT:	jr	ra
