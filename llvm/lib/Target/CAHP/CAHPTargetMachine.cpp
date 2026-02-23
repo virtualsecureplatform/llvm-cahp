@@ -11,6 +11,7 @@
 #include "llvm/Support/FormattedStream.h"
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Target/TargetOptions.h"
+#include <optional>
 using namespace llvm;
 
 extern "C" void LLVMInitializeCAHPTarget() {
@@ -27,17 +28,15 @@ static std::string computeDataLayout(const Triple &TT) {
 }
 
 static Reloc::Model getEffectiveRelocModel(const Triple &TT,
-                                           Optional<Reloc::Model> RM) {
-  if (!RM.hasValue())
-    return Reloc::Static;
-  return *RM;
+                                           std::optional<Reloc::Model> RM) {
+  return RM.value_or(Reloc::Static);
 }
 
 CAHPTargetMachine::CAHPTargetMachine(const Target &T, const Triple &TT,
                                      StringRef CPU, StringRef FS,
                                      const TargetOptions &Options,
-                                     Optional<Reloc::Model> RM,
-                                     Optional<CodeModel::Model> CM,
+                                     std::optional<Reloc::Model> RM,
+                                     std::optional<CodeModel::Model> CM,
                                      CodeGenOpt::Level OL, bool JIT)
       : LLVMTargetMachine(T, computeDataLayout(TT), TT, CPU, FS, Options,
                         getEffectiveRelocModel(TT, RM),
@@ -67,7 +66,7 @@ TargetPassConfig *CAHPTargetMachine::createPassConfig(PassManagerBase &PM) {
 }
 
 bool CAHPPassConfig::addInstSelector() {
-  addPass(createCAHPISelDag(getCAHPTargetMachine()));
+  addPass(createCAHPISelDag(getCAHPTargetMachine(), getOptLevel()));
 
   return false;
 }
