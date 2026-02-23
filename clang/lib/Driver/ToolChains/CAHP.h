@@ -40,9 +40,9 @@ protected:
 
 namespace tools {
 namespace CAHP {
-class LLVM_LIBRARY_VISIBILITY Linker : public GnuTool {
+class LLVM_LIBRARY_VISIBILITY Linker : public Tool {
 public:
-  Linker(const ToolChain &TC) : GnuTool("CAHP::Linker", "ld.lld", TC) {}
+  Linker(const ToolChain &TC) : Tool("CAHP::Linker", "ld.lld", TC) {}
   bool hasIntegratedCPP() const override { return false; }
   bool isLinkJob() const override { return true; }
   void ConstructJob(Compilation &C, const JobAction &JA,
