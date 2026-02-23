@@ -52,28 +52,30 @@ void CAHPRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 
   int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
   Register FrameReg;
-  int Offset =
-      getFrameLowering(MF)->getFrameIndexReference(MF, FrameIndex, FrameReg) +
-      MI.getOperand(FIOperandNum + 1).getImm();
+  StackOffset Offset = getFrameLowering(MF)->getFrameIndexReference(
+      MF, FrameIndex, FrameReg);
+  assert(Offset.getScalable() == 0 &&
+         "Scalable stack offsets are not supported for CAHP");
+  int64_t OffsetValue = Offset.getFixed() + MI.getOperand(FIOperandNum + 1).getImm();
 
-  if (!isInt<16>(Offset))
+  if (!isInt<16>(OffsetValue))
     report_fatal_error(
         "Frame offsets outside of the signed 16-bit range not supported");
 
   MachineBasicBlock &MBB = *MI.getParent();
 
-  if (!isInt<10>(Offset)) {
+  if (!isInt<10>(OffsetValue)) {
     unsigned ScratchReg = MRI.createVirtualRegister(&CAHP::GPRRegClass);
-    TII->movImm16(MBB, II, DL, ScratchReg, Offset);
+    TII->movImm16(MBB, II, DL, ScratchReg, OffsetValue);
     BuildMI(MBB, II, DL, TII->get(CAHP::ADD), ScratchReg)
         .addReg(ScratchReg)
         .addReg(FrameReg);
-    Offset = 0;
+    OffsetValue = 0;
     FrameReg = ScratchReg;
   }
 
   MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false);
-  MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
+  MI.getOperand(FIOperandNum + 1).ChangeToImmediate(OffsetValue);
 }
 
 Register CAHPRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
