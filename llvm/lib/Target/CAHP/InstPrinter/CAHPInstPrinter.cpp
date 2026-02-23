@@ -17,9 +17,10 @@ using namespace llvm;
 // Include the auto-generated portion of the assembly writer.
 #include "CAHPGenAsmWriter.inc"
 
-void CAHPInstPrinter::printInst(const MCInst *MI, raw_ostream &O,
-                                StringRef Annot, const MCSubtargetInfo &STI) {
-  printInstruction(MI, STI, O);
+void CAHPInstPrinter::printInst(const MCInst *MI, uint64_t Address,
+                                StringRef Annot, const MCSubtargetInfo &STI,
+                                raw_ostream &O) {
+  printInstruction(MI, Address, STI, O);
   printAnnotation(O, Annot);
 }
 
