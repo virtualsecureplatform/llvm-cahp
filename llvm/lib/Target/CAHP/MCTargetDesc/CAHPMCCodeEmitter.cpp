@@ -40,7 +40,7 @@ public:
 
   ~CAHPMCCodeEmitter() override {}
 
-  void encodeInstruction(const MCInst &MI, raw_ostream &OS,
+  void encodeInstruction(const MCInst &MI, SmallVectorImpl<char> &CB,
                          SmallVectorImpl<MCFixup> &Fixups,
                          const MCSubtargetInfo &STI) const override;
 
@@ -61,7 +61,7 @@ public:
                          const MCSubtargetInfo &STI) const;
 
 private:
-  void expandHlt(const MCInst &MI, raw_ostream &OS,
+  void expandHlt(const MCInst &MI, SmallVectorImpl<char> &CB,
                  SmallVectorImpl<MCFixup> &Fixups,
                  const MCSubtargetInfo &STI) const;
 };
@@ -72,22 +72,23 @@ MCCodeEmitter *llvm::createCAHPMCCodeEmitter(const MCInstrInfo &MCII,
   return new CAHPMCCodeEmitter(Ctx, MCII);
 }
 
-void CAHPMCCodeEmitter::expandHlt(const MCInst &MI, raw_ostream &OS,
+void CAHPMCCodeEmitter::expandHlt(const MCInst &MI, SmallVectorImpl<char> &CB,
                                   SmallVectorImpl<MCFixup> &Fixups,
                                   const MCSubtargetInfo &STI) const {
   // Emit `js 0`
   MCInst TmpInst = MCInstBuilder(CAHP::JS).addImm(0);
   uint16_t Bits = getBinaryCodeForInstr(TmpInst, Fixups, STI);
-  support::endian::write<uint16_t>(OS, Bits, support::little);
+  support::endian::write<uint16_t>(CB, Bits, llvm::endianness::little);
 }
 
-void CAHPMCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
+void CAHPMCCodeEmitter::encodeInstruction(const MCInst &MI,
+                                          SmallVectorImpl<char> &CB,
                                           SmallVectorImpl<MCFixup> &Fixups,
                                           const MCSubtargetInfo &STI) const {
   const MCInstrDesc &Desc = MCII.get(MI.getOpcode());
 
   if (MI.getOpcode() == CAHP::PseudoHLT) {
-    expandHlt(MI, OS, Fixups, STI);
+    expandHlt(MI, CB, Fixups, STI);
     MCNumEmitted += 2;
     return;
   }
@@ -100,13 +101,13 @@ void CAHPMCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
     llvm_unreachable("Unhandled encodeInstruction length!");
   case 2: {
     uint16_t Bits = getBinaryCodeForInstr(MI, Fixups, STI);
-    support::endian::write<uint16_t>(OS, Bits, support::little);
+    support::endian::write<uint16_t>(CB, Bits, llvm::endianness::little);
     break;
   }
   case 3: {
     uint32_t Bits = getBinaryCodeForInstr(MI, Fixups, STI);
-    support::endian::write<uint16_t>(OS, Bits & 0xffff, support::little);
-    OS.write((Bits >> 16) & 0xff);
+    support::endian::write<uint16_t>(CB, Bits & 0xffff, llvm::endianness::little);
+    CB.push_back((Bits >> 16) & 0xff);
     break;
   }
   }

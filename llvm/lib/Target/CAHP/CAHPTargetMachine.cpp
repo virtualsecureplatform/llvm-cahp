@@ -37,7 +37,7 @@ CAHPTargetMachine::CAHPTargetMachine(const Target &T, const Triple &TT,
                                      const TargetOptions &Options,
                                      std::optional<Reloc::Model> RM,
                                      std::optional<CodeModel::Model> CM,
-                                     CodeGenOpt::Level OL, bool JIT)
+                                     CodeGenOptLevel OL, bool JIT)
       : LLVMTargetMachine(T, computeDataLayout(TT), TT, CPU, FS, Options,
                         getEffectiveRelocModel(TT, RM),
                         getEffectiveCodeModel(CM, CodeModel::Small), OL),
