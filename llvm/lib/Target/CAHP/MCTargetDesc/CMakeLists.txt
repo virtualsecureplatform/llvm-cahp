@@ -5,4 +5,7 @@ add_llvm_library(LLVMCAHPDesc
   CAHPELFObjectWriter.cpp
   CAHPMCCodeEmitter.cpp
   CAHPMCExpr.cpp
+
+  LINK_COMPONENTS
+  CAHPAsmPrinter
 )
