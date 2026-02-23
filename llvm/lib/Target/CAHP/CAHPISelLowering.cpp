@@ -414,7 +414,7 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
   ArgCCInfo.AnalyzeCallOperands(Outs, CC_CAHP);
 
   // Get a count of how many bytes are to be pushed on the stack.
-  unsigned NumBytes = ArgCCInfo.getNextStackOffset();
+  unsigned NumBytes = ArgCCInfo.getStackSize();
 
   // Create local copies for byval args
   SmallVector<SDValue, 8> ByValArgs;
