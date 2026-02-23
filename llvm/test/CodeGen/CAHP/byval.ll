@@ -5,7 +5,7 @@
 %struct.Foo = type { i16, i16, i16, i16, i8 }
 @foo = global %struct.Foo { i16 1, i16 2, i16 3, i16 4, i8 5 }
 
-define i16 @callee(%struct.Foo* byval %f) {
+define i16 @callee(%struct.Foo* byval(%struct.Foo) %f) {
 ; CAHP-LABEL: callee:
 ; CAHP:       # %bb.0:
 ; CAHP-NEXT:	lw	a0, 0(a0)
@@ -20,24 +20,16 @@ define void @caller() {
 ; CAHP:       # %bb.0:
 ; CAHP-NEXT:	addi2	sp, -12
 ; CAHP-NEXT:	swsp	ra, 10(sp)
-; CAHP-NEXT:	lui	a0, %hi(foo+8)
-; CAHP-NEXT:	addi	a0, a0, %lo(foo+8)
-; CAHP-NEXT:	lw	a0, 0(a0)
-; CAHP-NEXT:	swsp	a0, 8(sp)
-; CAHP-NEXT:	lui	a0, %hi(foo+6)
-; CAHP-NEXT:	addi	a0, a0, %lo(foo+6)
-; CAHP-NEXT:	lw	a0, 0(a0)
-; CAHP-NEXT:	swsp	a0, 6(sp)
-; CAHP-NEXT:	lui	a0, %hi(foo+4)
-; CAHP-NEXT:	addi	a0, a0, %lo(foo+4)
-; CAHP-NEXT:	lw	a0, 0(a0)
-; CAHP-NEXT:	swsp	a0, 4(sp)
-; CAHP-NEXT:	lui	a0, %hi(foo+2)
-; CAHP-NEXT:	addi	a0, a0, %lo(foo+2)
-; CAHP-NEXT:	lw	a0, 0(a0)
-; CAHP-NEXT:	swsp	a0, 2(sp)
 ; CAHP-NEXT:	lui	a0, %hi(foo)
 ; CAHP-NEXT:	addi	a0, a0, %lo(foo)
+; CAHP-NEXT:	lw	a1, 8(a0)
+; CAHP-NEXT:	swsp	a1, 8(sp)
+; CAHP-NEXT:	lw	a1, 6(a0)
+; CAHP-NEXT:	swsp	a1, 6(sp)
+; CAHP-NEXT:	lw	a1, 4(a0)
+; CAHP-NEXT:	swsp	a1, 4(sp)
+; CAHP-NEXT:	lw	a1, 2(a0)
+; CAHP-NEXT:	swsp	a1, 2(sp)
 ; CAHP-NEXT:	lw	a0, 0(a0)
 ; CAHP-NEXT:	swsp	a0, 0(sp)
 ; CAHP-NEXT:	addi	a0, sp, 0
@@ -45,6 +37,6 @@ define void @caller() {
 ; CAHP-NEXT:	lwsp	ra, 10(sp)
 ; CAHP-NEXT:	addi2	sp, 12
 ; CAHP-NEXT:	jr	ra
-  %call = call i16 @callee(%struct.Foo* byval @foo)
+  %call = call i16 @callee(%struct.Foo* byval(%struct.Foo) @foo)
   ret void
 }
