@@ -6,6 +6,7 @@
 #include "CAHPTargetMachine.h"
 #include "MCTargetDesc/CAHPMCTargetDesc.h"
 #include "llvm/CodeGen/SelectionDAGISel.h"
+#include "llvm/IR/InlineAsm.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
@@ -21,7 +22,7 @@ public:
   static char ID;
 
   explicit CAHPDAGToDAGISel(CAHPTargetMachine &TargetMachine,
-                            CodeGenOpt::Level OptLevel)
+                            CodeGenOptLevel OptLevel)
       : SelectionDAGISel(ID, TargetMachine, OptLevel) {}
 
   StringRef getPassName() const override {
@@ -30,7 +31,8 @@ public:
 
   void Select(SDNode *Node) override;
 
-  bool SelectInlineAsmMemoryOperand(const SDValue &Op, unsigned ConstraintID,
+  bool SelectInlineAsmMemoryOperand(const SDValue &Op,
+                                    InlineAsm::ConstraintCode ConstraintID,
                                     std::vector<SDValue> &OutOps) override;
 
   bool SelectAddrFI(SDValue Addr, SDValue &Base);
@@ -65,10 +67,11 @@ void CAHPDAGToDAGISel::Select(SDNode *Node) {
 }
 
 bool CAHPDAGToDAGISel::SelectInlineAsmMemoryOperand(
-    const SDValue &Op, unsigned ConstraintID, std::vector<SDValue> &OutOps) {
+    const SDValue &Op, InlineAsm::ConstraintCode ConstraintID,
+    std::vector<SDValue> &OutOps) {
   switch (ConstraintID) {
-  case InlineAsm::Constraint_i:
-  case InlineAsm::Constraint_m:
+  case InlineAsm::ConstraintCode::i:
+  case InlineAsm::ConstraintCode::m:
     // We just support simple memory operands that have a single address
     // operand and need no special handling.
     OutOps.push_back(Op);
@@ -91,6 +94,6 @@ bool CAHPDAGToDAGISel::SelectAddrFI(SDValue Addr, SDValue &Base) {
 // This pass converts a legalized DAG into a CAHP-specific DAG, ready
 // for instruction scheduling.
 FunctionPass *llvm::createCAHPISelDag(CAHPTargetMachine &TM,
-                                      CodeGenOpt::Level OptLevel) {
+                                      CodeGenOptLevel OptLevel) {
   return new CAHPDAGToDAGISel(TM, OptLevel);
 }
