@@ -20,15 +20,15 @@ void CAHPSubtarget::anchor() {}
 CAHPSubtarget &CAHPSubtarget::initializeSubtargetDependencies(StringRef CPU,
                                                               StringRef FS) {
   // Determine default and user-specified characteristics
-  std::string CPUName = CPU;
+  std::string CPUName = CPU.str();
   if (CPUName.empty())
     CPUName = "generic";
   ParseSubtargetFeatures(CPUName, FS);
   return *this;
 }
 
-CAHPSubtarget::CAHPSubtarget(const Triple &TT, const std::string &CPU,
-                             const std::string &FS, const TargetMachine &TM)
+CAHPSubtarget::CAHPSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
+                             const TargetMachine &TM)
     : CAHPGenSubtargetInfo(TT, CPU, FS),
       FrameLowering(initializeSubtargetDependencies(CPU, FS)), InstrInfo(),
       RegInfo(getHwMode()), TLInfo(TM, *this) {}
