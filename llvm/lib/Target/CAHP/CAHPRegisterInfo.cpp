@@ -39,7 +39,7 @@ BitVector CAHPRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   return Reserved;
 }
 
-void CAHPRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
+bool CAHPRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
                                            int SPAdj, unsigned FIOperandNum,
                                            RegScavenger *RS) const {
   assert(SPAdj == 0 && "Unexpected non-zero SPAdj value");
@@ -76,6 +76,7 @@ void CAHPRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 
   MI.getOperand(FIOperandNum).ChangeToRegister(FrameReg, false);
   MI.getOperand(FIOperandNum + 1).ChangeToImmediate(OffsetValue);
+  return false;
 }
 
 Register CAHPRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
