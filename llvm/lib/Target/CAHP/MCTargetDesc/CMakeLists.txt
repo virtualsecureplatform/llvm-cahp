@@ -8,4 +8,7 @@ add_llvm_library(LLVMCAHPDesc
 
   LINK_COMPONENTS
   CAHPAsmPrinter
+  CAHPInfo
+  MC
+  Support
 )
