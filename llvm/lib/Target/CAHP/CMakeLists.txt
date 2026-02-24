@@ -27,6 +27,18 @@ add_llvm_target(CAHPCodeGen
   CAHPSubtarget.cpp
   CAHPTargetMachine.cpp
 
+  LINK_COMPONENTS
+  CAHPDesc
+  CAHPInfo
+  AsmPrinter
+  CodeGen
+  CodeGenTypes
+  Core
+  MC
+  SelectionDAG
+  Support
+  Target
+
   ADD_TO_COMPONENT
   CAHP
   )
