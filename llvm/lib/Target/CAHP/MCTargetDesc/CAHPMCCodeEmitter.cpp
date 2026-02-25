@@ -182,8 +182,10 @@ unsigned CAHPMCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
 
   assert(FixupKind != CAHP::fixup_cahp_invalid && "Unhandled expression!");
 
+  bool PCRel = (FixupKind == CAHP::fixup_cahp_pcrel_10 ||
+                FixupKind == CAHP::fixup_cahp_pcrel_11);
   Fixups.push_back(MCFixup::create(
-      Offset, Expr, static_cast<MCFixupKind>(FixupKind)));
+      Offset, Expr, static_cast<MCFixupKind>(FixupKind), PCRel));
   ++MCNumFixups;
 
   return 0;
