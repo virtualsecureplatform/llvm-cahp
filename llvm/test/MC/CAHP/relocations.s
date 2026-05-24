@@ -35,3 +35,8 @@ jsal foo
 # RELOC: R_CAHP_PCREL_11
 # INSTR: jsal foo
 # FIXUP: fixup A - offset: 0, value: foo, kind: fixup_cahp_pcrel_11
+
+beq a0, a1, foo
+# RELOC: R_CAHP_PCREL_10
+# INSTR: beq a0, a1, foo
+# FIXUP: fixup A - offset: 0, value: foo, kind: fixup_cahp_pcrel_10

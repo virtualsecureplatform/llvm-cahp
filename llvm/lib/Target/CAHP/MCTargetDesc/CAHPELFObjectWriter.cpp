@@ -43,6 +43,8 @@ unsigned CAHPELFObjectWriter::getRelocType(const MCFixup &Fixup,
     return ELF::R_CAHP_HI6;
   case CAHP::fixup_cahp_lo10:
     return ELF::R_CAHP_LO10;
+  case CAHP::fixup_cahp_pcrel_10:
+    return ELF::R_CAHP_PCREL_10;
   case CAHP::fixup_cahp_pcrel_11:
     return ELF::R_CAHP_PCREL_11;
   }

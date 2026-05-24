@@ -31,6 +31,7 @@ CAHP::CAHP(Ctx &ctx) : TargetInfo(ctx) {}
 RelExpr CAHP::getRelExpr(const RelType type, const Symbol &s,
                          const uint8_t *loc) const {
   switch (type) {
+  case R_CAHP_PCREL_10:
   case R_CAHP_PCREL_11:
     return R_PC;
 
@@ -54,6 +55,16 @@ void CAHP::relocate(uint8_t *loc, const Relocation &rel,
     uint32_t insn = read16le(loc) & 0x001F;
     insn |= (val << 5);
     write16le(loc, insn);
+    break;
+  }
+
+  case R_CAHP_PCREL_10: {
+    checkInt(ctx, loc, static_cast<int64_t>(val), 10, rel);
+    uint32_t insn = read32le(loc) & 0xFF00FF3F;
+    uint32_t imm7_0 = (val & 0xFF) << 16;
+    uint32_t imm9_8 = ((val >> 8) & 3) << 6;
+    insn |= imm7_0 | imm9_8;
+    write32le(loc, insn);
     break;
   }
 

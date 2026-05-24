@@ -26,7 +26,7 @@ public:
   CAHPAsmBackend(uint8_t OSABI) : MCAsmBackend(llvm::endianness::little), OSABI(OSABI) {}
   ~CAHPAsmBackend() override {}
 
-  void applyFixup(const MCFragment &, const MCFixup &Fixup,
+  void applyFixup(const MCFragment &F, const MCFixup &Fixup,
                   const MCValue &Target, MutableArrayRef<char> Data,
                   uint64_t Value, bool IsResolved) override;
 
@@ -112,10 +112,12 @@ static uint64_t adjustFixupValue(const MCFixup &Fixup, uint64_t Value,
   }
 }
 
-void CAHPAsmBackend::applyFixup(const MCFragment &, const MCFixup &Fixup,
+void CAHPAsmBackend::applyFixup(const MCFragment &F, const MCFixup &Fixup,
                                 const MCValue &Target,
                                 MutableArrayRef<char> Data, uint64_t Value,
                                 bool IsResolved) {
+  maybeAddReloc(F, Fixup, Target, Value, IsResolved);
+
   if (!Value)
     return; // Doesn't change encoding.
 
