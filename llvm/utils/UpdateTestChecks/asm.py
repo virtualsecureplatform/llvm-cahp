@@ -132,6 +132,11 @@ ASM_FUNCTION_RISCV_RE = re.compile(
     flags=(re.M | re.S),
 )
 
+# CAHP uses the same function, basic-block, and end labels as the RISC-V
+# assembly printer.  Keep a named handler so update_llc_test_checks.py can
+# regenerate CAHP tests instead of failing with an undefined regex.
+ASM_FUNCTION_CAHP_RE = ASM_FUNCTION_RISCV_RE
+
 ASM_FUNCTION_LANAI_RE = re.compile(
     r'^_?(?P<func>[^:]+):[ \t]*!+[ \t]*@"?(?P=func)"?\n'
     r"(?:[ \t]+.cfi_startproc\n)?"  # drop optional cfi noise

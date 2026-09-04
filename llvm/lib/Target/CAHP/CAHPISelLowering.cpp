@@ -491,10 +491,29 @@ SDValue CAHPTargetLowering::LowerCall(CallLoweringInfo &CLI,
     Glue = Chain.getValue(1);
   }
 
-  if (GlobalAddressSDNode *S = dyn_cast<GlobalAddressSDNode>(Callee))
-    Callee = DAG.getTargetGlobalAddress(S->getGlobal(), DL, PtrVT, 0, 0);
-  else if (ExternalSymbolSDNode *S = dyn_cast<ExternalSymbolSDNode>(Callee))
-    Callee = DAG.getTargetExternalSymbol(S->getSymbol(), PtrVT, 0);
+  if (GlobalAddressSDNode *S = dyn_cast<GlobalAddressSDNode>(Callee)) {
+    const GlobalValue *GV = S->getGlobal();
+    if (GV->isDeclaration()) {
+      SDValue Hi = DAG.getTargetGlobalAddress(GV, DL, PtrVT, 0,
+                                               CAHPII::MO_HI);
+      SDValue Lo = DAG.getTargetGlobalAddress(GV, DL, PtrVT, 0,
+                                               CAHPII::MO_LO);
+      SDValue Base = SDValue(DAG.getMachineNode(CAHP::LUI, DL, PtrVT, Hi), 0);
+      Callee = SDValue(
+          DAG.getMachineNode(CAHP::ADDI, DL, PtrVT, Base, Lo), 0);
+    } else {
+      Callee = DAG.getTargetGlobalAddress(GV, DL, PtrVT, 0, 0);
+    }
+  } else if (ExternalSymbolSDNode *S =
+                 dyn_cast<ExternalSymbolSDNode>(Callee)) {
+    SDValue Hi = DAG.getTargetExternalSymbol(S->getSymbol(), PtrVT,
+                                              CAHPII::MO_HI);
+    SDValue Lo = DAG.getTargetExternalSymbol(S->getSymbol(), PtrVT,
+                                              CAHPII::MO_LO);
+    SDValue Base = SDValue(DAG.getMachineNode(CAHP::LUI, DL, PtrVT, Hi), 0);
+    Callee =
+        SDValue(DAG.getMachineNode(CAHP::ADDI, DL, PtrVT, Base, Lo), 0);
+  }
 
   // The first call operand is the chain and the second is the target address.
   SmallVector<SDValue, 8> Ops;

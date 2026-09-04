@@ -15,19 +15,22 @@ declare void @test_false()
 define void @test_bcc_fallthrough_taken(i16 %in) nounwind {
 ; CAHP-LABEL: test_bcc_fallthrough_taken:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	li	a1, 42
-; CAHP-NEXT:	bne	a0, a1, .LBB0_3
-; CAHP-NEXT:# %bb.1:                                # %true
-; CAHP-NEXT:	jsal	test_true
-; CAHP-NEXT:.LBB0_2:                                # %true
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
-; CAHP-NEXT:.LBB0_3:                                # %false
-; CAHP-NEXT:	jsal	test_false
-; CAHP-NEXT:	js	.LBB0_2
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    li a1, 42
+; CAHP-NEXT:    bne a0, a1, .LBB0_3
+; CAHP-NEXT:  # %bb.1: # %true
+; CAHP-NEXT:    lui a0, %hi(test_true)
+; CAHP-NEXT:    addi a0, a0, %lo(test_true)
+; CAHP-NEXT:  .LBB0_2: # %true
+; CAHP-NEXT:    jalr a0
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
+; CAHP-NEXT:  .LBB0_3: # %false
+; CAHP-NEXT:    lui a0, %hi(test_false)
+; CAHP-NEXT:    addi a0, a0, %lo(test_false)
+; CAHP-NEXT:    js .LBB0_2
   %tst = icmp eq i16 %in, 42
   br i1 %tst, label %true, label %false, !prof !0
 
@@ -47,19 +50,22 @@ false:
 define void @test_bcc_fallthrough_nottaken(i16 %in) nounwind {
 ; CAHP-LABEL: test_bcc_fallthrough_nottaken:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	li	a1, 42
-; CAHP-NEXT:	beq	a0, a1, .LBB1_3
-; CAHP-NEXT:# %bb.1:                                # %false
-; CAHP-NEXT:	jsal	test_false
-; CAHP-NEXT:.LBB1_2:                                # %true
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
-; CAHP-NEXT:.LBB1_3:                                # %true
-; CAHP-NEXT:	jsal	test_true
-; CAHP-NEXT:	js	.LBB1_2
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    li a1, 42
+; CAHP-NEXT:    beq a0, a1, .LBB1_3
+; CAHP-NEXT:  # %bb.1: # %false
+; CAHP-NEXT:    lui a0, %hi(test_false)
+; CAHP-NEXT:    addi a0, a0, %lo(test_false)
+; CAHP-NEXT:  .LBB1_2: # %true
+; CAHP-NEXT:    jalr a0
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
+; CAHP-NEXT:  .LBB1_3: # %true
+; CAHP-NEXT:    lui a0, %hi(test_true)
+; CAHP-NEXT:    addi a0, a0, %lo(test_true)
+; CAHP-NEXT:    js .LBB1_2
 %tst = icmp eq i16 %in, 42
 br i1 %tst, label %true, label %false, !prof !1
 

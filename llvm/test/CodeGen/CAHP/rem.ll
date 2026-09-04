@@ -5,12 +5,14 @@
 define i16 @urem(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: urem:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	jsal	__umodhi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a2, %hi(__umodhi3)
+; CAHP-NEXT:    addi a2, a2, %lo(__umodhi3)
+; CAHP-NEXT:    jalr a2
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = urem i16 %a, %b
   ret i16 %1
 }
@@ -18,12 +20,14 @@ define i16 @urem(i16 %a, i16 %b) nounwind {
 define i16 @srem(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: srem:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	jsal	__modhi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a2, %hi(__modhi3)
+; CAHP-NEXT:    addi a2, a2, %lo(__modhi3)
+; CAHP-NEXT:    jalr a2
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = srem i16 %a, %b
   ret i16 %1
 }

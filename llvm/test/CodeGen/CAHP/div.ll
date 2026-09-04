@@ -5,12 +5,14 @@
 define i16 @udiv(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: udiv:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	jsal	__udivhi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a2, %hi(__udivhi3)
+; CAHP-NEXT:    addi a2, a2, %lo(__udivhi3)
+; CAHP-NEXT:    jalr a2
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = udiv i16 %a, %b
   ret i16 %1
 }
@@ -18,13 +20,15 @@ define i16 @udiv(i16 %a, i16 %b) nounwind {
 define i16 @udiv_constant(i16 %a) nounwind {
 ; CAHP-LABEL: udiv_constant:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	lsi	a1, 5
-; CAHP-NEXT:	jsal	__udivhi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a1, %hi(__udivhi3)
+; CAHP-NEXT:    addi a2, a1, %lo(__udivhi3)
+; CAHP-NEXT:    lsi a1, 5
+; CAHP-NEXT:    jalr a2
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = udiv i16 %a, 5
   ret i16 %1
 }
@@ -32,8 +36,8 @@ define i16 @udiv_constant(i16 %a) nounwind {
 define i16 @udiv_pow2(i16 %a) nounwind {
 ; CAHP-LABEL: udiv_pow2:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	lsri2	a0, 3
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    lsri2 a0, 3
+; CAHP-NEXT:    jr ra
   %1 = udiv i16 %a, 8
   ret i16 %1
 }
@@ -41,12 +45,14 @@ define i16 @udiv_pow2(i16 %a) nounwind {
 define i32 @udiv32(i32 %a, i32 %b) nounwind {
 ; CAHP-LABEL: udiv32:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	jsal	__udivsi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a4, %hi(__udivsi3)
+; CAHP-NEXT:    addi a4, a4, %lo(__udivsi3)
+; CAHP-NEXT:    jalr a4
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = udiv i32 %a, %b
   ret i32 %1
 }
@@ -54,14 +60,16 @@ define i32 @udiv32(i32 %a, i32 %b) nounwind {
 define i32 @udiv32_constant(i32 %a) nounwind {
 ; CAHP-LABEL: udiv32_constant:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	lsi	a2, 5
-; CAHP-NEXT:	lsi	a3, 0
-; CAHP-NEXT:	jsal	__udivsi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a2, %hi(__udivsi3)
+; CAHP-NEXT:    addi a4, a2, %lo(__udivsi3)
+; CAHP-NEXT:    lsi a2, 5
+; CAHP-NEXT:    lsi a3, 0
+; CAHP-NEXT:    jalr a4
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = udiv i32 %a, 5
   ret i32 %1
 }
@@ -69,12 +77,14 @@ define i32 @udiv32_constant(i32 %a) nounwind {
 define i16 @sdiv(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: sdiv:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	jsal	__divhi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a2, %hi(__divhi3)
+; CAHP-NEXT:    addi a2, a2, %lo(__divhi3)
+; CAHP-NEXT:    jalr a2
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = sdiv i16 %a, %b
   ret i16 %1
 }
@@ -82,13 +92,15 @@ define i16 @sdiv(i16 %a, i16 %b) nounwind {
 define i16 @sdiv_constant(i16 %a) nounwind {
 ; CAHP-LABEL: sdiv_constant:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	lsi	a1, 5
-; CAHP-NEXT:	jsal	__divhi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a1, %hi(__divhi3)
+; CAHP-NEXT:    addi a2, a1, %lo(__divhi3)
+; CAHP-NEXT:    lsi a1, 5
+; CAHP-NEXT:    jalr a2
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = sdiv i16 %a, 5
   ret i16 %1
 }
@@ -96,11 +108,11 @@ define i16 @sdiv_constant(i16 %a) nounwind {
 define i16 @sdiv_pow2(i16 %a) nounwind {
 ; CAHP-LABEL: sdiv_pow2:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	asri	a1, a0, 15
-; CAHP-NEXT:	lsri2	a1, 13
-; CAHP-NEXT:	add2	a0, a1
-; CAHP-NEXT:	asri2	a0, 3
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    asri a1, a0, 15
+; CAHP-NEXT:    lsri2 a1, 13
+; CAHP-NEXT:    add2 a0, a1
+; CAHP-NEXT:    asri2 a0, 3
+; CAHP-NEXT:    jr ra
   %1 = sdiv i16 %a, 8
   ret i16 %1
 }
@@ -108,12 +120,14 @@ define i16 @sdiv_pow2(i16 %a) nounwind {
 define i32 @sdiv32(i32 %a, i32 %b) nounwind {
 ; CAHP-LABEL: sdiv32:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	jsal	__divsi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a4, %hi(__divsi3)
+; CAHP-NEXT:    addi a4, a4, %lo(__divsi3)
+; CAHP-NEXT:    jalr a4
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = sdiv i32 %a, %b
   ret i32 %1
 }
@@ -121,14 +135,16 @@ define i32 @sdiv32(i32 %a, i32 %b) nounwind {
 define i32 @sdiv32_constant(i32 %a) nounwind {
 ; CAHP-LABEL: sdiv32_constant:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	lsi	a2, 5
-; CAHP-NEXT:	lsi	a3, 0
-; CAHP-NEXT:	jsal	__divsi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a2, %hi(__divsi3)
+; CAHP-NEXT:    addi a4, a2, %lo(__divsi3)
+; CAHP-NEXT:    lsi a2, 5
+; CAHP-NEXT:    lsi a3, 0
+; CAHP-NEXT:    jalr a4
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = sdiv i32 %a, 5
   ret i32 %1
 }

@@ -7,12 +7,14 @@ declare i16 @external_function(i16)
 define i16 @test_call_external(i16 %a) nounwind {
 ; CAHP-LABEL: test_call_external:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	jsal	external_function
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a1, %hi(external_function)
+; CAHP-NEXT:    addi a1, a1, %lo(external_function)
+; CAHP-NEXT:    jalr a1
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = call i16 @external_function(i16 %a)
   ret i16 %1
 }
@@ -20,8 +22,8 @@ define i16 @test_call_external(i16 %a) nounwind {
 define i16 @defined_function(i16 %a) nounwind {
 ; CAHP-LABEL: defined_function:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	a0, 1
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 a0, 1
+; CAHP-NEXT:    jr ra
   %1 = add i16 %a, 1
   ret i16 %1
 }
@@ -29,12 +31,12 @@ define i16 @defined_function(i16 %a) nounwind {
 define i16 @test_call_defined(i16 %a) nounwind {
 ; CAHP-LABEL: test_call_defined:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	jsal	defined_function
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    jsal defined_function
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = call i16 @defined_function(i16 %a) nounwind
   ret i16 %1
 }
@@ -42,14 +44,14 @@ define i16 @test_call_defined(i16 %a) nounwind {
 define i16 @test_call_indirect(i16 (i16)* %a, i16 %b) nounwind {
 ; CAHP-LABEL: test_call_indirect:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	mov	a0, a1
-; CAHP-NEXT:	jalr	a2
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    mov a2, a0
+; CAHP-NEXT:    mov a0, a1
+; CAHP-NEXT:    jalr a2
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = call i16 %a(i16 %b)
   ret i16 %1
 }
@@ -57,8 +59,8 @@ define i16 @test_call_indirect(i16 (i16)* %a, i16 %b) nounwind {
 define fastcc i16 @fastcc_function(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: fastcc_function:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	add2	a0, a1
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    add2 a0, a1
+; CAHP-NEXT:    jr ra
 
  %1 = add i16 %a, %b
  ret i16 %1
@@ -67,16 +69,16 @@ define fastcc i16 @fastcc_function(i16 %a, i16 %b) nounwind {
 define i16 @test_call_fastcc(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: test_call_fastcc:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -4
-; CAHP-NEXT:	swsp	ra, 2(sp)
-; CAHP-NEXT:	swsp	s0, 0(sp)
-; CAHP-NEXT:	mov	s0, a0
-; CAHP-NEXT:	jsal	fastcc_function
-; CAHP-NEXT:	mov	a0, s0
-; CAHP-NEXT:	lwsp	s0, 0(sp)
-; CAHP-NEXT:	lwsp	ra, 2(sp)
-; CAHP-NEXT:	addi2	sp, 4
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -4
+; CAHP-NEXT:    swsp ra, 2(sp)
+; CAHP-NEXT:    swsp s0, 0(sp)
+; CAHP-NEXT:    mov s0, a0
+; CAHP-NEXT:    jsal fastcc_function
+; CAHP-NEXT:    mov a0, s0
+; CAHP-NEXT:    lwsp s0, 0(sp)
+; CAHP-NEXT:    lwsp ra, 2(sp)
+; CAHP-NEXT:    addi2 sp, 4
+; CAHP-NEXT:    jr ra
 
   %1 = call fastcc i16 @fastcc_function(i16 %a, i16 %b)
   ret i16 %a
@@ -87,25 +89,28 @@ declare i16 @external_many_args(i16, i16, i16, i16, i16, i16, i16, i16, i16, i16
 define i16 @test_call_external_many_args(i16 %a) nounwind {
 ; CAHP-LABEL: test_call_external_many_args:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -12
-; CAHP-NEXT:	swsp	ra, 10(sp)
-; CAHP-NEXT:	swsp	s0, 8(sp)
-; CAHP-NEXT:	mov	s0, a0
-; CAHP-NEXT:	swsp	a0, 6(sp)
-; CAHP-NEXT:	swsp	a0, 4(sp)
-; CAHP-NEXT:	swsp	a0, 2(sp)
-; CAHP-NEXT:	swsp	a0, 0(sp)
-; CAHP-NEXT:	mov	a1, a0
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	mov	a3, a0
-; CAHP-NEXT:	mov	a4, a0
-; CAHP-NEXT:	mov	a5, a0
-; CAHP-NEXT:	jsal	external_many_args
-; CAHP-NEXT:	mov	a0, s0
-; CAHP-NEXT:	lwsp	s0, 8(sp)
-; CAHP-NEXT:	lwsp	ra, 10(sp)
-; CAHP-NEXT:	addi2	sp, 12
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -12
+; CAHP-NEXT:    swsp ra, 10(sp)
+; CAHP-NEXT:    swsp s0, 8(sp)
+; CAHP-NEXT:    mov s0, a0
+; CAHP-NEXT:    swsp a0, 6(sp)
+; CAHP-NEXT:    swsp a0, 4(sp)
+; CAHP-NEXT:    swsp a0, 2(sp)
+; CAHP-NEXT:    lui a0, %hi(external_many_args)
+; CAHP-NEXT:    addi t0, a0, %lo(external_many_args)
+; CAHP-NEXT:    swsp s0, 0(sp)
+; CAHP-NEXT:    mov a0, s0
+; CAHP-NEXT:    mov a1, s0
+; CAHP-NEXT:    mov a2, s0
+; CAHP-NEXT:    mov a3, s0
+; CAHP-NEXT:    mov a4, s0
+; CAHP-NEXT:    mov a5, s0
+; CAHP-NEXT:    jalr t0
+; CAHP-NEXT:    mov a0, s0
+; CAHP-NEXT:    lwsp s0, 8(sp)
+; CAHP-NEXT:    lwsp ra, 10(sp)
+; CAHP-NEXT:    addi2 sp, 12
+; CAHP-NEXT:    jr ra
   %1 = call i16 @external_many_args(i16 %a, i16 %a, i16 %a, i16 %a, i16 %a,
                                     i16 %a, i16 %a, i16 %a, i16 %a, i16 %a)
   ret i16 %a
@@ -114,9 +119,9 @@ define i16 @test_call_external_many_args(i16 %a) nounwind {
 define i16 @defined_many_args(i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 %j) nounwind {
 ; CAHP-LABEL: defined_many_args:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	lwsp	a0, 6(sp)
-; CAHP-NEXT:	addi2	a0, 1
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    lwsp a0, 6(sp)
+; CAHP-NEXT:    addi2 a0, 1
+; CAHP-NEXT:    jr ra
   %added = add i16 %j, 1
   ret i16 %added
 }
@@ -124,21 +129,21 @@ define i16 @defined_many_args(i16, i16, i16, i16, i16, i16, i16, i16, i16, i16 %
 define i16 @test_call_defined_many_args(i16 %a) nounwind {
 ; CAHP-LABEL: test_call_defined_many_args:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -10
-; CAHP-NEXT:	swsp	ra, 8(sp)
-; CAHP-NEXT:	swsp	a0, 6(sp)
-; CAHP-NEXT:	swsp	a0, 4(sp)
-; CAHP-NEXT:	swsp	a0, 2(sp)
-; CAHP-NEXT:	swsp	a0, 0(sp)
-; CAHP-NEXT:	mov	a1, a0
-; CAHP-NEXT:	mov	a2, a0
-; CAHP-NEXT:	mov	a3, a0
-; CAHP-NEXT:	mov	a4, a0
-; CAHP-NEXT:	mov	a5, a0
-; CAHP-NEXT:	jsal	defined_many_args
-; CAHP-NEXT:	lwsp	ra, 8(sp)
-; CAHP-NEXT:	addi2	sp, 10
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -10
+; CAHP-NEXT:    swsp ra, 8(sp)
+; CAHP-NEXT:    swsp a0, 6(sp)
+; CAHP-NEXT:    swsp a0, 4(sp)
+; CAHP-NEXT:    swsp a0, 2(sp)
+; CAHP-NEXT:    swsp a0, 0(sp)
+; CAHP-NEXT:    mov a1, a0
+; CAHP-NEXT:    mov a2, a0
+; CAHP-NEXT:    mov a3, a0
+; CAHP-NEXT:    mov a4, a0
+; CAHP-NEXT:    mov a5, a0
+; CAHP-NEXT:    jsal defined_many_args
+; CAHP-NEXT:    lwsp ra, 8(sp)
+; CAHP-NEXT:    addi2 sp, 10
+; CAHP-NEXT:    jr ra
   %1 = call i16 @defined_many_args(i16 %a, i16 %a, i16 %a, i16 %a, i16 %a,
                                    i16 %a, i16 %a, i16 %a, i16 %a, i16 %a)
   ret i16 %1
@@ -149,25 +154,27 @@ declare i16 @callee_i32_scalars(i16, i32, i32, i32, i32, i32, i32)
 define i16 @caller_i32_scalars(i32 %a) nounwind {
 ; CAHP-LABEL: caller_i32_scalars:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -16
-; CAHP-NEXT:	swsp	ra, 14(sp)
-; CAHP-NEXT:	mov	a2, a1
-; CAHP-NEXT:	mov	a1, a0
-; CAHP-NEXT:	swsp	a2, 12(sp)
-; CAHP-NEXT:	swsp	a0, 10(sp)
-; CAHP-NEXT:	swsp	a2, 8(sp)
-; CAHP-NEXT:	swsp	a0, 6(sp)
-; CAHP-NEXT:	swsp	a2, 4(sp)
-; CAHP-NEXT:	swsp	a0, 2(sp)
-; CAHP-NEXT:	li	a0, 42
-; CAHP-NEXT:	swsp	a2, 0(sp)
-; CAHP-NEXT:	mov	a3, a1
-; CAHP-NEXT:	mov	a4, a2
-; CAHP-NEXT:	mov	a5, a1
-; CAHP-NEXT:	jsal	callee_i32_scalars
-; CAHP-NEXT:	lwsp	ra, 14(sp)
-; CAHP-NEXT:	addi2	sp, 16
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -16
+; CAHP-NEXT:    swsp ra, 14(sp)
+; CAHP-NEXT:    mov a2, a1
+; CAHP-NEXT:    mov a1, a0
+; CAHP-NEXT:    swsp a2, 12(sp)
+; CAHP-NEXT:    swsp a0, 10(sp)
+; CAHP-NEXT:    swsp a2, 8(sp)
+; CAHP-NEXT:    swsp a0, 6(sp)
+; CAHP-NEXT:    swsp a2, 4(sp)
+; CAHP-NEXT:    swsp a0, 2(sp)
+; CAHP-NEXT:    lui a0, %hi(callee_i32_scalars)
+; CAHP-NEXT:    addi t0, a0, %lo(callee_i32_scalars)
+; CAHP-NEXT:    li a0, 42
+; CAHP-NEXT:    swsp a2, 0(sp)
+; CAHP-NEXT:    mov a3, a1
+; CAHP-NEXT:    mov a4, a2
+; CAHP-NEXT:    mov a5, a1
+; CAHP-NEXT:    jalr t0
+; CAHP-NEXT:    lwsp ra, 14(sp)
+; CAHP-NEXT:    addi2 sp, 16
+; CAHP-NEXT:    jr ra
   %1 = call i16 @callee_i32_scalars(i16 42, i32 %a, i32 %a, i32 %a, i32 %a, i32 %a, i32 %a)
   ret i16 %1
 }

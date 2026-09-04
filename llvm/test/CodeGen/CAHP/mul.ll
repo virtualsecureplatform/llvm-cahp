@@ -5,13 +5,15 @@
 define i16 @square(i16 %a) nounwind {
 ; CAHP-LABEL: square:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	mov	a1, a0
-; CAHP-NEXT:	jsal	__mulhi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a1, %hi(__mulhi3)
+; CAHP-NEXT:    addi a2, a1, %lo(__mulhi3)
+; CAHP-NEXT:    mov a1, a0
+; CAHP-NEXT:    jalr a2
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = mul i16 %a, %a
   ret i16 %1
 }
@@ -19,12 +21,14 @@ define i16 @square(i16 %a) nounwind {
 define i16 @mul(i16 %a, i16 %b) nounwind {
 ; CAHP-LABEL: mul:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	jsal	__mulhi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a2, %hi(__mulhi3)
+; CAHP-NEXT:    addi a2, a2, %lo(__mulhi3)
+; CAHP-NEXT:    jalr a2
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = mul i16 %a, %b
   ret i16 %1
 }
@@ -32,13 +36,15 @@ define i16 @mul(i16 %a, i16 %b) nounwind {
 define i16 @mul_constant(i16 %a) nounwind {
 ; CAHP-LABEL: mul_constant:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	lsi	a1, 5
-; CAHP-NEXT:	jsal	__mulhi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a1, %hi(__mulhi3)
+; CAHP-NEXT:    addi a2, a1, %lo(__mulhi3)
+; CAHP-NEXT:    lsi a1, 5
+; CAHP-NEXT:    jalr a2
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = mul i16 %a, 5
   ret i16 %1
 }
@@ -46,8 +52,8 @@ define i16 @mul_constant(i16 %a) nounwind {
 define i16 @mul_pow2(i16 %a) nounwind {
 ; CAHP-LABEL: mul_pow2:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	lsli2	a0, 3
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    lsli2 a0, 3
+; CAHP-NEXT:    jr ra
   %1 = mul i16 %a, 8
   ret i16 %1
 }
@@ -55,12 +61,14 @@ define i16 @mul_pow2(i16 %a) nounwind {
 define i32 @mul32(i32 %a, i32 %b) nounwind {
 ; CAHP-LABEL: mul32:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	jsal	__mulsi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a4, %hi(__mulsi3)
+; CAHP-NEXT:    addi a4, a4, %lo(__mulsi3)
+; CAHP-NEXT:    jalr a4
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = mul i32 %a, %b
   ret i32 %1
 }
@@ -68,14 +76,16 @@ define i32 @mul32(i32 %a, i32 %b) nounwind {
 define i32 @mul32_constant(i32 %a) nounwind {
 ; CAHP-LABEL: mul32_constant:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -2
-; CAHP-NEXT:	swsp	ra, 0(sp)
-; CAHP-NEXT:	lsi	a2, 5
-; CAHP-NEXT:	lsi	a3, 0
-; CAHP-NEXT:	jsal	__mulsi3
-; CAHP-NEXT:	lwsp	ra, 0(sp)
-; CAHP-NEXT:	addi2	sp, 2
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -2
+; CAHP-NEXT:    swsp ra, 0(sp)
+; CAHP-NEXT:    lui a2, %hi(__mulsi3)
+; CAHP-NEXT:    addi a4, a2, %lo(__mulsi3)
+; CAHP-NEXT:    lsi a2, 5
+; CAHP-NEXT:    lsi a3, 0
+; CAHP-NEXT:    jalr a4
+; CAHP-NEXT:    lwsp ra, 0(sp)
+; CAHP-NEXT:    addi2 sp, 2
+; CAHP-NEXT:    jr ra
   %1 = mul i32 %a, 5
   ret i32 %1
 }

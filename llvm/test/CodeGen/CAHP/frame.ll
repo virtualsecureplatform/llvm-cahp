@@ -10,22 +10,24 @@
 define i16 @test() nounwind {
 ; CAHP-LABEL: test:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -22
-; CAHP-NEXT:	swsp	ra, 20(sp)
-; CAHP-NEXT:	swsp	s0, 18(sp)
-; CAHP-NEXT:	lsi	s0, 0
-; CAHP-NEXT:	swsp	s0, 8(sp)
-; CAHP-NEXT:	swsp	s0, 6(sp)
-; CAHP-NEXT:	swsp	s0, 4(sp)
-; CAHP-NEXT:	swsp	s0, 2(sp)
-; CAHP-NEXT:	swsp	s0, 0(sp)
-; CAHP-NEXT:	addi	a0, sp, 2
-; CAHP-NEXT:	jsal	test1
-; CAHP-NEXT:	mov	a0, s0
-; CAHP-NEXT:	lwsp	s0, 18(sp)
-; CAHP-NEXT:	lwsp	ra, 20(sp)
-; CAHP-NEXT:	addi2	sp, 22
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -22
+; CAHP-NEXT:    swsp ra, 20(sp)
+; CAHP-NEXT:    swsp s0, 18(sp)
+; CAHP-NEXT:    lsi s0, 0
+; CAHP-NEXT:    swsp s0, 8(sp)
+; CAHP-NEXT:    swsp s0, 6(sp)
+; CAHP-NEXT:    swsp s0, 4(sp)
+; CAHP-NEXT:    swsp s0, 2(sp)
+; CAHP-NEXT:    swsp s0, 0(sp)
+; CAHP-NEXT:    addi a0, sp, 2
+; CAHP-NEXT:    lui a1, %hi(test1)
+; CAHP-NEXT:    addi a1, a1, %lo(test1)
+; CAHP-NEXT:    jalr a1
+; CAHP-NEXT:    mov a0, s0
+; CAHP-NEXT:    lwsp s0, 18(sp)
+; CAHP-NEXT:    lwsp ra, 20(sp)
+; CAHP-NEXT:    addi2 sp, 22
+; CAHP-NEXT:    jr ra
 
   %key = alloca %struct.key_t, align 2
   %1 = bitcast %struct.key_t* %key to i8*

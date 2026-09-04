@@ -10,20 +10,22 @@ declare void @notdead(i8*)
 define void @simple_alloca(i32 %n) nounwind {
 ; CAHP-LABEL: simple_alloca:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:	addi2	sp, -4
-; CAHP-NEXT:	swsp	ra, 2(sp)
-; CAHP-NEXT:	swsp	fp, 0(sp)
-; CAHP-NEXT:	addi	fp, sp, 4
-; CAHP-NEXT:	addi2	a0, 1
-; CAHP-NEXT:	andi2	a0, -2
-; CAHP-NEXT:	sub	a0, sp, a0
-; CAHP-NEXT:	mov	sp, a0
-; CAHP-NEXT:	jsal	notdead
-; CAHP-NEXT:	addi	sp, fp, -4
-; CAHP-NEXT:	lwsp	fp, 0(sp)
-; CAHP-NEXT:	lwsp	ra, 2(sp)
-; CAHP-NEXT:	addi2	sp, 4
-; CAHP-NEXT:	jr	ra
+; CAHP-NEXT:    addi2 sp, -4
+; CAHP-NEXT:    swsp ra, 2(sp)
+; CAHP-NEXT:    swsp fp, 0(sp)
+; CAHP-NEXT:    addi fp, sp, 4
+; CAHP-NEXT:    addi2 a0, 1
+; CAHP-NEXT:    andi2 a0, -2
+; CAHP-NEXT:    sub a0, sp, a0
+; CAHP-NEXT:    mov sp, a0
+; CAHP-NEXT:    lui a1, %hi(notdead)
+; CAHP-NEXT:    addi a1, a1, %lo(notdead)
+; CAHP-NEXT:    jalr a1
+; CAHP-NEXT:    addi sp, fp, -4
+; CAHP-NEXT:    lwsp fp, 0(sp)
+; CAHP-NEXT:    lwsp ra, 2(sp)
+; CAHP-NEXT:    addi2 sp, 4
+; CAHP-NEXT:    jr ra
 
   %1 = alloca i8, i32 %n
   call void @notdead(i8* %1)
@@ -36,24 +38,26 @@ declare void @llvm.stackrestore(i8*)
 define void @scoped_alloca(i32 %n) nounwind {
 ; CAHP-LABEL: scoped_alloca:
 ; CAHP:       # %bb.0:
-; CAHP-NEXT:    addi2	sp, -6
-; CAHP-NEXT:    swsp	ra, 4(sp)
-; CAHP-NEXT:    swsp	fp, 2(sp)
-; CAHP-NEXT:    swsp	s0, 0(sp)
-; CAHP-NEXT:    addi	fp, sp, 6
-; CAHP-NEXT:    mov	s0, sp
-; CAHP-NEXT:    addi2	a0, 1
-; CAHP-NEXT:    andi2	a0, -2
-; CAHP-NEXT:    sub	a0, sp, a0
-; CAHP-NEXT:    mov	sp, a0
-; CAHP-NEXT:    jsal	notdead
-; CAHP-NEXT:    mov	sp, s0
-; CAHP-NEXT:    addi	sp, fp, -6
-; CAHP-NEXT:    lwsp	s0, 0(sp)
-; CAHP-NEXT:    lwsp	fp, 2(sp)
-; CAHP-NEXT:    lwsp	ra, 4(sp)
-; CAHP-NEXT:    addi2	sp, 6
-; CAHP-NEXT:    jr	ra
+; CAHP-NEXT:    addi2 sp, -6
+; CAHP-NEXT:    swsp ra, 4(sp)
+; CAHP-NEXT:    swsp fp, 2(sp)
+; CAHP-NEXT:    swsp s0, 0(sp)
+; CAHP-NEXT:    addi fp, sp, 6
+; CAHP-NEXT:    mov s0, sp
+; CAHP-NEXT:    addi2 a0, 1
+; CAHP-NEXT:    andi2 a0, -2
+; CAHP-NEXT:    sub a0, sp, a0
+; CAHP-NEXT:    mov sp, a0
+; CAHP-NEXT:    lui a1, %hi(notdead)
+; CAHP-NEXT:    addi a1, a1, %lo(notdead)
+; CAHP-NEXT:    jalr a1
+; CAHP-NEXT:    mov sp, s0
+; CAHP-NEXT:    addi sp, fp, -6
+; CAHP-NEXT:    lwsp s0, 0(sp)
+; CAHP-NEXT:    lwsp fp, 2(sp)
+; CAHP-NEXT:    lwsp ra, 4(sp)
+; CAHP-NEXT:    addi2 sp, 6
+; CAHP-NEXT:    jr ra
 
   %sp = call i8* @llvm.stacksave()
   %addr = alloca i8, i32 %n
